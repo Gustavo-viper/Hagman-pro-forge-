@@ -1,0 +1,12 @@
+{
+  "name": "Hangman Pro — Forge Studios",
+  "short_name": "Hangman Pro",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#02050a",
+  "theme_color": "#03060b",
+  "lang": "pt-BR",
+  "icons": [
+    {"src":"assets/hangman-pro-logo.jpg","sizes":"512x512","type":"image/jpeg","purpose":"any maskable"}
+  ]
+}
