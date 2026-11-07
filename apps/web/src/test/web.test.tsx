@@ -2,6 +2,7 @@ import { onboardingSchema, signUpSchema } from '@fandom/schemas';
 import type { SubscriptionPlanSummary } from '@fandom/types';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { fireEvent, render, screen } from '@testing-library/react';
+import { vi } from 'vitest';
 import { MemoryRouter } from 'react-router';
 import { beforeAll, describe, expect, it } from 'vitest';
 import { AuthProvider } from '@/auth/AuthProvider';
@@ -71,14 +72,26 @@ describe('form validation keys', () => {
 });
 
 describe('PlanCards', () => {
-  it('shows real prices, toggles billing interval and never renders a dead checkout button', () => {
+  const stubConfig = (enabled: boolean) =>
+    vi.stubGlobal('fetch', vi.fn(async () => new Response(JSON.stringify({ enabled, provider: enabled ? 'infinitepay' : null, currency: 'BRL', autoRenew: false }), { status: 200 })));
+
+  it('shows real prices, toggles billing interval and shows "coming soon" while billing is off', async () => {
+    stubConfig(false);
     wrap(<PlanCards plans={plans} />);
     expect(screen.getByText(/R\$\s14,90/)).toBeInTheDocument();
     fireEvent.click(screen.getByRole('radio', { name: 'Anual' }));
     expect(screen.getByText(/R\$\s149,90/)).toBeInTheDocument();
     expect(screen.getByText(/economize 16%/)).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Começar grátis' })).toHaveAttribute('href', '/register');
-    expect(screen.getByText('Assinaturas em breve')).toBeInTheDocument();
+    expect(await screen.findByText('Assinaturas em breve')).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /assinar/i })).toBeNull();
+  });
+
+  it('offers a real subscribe action (via login) when billing is on', async () => {
+    stubConfig(true);
+    wrap(<PlanCards plans={plans} />);
+    const cta = await screen.findByRole('link', { name: 'Assinar agora' });
+    expect(cta).toHaveAttribute('href', '/login');
+    vi.unstubAllGlobals();
   });
 });

@@ -113,7 +113,9 @@ function Overview({ data }: { data: DashboardResponse }) {
           )}
         </div>
         <Button asChild variant="outline" className="mt-6">
-          <Link to="/#plans">{t('dashboard.seePlans')}</Link>
+          <Link to={subscription.planCode === 'free' ? '/premium' : '/account/subscription'}>
+            {subscription.planCode === 'free' ? t('dashboard.seePlans') : t('premium.manage')}
+          </Link>
         </Button>
       </Card>
     </div>

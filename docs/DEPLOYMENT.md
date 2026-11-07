@@ -56,7 +56,17 @@ APP_PUBLIC_URL=https://${{fandom-web.RAILWAY_PUBLIC_DOMAIN}}
 WEB_ORIGINS=https://${{fandom-web.RAILWAY_PUBLIC_DOMAIN}}
 SUBSCRIPTION_GRACE_DAYS=3
 BOOTSTRAP_SUPER_ADMIN_EMAILS=<e-mail do fundador; remova depois>
+API_PUBLIC_URL=https://${{RAILWAY_PUBLIC_DOMAIN}}
+# Pagamentos (InfinitePay Checkout Integrado). Sem estas três, a cobrança fica desligada.
+INFINITEPAY_HANDLE=<sua InfiniteTag, sem o $>
+INFINITEPAY_API_KEY=<inchk_… criada em Configurações do Checkout>
+INFINITEPAY_WEBHOOK_TOKEN=<32+ caracteres aleatórios>
 ```
+
+#### InfinitePay
+1. No app/Conta Web: *Configurações do Checkout* → ative **Checkout Integrado** → crie uma **API Key** (`inchk_…`, aparece uma vez).
+2. Preencha as variáveis acima em `fandom-api`. O webhook é configurado automaticamente em cada link (`/v1/billing/webhooks/infinitepay?token=…`).
+3. Não há sandbox: valide com um pagamento real e estorne pelo app se quiser. Estornos e cancelamentos de cobrança são feitos só pelo app/Conta Web da InfinitePay.
 > `DATABASE_SSL=disable` só é aceito em produção para hosts `*.railway.internal` (rede privada). Para a URL pública use `require`.
 
 ### fandom-worker
@@ -72,6 +82,7 @@ SMTP_PORT=465
 SMTP_USER=forgestudios.contato@gmail.com
 SMTP_PASSWORD=<senha de app de 16 letras, sem espaços>
 EMAIL_FROM=Fandom Universe <forgestudios.contato@gmail.com>
+APP_PUBLIC_URL=https://${{fandom-web.RAILWAY_PUBLIC_DOMAIN}}
 ```
 
 #### Gmail (configuração atual, sem domínio próprio)

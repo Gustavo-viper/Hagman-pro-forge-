@@ -35,6 +35,17 @@ export const envSchema = z
     PASSWORD_RESET_TTL_MINUTES: z.coerce.number().int().min(10).max(1440).default(60),
     /** Public URL of fandom-web, used to build links in emails. */
     APP_PUBLIC_URL: z.url().default('http://localhost:5173'),
+    /** Public URL of this API, used for provider webhooks. */
+    API_PUBLIC_URL: z.url().optional(),
+
+    /** InfinitePay Checkout Integrado. Billing stays disabled until all three are set. */
+    INFINITEPAY_HANDLE: z.string().regex(/^[a-z0-9_.-]{2,64}$/i, 'InfiniteTag without the $').optional(),
+    INFINITEPAY_API_KEY: z.string().startsWith('inchk_').optional(),
+    /** Random secret appended to the webhook URL (webhooks are unsigned). */
+    INFINITEPAY_WEBHOOK_TOKEN: z.string().min(24).optional(),
+    INFINITEPAY_API_URL: z.url().default('https://api.checkout.infinitepay.io'),
+    /** Hours a checkout link stays payable. */
+    CHECKOUT_LINK_TTL_HOURS: z.coerce.number().int().min(1).max(168).default(24),
 
     RATE_LIMIT_TTL_MS: z.coerce.number().int().positive().default(60_000),
     RATE_LIMIT_MAX: z.coerce.number().int().positive().default(120),
@@ -45,6 +56,14 @@ export const envSchema = z
     BOOTSTRAP_SUPER_ADMIN_EMAILS: csv.default([]),
   })
   .superRefine((env, ctx) => {
+    const providerVars = [env.INFINITEPAY_HANDLE, env.INFINITEPAY_API_KEY, env.INFINITEPAY_WEBHOOK_TOKEN];
+    if (providerVars.some(Boolean) && !(providerVars.every(Boolean) && env.API_PUBLIC_URL)) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['INFINITEPAY_HANDLE'],
+        message: 'Billing needs INFINITEPAY_HANDLE, INFINITEPAY_API_KEY, INFINITEPAY_WEBHOOK_TOKEN and API_PUBLIC_URL together',
+      });
+    }
     if (env.NODE_ENV === 'production') {
       if (!env.REDIS_URL) {
         ctx.addIssue({ code: 'custom', path: ['REDIS_URL'], message: 'REDIS_URL is required in production' });

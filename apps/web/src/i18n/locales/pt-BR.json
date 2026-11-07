@@ -22,7 +22,8 @@
     "signUp": "Criar conta",
     "signOut": "Sair",
     "openMenu": "Abrir menu",
-    "closeMenu": "Fechar menu"
+    "closeMenu": "Fechar menu",
+    "premium": "Premium"
   },
   "landing": {
     "hero": {
@@ -311,6 +312,76 @@
     "session_revoked": "Sua sessão foi encerrada. Entre novamente.",
     "refresh_token_reused": "Por segurança, sua sessão foi encerrada. Entre novamente.",
     "invalid_refresh_token": "Sua sessão expirou. Entre novamente.",
-    "email_already_verified": "Seu e-mail já está confirmado."
+    "email_already_verified": "Seu e-mail já está confirmado.",
+    "billing_unavailable": "Os pagamentos ainda não estão disponíveis. Tente novamente em breve.",
+    "minor_purchase_blocked": "Assinaturas não estão disponíveis para menores de 18 anos.",
+    "email_not_verified": "Confirme seu e-mail antes de assinar (veja o aviso no seu painel).",
+    "plan_change_unavailable": "Você poderá trocar de plano quando o período atual terminar.",
+    "too_many_checkouts": "Muitas tentativas de pagamento. Aguarde alguns minutos.",
+    "payment_provider_error": "O serviço de pagamento está instável. Tente novamente em instantes.",
+    "price_not_found": "Este preço não está disponível.",
+    "payment_not_found": "Pagamento não encontrado.",
+    "no_active_subscription": "Você não tem uma assinatura ativa.",
+    "cannot_reactivate": "Não há assinatura para reativar. Assine novamente pela página Premium."
+  },
+  "premium": {
+    "title": "Desbloqueie o seu lado Premium",
+    "subtitle": "Emblemas, molduras, temas e espaços exclusivos. Os recursos essenciais continuam grátis — e o Premium nunca dá vantagem nos rankings.",
+    "subscribe": "Assinar agora",
+    "renew": "Renovar",
+    "redirecting": "Abrindo pagamento…",
+    "changeAtPeriodEnd": "Você poderá trocar de plano quando o período atual terminar.",
+    "youHave": "Você já é {{plan}}.",
+    "manage": "Gerenciar assinatura",
+    "secureNote": "Pagamento seguro pela InfinitePay: Pix ou cartão em até 12x. Não armazenamos dados do seu cartão.",
+    "faqTitle": "Como funciona o pagamento",
+    "faq": {
+      "payment": {
+        "q": "Como eu pago?",
+        "a": "Você é levado à página segura da InfinitePay e paga com Pix ou cartão de crédito (em até 12x). Assim que o pagamento é confirmado, os benefícios são liberados automaticamente."
+      },
+      "renewal": {
+        "q": "A cobrança é automática?",
+        "a": "Não. Cada pagamento libera um período (mês ou ano). Avisamos por e-mail 3 dias antes do vencimento e você renova com um clique — sem surpresas na fatura."
+      },
+      "cancel": {
+        "q": "Posso cancelar?",
+        "a": "Sim, a qualquer momento: os benefícios continuam até o fim do período já pago. Compras on-line podem ser desistidas em até 7 dias (Código de Defesa do Consumidor) — fale com o suporte."
+      },
+      "fair": {
+        "q": "O Premium dá vantagem?",
+        "a": "Não em rankings ou XP. O Premium é sobre identidade, personalização e espaços especiais. Toda a comunidade essencial continua gratuita."
+      }
+    }
+  },
+  "subscription": {
+    "title": "Minha assinatura",
+    "subtitle": "Plano, validade, pagamentos e recibos.",
+    "confirming": "Confirmando seu pagamento com a InfinitePay…",
+    "paid": "Pagamento confirmado! Seus benefícios já estão liberados.",
+    "pendingPayment": "Ainda não recebemos a confirmação do pagamento. Pix e cartão costumam confirmar em instantes — atualize a página em alguns minutos.",
+    "validUntil": "Válido até",
+    "endsOn": "Termina em",
+    "prepaidNote": "Seu plano é pré-pago: não há cobrança automática. Avisaremos por e-mail antes do vencimento.",
+    "cancelledNote": "Renovação cancelada. Você mantém os benefícios até o fim do período pago.",
+    "freeNote": "Você está no plano Free. Conheça os planos Premium para desbloquear benefícios exclusivos.",
+    "cancel": "Cancelar assinatura",
+    "reactivate": "Reativar assinatura",
+    "seeAllPlans": "Ver todos os planos",
+    "cancelConfirm": "Cancelar a assinatura? Você mantém os benefícios até o fim do período já pago.",
+    "history": "Histórico de pagamentos",
+    "noPayments": "Nenhum pagamento ainda.",
+    "date": "Data",
+    "amount": "Valor",
+    "status": "Status",
+    "receipt": "Comprovante",
+    "card": "Cartão",
+    "paymentStatus": {
+      "paid": "Pago",
+      "pending": "Aguardando",
+      "failed": "Falhou",
+      "expired": "Link expirado",
+      "refunded": "Estornado"
+    }
   }
 }

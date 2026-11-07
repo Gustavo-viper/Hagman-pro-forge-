@@ -3,13 +3,51 @@ import type { EmailJobData, EmailTemplate, Locale } from '@fandom/shared';
 interface Copy {
   subject: string;
   heading: string;
-  body: string;
+  body: string | ((d: NonNullable<EmailJobData['details']>) => string);
   cta: string;
   expiry: (minutes: number) => string;
   ignore: string;
 }
 
+const none = () => '';
+
 const COPY: Record<EmailTemplate, Record<Locale, Copy>> = {
+  subscription_activated: {
+    'pt-BR': {
+      subject: 'Pagamento confirmado — Fandom Universe',
+      heading: 'Sua assinatura está ativa!',
+      body: (d) => `Recebemos seu pagamento${d.amount ? ` de ${d.amount}` : ''}. O plano ${d.plan} está liberado até ${d.until}. Aproveite seus benefícios exclusivos!`,
+      cta: 'Ver minha assinatura',
+      expiry: none,
+      ignore: 'Não há renovação automática: avisaremos antes do vencimento.',
+    },
+    en: {
+      subject: 'Payment confirmed — Fandom Universe',
+      heading: 'Your subscription is active!',
+      body: (d) => `We received your payment${d.amount ? ` of ${d.amount}` : ''}. ${d.plan} is unlocked until ${d.until}. Enjoy your exclusive benefits!`,
+      cta: 'View my subscription',
+      expiry: none,
+      ignore: "There is no automatic renewal: we'll remind you before it ends.",
+    },
+  },
+  subscription_renewal_reminder: {
+    'pt-BR': {
+      subject: 'Sua assinatura vence em breve — Fandom Universe',
+      heading: 'Hora de renovar',
+      body: (d) => `Seu plano ${d.plan} vence em ${d.until}. Renove agora para não perder emblemas, molduras e acesso às áreas exclusivas.`,
+      cta: 'Renovar assinatura',
+      expiry: none,
+      ignore: 'Se não quiser renovar, não precisa fazer nada: sua conta volta ao plano Free ao fim do período.',
+    },
+    en: {
+      subject: 'Your subscription ends soon — Fandom Universe',
+      heading: 'Time to renew',
+      body: (d) => `Your ${d.plan} plan ends on ${d.until}. Renew now to keep your badges, frames and access to exclusive areas.`,
+      cta: 'Renew subscription',
+      expiry: none,
+      ignore: "If you don't want to renew, do nothing: your account returns to Free when the period ends.",
+    },
+  },
   email_verification: {
     'pt-BR': {
       subject: 'Confirme seu e-mail — Fandom Universe',
@@ -54,15 +92,17 @@ const escape = (s: string) =>
 export function renderEmail(job: EmailJobData): { subject: string; text: string; html: string } {
   const c = COPY[job.template][job.locale] ?? COPY[job.template]['pt-BR'];
   const link = escape(job.link);
-  const text = `${c.heading}\n\n${c.body}\n\n${job.link}\n\n${c.expiry(job.expiresInMinutes)}\n${c.ignore}\n\n— Fandom Universe · Forge Studios`;
+  const body = typeof c.body === 'function' ? c.body(job.details ?? { plan: '', until: '' }) : c.body;
+  const expiry = job.expiresInMinutes ? c.expiry(job.expiresInMinutes) : '';
+  const text = `${c.heading}\n\n${body}\n\n${job.link}\n\n${expiry ? `${expiry}\n` : ''}${c.ignore}\n\n— Fandom Universe · Forge Studios`;
   const html = `<!doctype html><html lang="${job.locale}"><body style="margin:0;background:#05040a;font-family:Arial,Helvetica,sans-serif;color:#ece9f6">
 <table width="100%" cellpadding="0" cellspacing="0" style="padding:32px 12px"><tr><td align="center">
 <table width="560" cellpadding="0" cellspacing="0" style="max-width:560px;background:#0c0a18;border:1px solid #2a2342;border-radius:16px;padding:36px">
 <tr><td style="font-size:13px;letter-spacing:4px;color:#f2cb6b;font-weight:bold">FANDOM UNIVERSE</td></tr>
 <tr><td style="padding-top:20px;font-size:24px;font-weight:bold">${escape(c.heading)}</td></tr>
-<tr><td style="padding-top:12px;font-size:15px;line-height:22px;color:#c9c4de">${escape(c.body)}</td></tr>
+<tr><td style="padding-top:12px;font-size:15px;line-height:22px;color:#c9c4de">${escape(body)}</td></tr>
 <tr><td style="padding-top:28px"><a href="${link}" style="display:inline-block;background:#7c3aed;color:#ffffff;text-decoration:none;font-weight:bold;padding:14px 26px;border-radius:12px">${escape(c.cta)}</a></td></tr>
-<tr><td style="padding-top:24px;font-size:12px;line-height:18px;color:#8f89a8">${escape(c.expiry(job.expiresInMinutes))}<br>${escape(c.ignore)}</td></tr>
+<tr><td style="padding-top:24px;font-size:12px;line-height:18px;color:#8f89a8">${expiry ? `${escape(expiry)}<br>` : ''}${escape(c.ignore)}</td></tr>
 <tr><td style="padding-top:24px;font-size:11px;color:#6b6585;word-break:break-all">${link}</td></tr>
 </table><p style="font-size:11px;color:#6b6585">ONE PLATFORM. INFINITE UNIVERSES. · Forge Studios Tecnologias em Softwares LTDA.</p>
 </td></tr></table></body></html>`;

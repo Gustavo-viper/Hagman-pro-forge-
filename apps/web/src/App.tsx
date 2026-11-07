@@ -15,6 +15,8 @@ const DashboardPage = lazy(() => import('@/pages/dashboard/DashboardPage'));
 const UniversesPage = lazy(() => import('@/pages/UniversesPage'));
 const UniverseDetailPage = lazy(() => import('@/pages/UniverseDetailPage'));
 const LegalPage = lazy(() => import('@/pages/legal/LegalPage'));
+const PremiumPage = lazy(() => import('@/pages/PremiumPage'));
+const SubscriptionPage = lazy(() => import('@/pages/account/SubscriptionPage'));
 const NotFoundPage = lazy(() => import('@/pages/NotFoundPage'));
 
 const s = (el: React.ReactNode) => <Suspense fallback={<FullPageLoader />}>{el}</Suspense>;
@@ -32,6 +34,8 @@ export const routes = [
       { path: '/universes', element: s(<UniversesPage />) },
       { path: '/universes/:slug', element: s(<UniverseDetailPage />) },
       { path: '/dashboard', element: <RequireAuth>{s(<DashboardPage />)}</RequireAuth> },
+      { path: '/premium', element: s(<PremiumPage />) },
+      { path: '/account/subscription', element: <RequireAuth>{s(<SubscriptionPage />)}</RequireAuth> },
       { path: '/legal/terms', element: s(<LegalPage doc="terms" />) },
       { path: '/legal/privacy', element: s(<LegalPage doc="privacy" />) },
       { path: '*', element: s(<NotFoundPage />) },

@@ -51,3 +51,20 @@ export function useDashboard() {
     enabled: Boolean(session),
   });
 }
+
+export function useBillingConfig() {
+  return useQuery({
+    queryKey: ['billing', 'config'],
+    queryFn: ({ signal }) => api<import('@fandom/types').BillingConfig>('/v1/billing/config', { signal, auth: false }),
+    staleTime: 5 * 60_000,
+  });
+}
+
+export function useSubscriptionDetails() {
+  const { session } = useAuth();
+  return useQuery({
+    queryKey: ['me', 'billing'],
+    queryFn: ({ signal }) => api<import('@fandom/types').SubscriptionDetails>('/v1/billing/subscription', { signal }),
+    enabled: Boolean(session),
+  });
+}

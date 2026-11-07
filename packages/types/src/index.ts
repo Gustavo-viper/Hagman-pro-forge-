@@ -135,3 +135,51 @@ export interface DashboardResponse {
   memberships: UniverseMembership[];
   universes: UniverseSummary[];
 }
+
+export interface BillingConfig {
+  /** false until the payment provider credentials are configured on the API. */
+  enabled: boolean;
+  provider: 'infinitepay' | null;
+  currency: string;
+  /** InfinitePay has no recurring API: periods are prepaid and renewed manually. */
+  autoRenew: boolean;
+}
+
+export interface CheckoutResponse {
+  checkoutUrl: string;
+  orderNsu: string;
+  expiresAt: string;
+}
+
+export interface PaymentSummary {
+  id: string;
+  planCode: PlanCode;
+  interval: BillingInterval;
+  amountMinor: number;
+  paidAmountMinor: number | null;
+  currency: string;
+  status: 'pending' | 'paid' | 'failed' | 'expired' | 'refunded';
+  captureMethod: string | null;
+  installments: number | null;
+  receiptUrl: string | null;
+  periodStart: string | null;
+  periodEnd: string | null;
+  createdAt: string;
+  paidAt: string | null;
+}
+
+export interface SubscriptionDetails {
+  subscription: SubscriptionSnapshot;
+  /** Price of the current/last plan period, if any. */
+  currentPrice: { amountMinor: number; currency: string } | null;
+  payments: PaymentSummary[];
+  /** True when the user may start a checkout now (no blocking condition). */
+  canCheckout: boolean;
+  /** Plan the user may renew (same plan only while a period is open). */
+  renewablePlan: PlanCode | null;
+}
+
+export interface ConfirmPaymentResponse {
+  status: 'paid' | 'pending';
+  subscription: SubscriptionSnapshot;
+}

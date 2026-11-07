@@ -36,6 +36,21 @@ Rate limit: `RATE_LIMIT_MAX` requisições por `RATE_LIMIT_TTL_MS` por IP (`429 
 
 `AuthSession`: `{ accessToken, expiresIn, refreshToken, refreshExpiresAt, user: { id, email, emailVerified } }`. O access token (JWT HS256, 15 min) vai no cabeçalho `Authorization: Bearer`.
 
+## Cobrança (Fandom Premium · InfinitePay)
+
+Planos **pré-pagos** (a API da InfinitePay não tem cobrança recorrente): cada pagamento confirmado ativa ou estende a assinatura por 1 mês/1 ano. Lembrete por e-mail 3 dias antes do vencimento.
+
+| Método | Rota | Acesso | Descrição |
+|---|---|---|---|
+| GET | `/v1/billing/config` | pública | `{ enabled, provider, currency, autoRenew:false }` |
+| POST | `/v1/billing/checkout` | autenticado, adulto, e-mail verificado, onboarding | `{ planCode: plus\|ultra, interval: month\|year }` → `{ checkoutUrl, orderNsu, expiresAt }` (link de uso único, 24 h) |
+| POST | `/v1/billing/confirm` | autenticado | `{ orderNsu, transactionNsu, slug }` (parâmetros do retorno) → confirmado no `/payment_check` da InfinitePay antes de ativar |
+| GET | `/v1/billing/subscription` | autenticado | plano, validade, preço, histórico de pagamentos |
+| POST | `/v1/billing/subscription/cancel` · `/reactivate` | autenticado | cancelamento mantém benefícios até o fim do período pago |
+| POST | `/v1/billing/webhooks/infinitepay?token=…` | token secreto | aviso da InfinitePay (não assinado): armazenado e **sempre** reconfirmado no `/payment_check`; valor divergente não ativa |
+
+Erros: `billing_unavailable`, `minor_purchase_blocked`, `email_not_verified`, `plan_change_unavailable`, `too_many_checkouts`, `payment_provider_error`, `payment_not_found`, `no_active_subscription`, `cannot_reactivate`, `invalid_webhook_token`.
+
 ## Universos
 
 | Método | Rota | Acesso | Descrição |

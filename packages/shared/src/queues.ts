@@ -9,18 +9,26 @@ export const QUEUES = {
 export const JOBS = {
   subscriptionLifecycle: 'subscription-lifecycle',
   authCleanup: 'auth-cleanup',
+  renewalReminders: 'renewal-reminders',
   sendEmail: 'send-email',
 } as const;
 
-export const EMAIL_TEMPLATES = ['email_verification', 'password_reset'] as const;
+export const EMAIL_TEMPLATES = [
+  'email_verification',
+  'password_reset',
+  'subscription_activated',
+  'subscription_renewal_reminder',
+] as const;
 export type EmailTemplate = (typeof EMAIL_TEMPLATES)[number];
 
 export interface EmailJobData {
   to: string;
   template: EmailTemplate;
   locale: Locale;
-  /** Absolute link containing a single-use token. Never log it. */
+  /** Absolute link (may contain a single-use token: never log it). */
   link: string;
-  /** Link validity, shown in the email body. */
-  expiresInMinutes: number;
+  /** Link validity, shown in auth emails. */
+  expiresInMinutes?: number;
+  /** Billing emails: already-formatted, localized values. */
+  details?: { plan: string; until: string; amount?: string };
 }

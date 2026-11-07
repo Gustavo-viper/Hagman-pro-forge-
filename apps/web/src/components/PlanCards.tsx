@@ -1,4 +1,4 @@
-import { yearlySavingsPercent, monthlyEquivalent, type BillingInterval } from '@fandom/shared';
+import { monthlyEquivalent, yearlySavingsPercent, type BillingInterval, type PlanCode } from '@fandom/shared';
 import type { SubscriptionPlanSummary } from '@fandom/types';
 import { Badge, Button, cn } from '@fandom/ui';
 import { motion } from 'framer-motion';
@@ -7,16 +7,65 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 import { useAuth } from '@/auth/AuthProvider';
+import { useBillingConfig, useSubscriptionDetails } from '@/hooks/data';
+import { useCheckout } from '@/hooks/useCheckout';
+import { errorMessage } from '@/lib/errors';
 import { localized, money } from '@/lib/format';
 import { currentLocale } from '@/lib/i18n';
 
 const ICONS = { free: Star, plus: Sparkles, ultra: Crown } as const;
 
-/**
- * Plan comparison from live API data. Paid checkout is introduced in stage 10 together with
- * the payment provider; until then paid plans show an explicit "coming soon" state instead
- * of a button that would do nothing.
- */
+/** Paid-plan call to action, driven by the server's billing config and subscription state. */
+function PaidPlanAction({ plan, interval, highlighted }: { plan: Exclude<PlanCode, 'free'>; interval: BillingInterval; highlighted: boolean }) {
+  const { t } = useTranslation();
+  const { session } = useAuth();
+  const config = useBillingConfig();
+  const details = useSubscriptionDetails();
+  const checkout = useCheckout();
+
+  if (config.isPending) return <div className="h-11" />;
+  if (!config.data?.enabled) {
+    return (
+      <p className="rounded-xl border border-dashed border-white/15 py-3 text-center text-sm text-mist/60" aria-live="polite">
+        {t('landing.plans.soon')}
+      </p>
+    );
+  }
+  if (!session) {
+    return (
+      <Button asChild variant={highlighted ? 'primary' : plan === 'ultra' ? 'gold' : 'glass'} className="w-full">
+        <Link to="/login" state={{ from: '/premium' }}>{t('premium.subscribe')}</Link>
+      </Button>
+    );
+  }
+  const current = details.data?.renewablePlan ?? null;
+  const blocked = current !== null && current !== plan;
+  const label = current === plan ? t('premium.renew') : t('premium.subscribe');
+  const pending = checkout.isPending || checkout.isSuccess; // isSuccess: redirecting to the payment page
+  return (
+    <div className="space-y-2">
+      <Button
+        variant={highlighted ? 'primary' : plan === 'ultra' ? 'gold' : 'glass'}
+        className="w-full"
+        disabled={blocked || details.isPending}
+        loading={pending}
+        onClick={() => checkout.mutate({ planCode: plan, interval })}
+      >
+        {pending ? t('premium.redirecting') : label}
+      </Button>
+      {blocked && <p className="text-center text-xs text-mist/55">{t('premium.changeAtPeriodEnd')}</p>}
+      {checkout.isError && (
+        <p role="alert" className="text-center text-xs text-red-300">
+          {errorMessage(checkout.error, t)}{' '}
+          {checkout.error && 'code' in checkout.error && checkout.error.code === 'email_not_verified' && (
+            <Link to="/dashboard" className="underline">{t('nav.dashboard')}</Link>
+          )}
+        </p>
+      )}
+    </div>
+  );
+}
+
 export function PlanCards({ plans }: { plans: SubscriptionPlanSummary[] }) {
   const { t } = useTranslation();
   const { session } = useAuth();
@@ -104,13 +153,11 @@ export function PlanCards({ plans }: { plans: SubscriptionPlanSummary[] }) {
               </ul>
               <div className="mt-8">
                 {plan.code === 'free' ? (
-                  <Button asChild variant={highlighted ? 'primary' : 'glass'} className="w-full">
+                  <Button asChild variant="glass" className="w-full">
                     <Link to={session ? '/dashboard' : '/register'}>{t('landing.plans.startFree')}</Link>
                   </Button>
                 ) : (
-                  <p className="rounded-xl border border-dashed border-white/15 py-3 text-center text-sm text-mist/60" aria-live="polite">
-                    {t('landing.plans.soon')}
-                  </p>
+                  <PaidPlanAction plan={plan.code} interval={interval} highlighted={highlighted} />
                 )}
               </div>
             </motion.div>

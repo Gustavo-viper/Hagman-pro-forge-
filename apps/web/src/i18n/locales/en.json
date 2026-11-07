@@ -22,7 +22,8 @@
     "signUp": "Sign up",
     "signOut": "Sign out",
     "openMenu": "Open menu",
-    "closeMenu": "Close menu"
+    "closeMenu": "Close menu",
+    "premium": "Premium"
   },
   "landing": {
     "hero": {
@@ -311,6 +312,76 @@
     "session_revoked": "Your session ended. Please sign in again.",
     "refresh_token_reused": "For your security, your session was ended. Please sign in again.",
     "invalid_refresh_token": "Your session expired. Please sign in again.",
-    "email_already_verified": "Your email is already confirmed."
+    "email_already_verified": "Your email is already confirmed.",
+    "billing_unavailable": "Payments are not available yet. Please try again soon.",
+    "minor_purchase_blocked": "Subscriptions are not available for users under 18.",
+    "email_not_verified": "Confirm your email before subscribing (see the notice on your dashboard).",
+    "plan_change_unavailable": "You can switch plans when the current period ends.",
+    "too_many_checkouts": "Too many payment attempts. Please wait a few minutes.",
+    "payment_provider_error": "The payment service is unstable. Please try again shortly.",
+    "price_not_found": "This price is not available.",
+    "payment_not_found": "Payment not found.",
+    "no_active_subscription": "You don't have an active subscription.",
+    "cannot_reactivate": "There is no subscription to reactivate. Subscribe again from the Premium page."
+  },
+  "premium": {
+    "title": "Unlock your Premium side",
+    "subtitle": "Badges, frames, themes and exclusive spaces. Essential features stay free — and Premium never gives ranking advantages.",
+    "subscribe": "Subscribe now",
+    "renew": "Renew",
+    "redirecting": "Opening payment…",
+    "changeAtPeriodEnd": "You can switch plans when the current period ends.",
+    "youHave": "You are already {{plan}}.",
+    "manage": "Manage subscription",
+    "secureNote": "Secure payment by InfinitePay: Pix or card in up to 12 installments. We never store your card data.",
+    "faqTitle": "How payment works",
+    "faq": {
+      "payment": {
+        "q": "How do I pay?",
+        "a": "You go to InfinitePay's secure page and pay with Pix or credit card (up to 12 installments). Once the payment is confirmed, benefits unlock automatically."
+      },
+      "renewal": {
+        "q": "Is billing automatic?",
+        "a": "No. Each payment unlocks one period (month or year). We email you 3 days before it ends and you renew in one click — no surprise charges."
+      },
+      "cancel": {
+        "q": "Can I cancel?",
+        "a": "Yes, anytime: benefits last until the end of the paid period. Online purchases can be withdrawn within 7 days under Brazilian consumer law — contact support."
+      },
+      "fair": {
+        "q": "Does Premium give an advantage?",
+        "a": "Not in rankings or XP. Premium is about identity, customization and special spaces. The whole essential community stays free."
+      }
+    }
+  },
+  "subscription": {
+    "title": "My subscription",
+    "subtitle": "Plan, validity, payments and receipts.",
+    "confirming": "Confirming your payment with InfinitePay…",
+    "paid": "Payment confirmed! Your benefits are unlocked.",
+    "pendingPayment": "We haven't received the payment confirmation yet. Pix and card usually confirm within moments — refresh in a few minutes.",
+    "validUntil": "Valid until",
+    "endsOn": "Ends on",
+    "prepaidNote": "Your plan is prepaid: there are no automatic charges. We'll email you before it ends.",
+    "cancelledNote": "Renewal cancelled. You keep your benefits until the end of the paid period.",
+    "freeNote": "You're on the Free plan. Check the Premium plans to unlock exclusive benefits.",
+    "cancel": "Cancel subscription",
+    "reactivate": "Reactivate subscription",
+    "seeAllPlans": "See all plans",
+    "cancelConfirm": "Cancel the subscription? You keep your benefits until the end of the paid period.",
+    "history": "Payment history",
+    "noPayments": "No payments yet.",
+    "date": "Date",
+    "amount": "Amount",
+    "status": "Status",
+    "receipt": "Receipt",
+    "card": "Card",
+    "paymentStatus": {
+      "paid": "Paid",
+      "pending": "Waiting",
+      "failed": "Failed",
+      "expired": "Link expired",
+      "refunded": "Refunded"
+    }
   }
 }

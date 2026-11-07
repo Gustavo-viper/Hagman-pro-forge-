@@ -29,6 +29,12 @@ export default defineConfig({
   ],
   webServer: [
     {
+      command: 'node e2e/fake-infinitepay.mjs',
+      url: 'http://127.0.0.1:3902/health',
+      reuseExistingServer: false,
+      env: { FAKE_IP_PORT: '3902', FAKE_IP_WEB_URL: web },
+    },
+    {
       command: 'node ../database/src/cli.ts migrate && node ../database/src/cli.ts seed && node ../apps/api/dist/main.js',
       url: `${api}/health/ready`,
       reuseExistingServer: false,
@@ -41,6 +47,12 @@ export default defineConfig({
         AUTH_JWT_SECRET: E2E_JWT_SECRET,
         AUTH_RATE_LIMIT_MAX: '10000',
         APP_PUBLIC_URL: web,
+        API_PUBLIC_URL: api,
+        INFINITEPAY_API_URL: 'http://127.0.0.1:3902',
+        INFINITEPAY_HANDLE: 'fandome2e',
+        INFINITEPAY_API_KEY: 'inchk_e2e_key',
+        INFINITEPAY_WEBHOOK_TOKEN: 'e2e-webhook-token-0123456789abcdef',
+        CHECKOUT_RATE_LIMIT_MAX: '10000',
         WEB_ORIGINS: web,
         RATE_LIMIT_MAX: '10000',
       },

@@ -5,6 +5,7 @@ import pg from 'pg';
 import { JOBS, pgSslConfig, QUEUES, stripSslParams, type EmailJobData } from '@fandom/shared';
 import { loadEnv } from './env.js';
 import { runAuthCleanup } from './jobs/auth-cleanup.js';
+import { collectRenewalReminders } from './jobs/renewal-reminders.js';
 import { renderEmail } from './jobs/email.js';
 import { runSubscriptionLifecycle } from './jobs/subscription-lifecycle.js';
 import { log } from './logger.js';
@@ -50,6 +51,8 @@ async function main(): Promise<void> {
   // Idempotent: upserting the schedulers on every boot keeps exactly one schedule each.
   await maintenance.upsertJobScheduler(JOBS.subscriptionLifecycle, { every: env.SUBSCRIPTION_SWEEP_EVERY_MS }, { name: JOBS.subscriptionLifecycle, opts: repeatOpts });
   await maintenance.upsertJobScheduler(JOBS.authCleanup, { every: 6 * 3_600_000 }, { name: JOBS.authCleanup, opts: repeatOpts });
+  await maintenance.upsertJobScheduler(JOBS.renewalReminders, { every: 3_600_000 }, { name: JOBS.renewalReminders, opts: repeatOpts });
+  const emailQueue = new Queue<EmailJobData>(QUEUES.email, { connection });
 
   const withClient = async <T>(fn: (c: pg.PoolClient) => Promise<T>): Promise<T> => {
     const client = await pool.connect();
@@ -70,6 +73,16 @@ async function main(): Promise<void> {
           );
           log('info', 'subscription lifecycle sweep', { jobId: job.id, ...result });
           return result;
+        }
+        case JOBS.renewalReminders: {
+          const emails = await withClient((c) =>
+            collectRenewalReminders(c, { daysBefore: env.RENEWAL_REMINDER_DAYS, appUrl: env.APP_PUBLIC_URL }),
+          );
+          for (const e of emails) {
+            await emailQueue.add(JOBS.sendEmail, e, { attempts: 5, backoff: { type: 'exponential', delay: 15_000 }, removeOnComplete: 1000, removeOnFail: 5000 });
+          }
+          log('info', 'renewal reminders', { jobId: job.id, queued: emails.length });
+          return { queued: emails.length };
         }
         case JOBS.authCleanup: {
           const result = await withClient((c) => runAuthCleanup(c));
@@ -127,6 +140,7 @@ async function main(): Promise<void> {
     server.close();
     await Promise.all([maintenanceWorker.close(), emailWorker.close()]);
     await maintenance.close();
+    await emailQueue.close();
     await connection.quit().catch(() => undefined);
     await pool.end();
     process.exit(0);

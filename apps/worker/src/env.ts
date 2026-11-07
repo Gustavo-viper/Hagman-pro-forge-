@@ -23,6 +23,9 @@ export const envSchema = z.object({
   SMTP_USER: z.string().optional(),
   SMTP_PASSWORD: z.string().optional(),
   EMAIL_FROM: z.string().default('Fandom Universe <no-reply@fandomuniverse.app>'),
+  /** Public URL of fandom-web, used in links inside emails sent by jobs. */
+  APP_PUBLIC_URL: z.url().default('http://localhost:5173'),
+  RENEWAL_REMINDER_DAYS: z.coerce.number().int().min(1).max(14).default(3),
 });
 export type WorkerEnv = z.infer<typeof envSchema>;
 

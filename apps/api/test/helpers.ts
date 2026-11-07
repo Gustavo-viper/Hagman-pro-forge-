@@ -16,7 +16,12 @@ export function configureTestEnv(overrides: Record<string, string> = {}): void {
     APP_PUBLIC_URL: 'https://fandom.test',
     RATE_LIMIT_MAX: '10000',
     AUTH_RATE_LIMIT_MAX: '10000',
+    CHECKOUT_RATE_LIMIT_MAX: '10000',
     BOOTSTRAP_SUPER_ADMIN_EMAILS: 'founder@forge.test',
+    API_PUBLIC_URL: 'https://api.fandom.test',
+    INFINITEPAY_HANDLE: 'fandomtest',
+    INFINITEPAY_API_KEY: 'inchk_test_key',
+    INFINITEPAY_WEBHOOK_TOKEN: 'webhook-token-for-tests-0123456789',
     ...overrides,
   });
   if (!process.env.REDIS_URL) delete process.env.REDIS_URL;

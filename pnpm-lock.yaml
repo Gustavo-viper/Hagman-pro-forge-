@@ -318,9 +318,15 @@ importers:
       '@types/node':
         specifier: ^22.19.0
         version: 22.20.5
+      '@types/pg':
+        specifier: ^8.15.0
+        version: 8.23.1
       jose:
         specifier: ^6.2.15
         version: 6.2.15
+      pg:
+        specifier: ^8.23.1
+        version: 8.23.1
       typescript:
         specifier: ^7.0.2
         version: 7.0.2

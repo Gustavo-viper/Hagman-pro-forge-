@@ -4,6 +4,7 @@ import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { AccessGuard } from './auth/access.guard.js';
 import { AuthGuard } from './auth/auth.guard.js';
 import { AuthModule } from './auth/auth.module.js';
+import { BillingModule } from './billing/billing.module.js';
 import { HttpExceptionFilter } from './common/http-exception.filter.js';
 import { RedisThrottlerStorage } from './common/redis-throttler.storage.js';
 import { ConfigModule, ENV } from './config/config.module.js';
@@ -39,6 +40,7 @@ import { XpModule } from './xp/xp.module.js';
     UniversesModule,
     PlansModule,
     MeModule,
+    BillingModule,
   ],
   providers: [
     // Order matters: rate limit → authenticate → authorize (roles / plan).
