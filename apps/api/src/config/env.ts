@@ -56,8 +56,9 @@ export const envSchema = z
     BOOTSTRAP_SUPER_ADMIN_EMAILS: csv.default([]),
   })
   .superRefine((env, ctx) => {
-    const providerVars = [env.INFINITEPAY_HANDLE, env.INFINITEPAY_API_KEY, env.INFINITEPAY_WEBHOOK_TOKEN];
-    if (providerVars.some(Boolean) && !(providerVars.every(Boolean) && env.API_PUBLIC_URL)) {
+    // The webhook token may be provisioned ahead of time; handle/API key switch billing on.
+    const credentials = [env.INFINITEPAY_HANDLE, env.INFINITEPAY_API_KEY];
+    if (credentials.some(Boolean) && !(credentials.every(Boolean) && env.INFINITEPAY_WEBHOOK_TOKEN && env.API_PUBLIC_URL)) {
       ctx.addIssue({
         code: 'custom',
         path: ['INFINITEPAY_HANDLE'],

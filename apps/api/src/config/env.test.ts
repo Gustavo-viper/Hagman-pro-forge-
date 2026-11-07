@@ -27,6 +27,14 @@ describe('loadEnv', () => {
     expect(() => loadEnv({ ...railway, DATABASE_URL: 'postgresql://postgres:x@fandom-postgres.railway.internal:5432/railway' })).not.toThrow();
     expect(() => loadEnv({ ...railway, DATABASE_URL: 'postgresql://postgres:x@shuttle.proxy.rlwy.net:41234/railway' })).toThrow(/DATABASE_SSL/);
   });
+  it('accepts the webhook token alone but requires the full InfinitePay set once credentials exist', () => {
+    expect(() => loadEnv({ ...base, INFINITEPAY_WEBHOOK_TOKEN: 'x'.repeat(40) })).not.toThrow();
+    expect(() => loadEnv({ ...base, INFINITEPAY_HANDLE: 'loja' })).toThrow(/Billing needs/);
+    expect(() => loadEnv({ ...base, INFINITEPAY_HANDLE: 'loja', INFINITEPAY_API_KEY: 'inchk_x', INFINITEPAY_WEBHOOK_TOKEN: 'x'.repeat(40) })).toThrow(/Billing needs/);
+    expect(() =>
+      loadEnv({ ...base, INFINITEPAY_HANDLE: 'loja', INFINITEPAY_API_KEY: 'inchk_x', INFINITEPAY_WEBHOOK_TOKEN: 'x'.repeat(40), API_PUBLIC_URL: 'https://api.x.com' }),
+    ).not.toThrow();
+  });
   it('parses CSV origins', () => {
     expect(loadEnv({ ...base, WEB_ORIGINS: 'https://a.com, https://b.com' }).WEB_ORIGINS).toEqual(['https://a.com', 'https://b.com']);
   });
