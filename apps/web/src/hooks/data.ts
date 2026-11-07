@@ -31,6 +31,7 @@ export function useUniverse(slug: string) {
   return useQuery({
     queryKey: queryKeys.universe(slug),
     queryFn: ({ signal }) => api<UniverseDetail>(`/v1/universes/${encodeURIComponent(slug)}`, { signal, auth: false }),
+    enabled: Boolean(slug),
   });
 }
 

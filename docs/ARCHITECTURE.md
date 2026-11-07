@@ -63,3 +63,14 @@ infrastructure/ Dockerfiles, docker-compose local, scripts
 - **i18n**: i18next com `pt-BR` e `en` (paridade de chaves testada); `Intl` para datas, números e moedas; idioma persistido no perfil.
 - **Identidade visual**: tokens Tailwind (`void`, `arcane`, `mystic`, `gold`, `mist`), Cinzel (fantasia) + Inter (tecnologia), vidro, partículas em canvas (pausa em aba oculta e respeita `prefers-reduced-motion`), luz que segue o cursor nos cards, transições de página.
 - **PWA**: manifest, ícones (inclui maskable) e service worker que **nunca** armazena respostas da API.
+
+### Trilhas sonoras dos universos
+
+Cada universo tem uma **trilha original** composta para o Fandom Universe (`apps/web/src/lib/music/`): não usamos nem imitamos músicas oficiais, que têm direitos autorais. A música é sintetizada no navegador com Web Audio (sem arquivos de áudio nem serviços externos):
+
+- `synth.ts`: instrumentos (cordas, celesta, piano, metais, guitarra, baixo, bateria) e reverb gerado.
+- `themes.ts`: tema por universo (tom, andamento, acordes, melodia e arranjo); universos novos usam um tema genérico até ganharem o seu.
+- `player.ts`: agendador sobre o relógio de áudio (lookahead), crossfade entre universos, pausa com a aba oculta.
+- `components/UniverseMusic.tsx`: toca nas páginas de um universo (e nas subpáginas: jogos, eventos, fórum), para ao sair, e tem botão de silenciar e volume, lembrados no aparelho. Pela regra de autoplay dos navegadores, o som começa no primeiro clique ou toque.
+
+Os testes renderizam cada trilha offline no navegador e verificam volume audível, sem saturação.

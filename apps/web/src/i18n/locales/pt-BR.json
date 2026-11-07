@@ -765,5 +765,13 @@
       "lives_zero": "0 vidas restantes",
       "rewardsLeft_zero": "Hoje as vitórias não valem mais XP (limite de 5 por dia)."
     }
+  },
+  "music": {
+    "region": "Trilha sonora do universo",
+    "play": "Tocar trilha sonora",
+    "mute": "Silenciar trilha sonora",
+    "volume": "Volume da trilha sonora",
+    "tapToPlay": "Toque em qualquer lugar para ouvir",
+    "original": "Trilha original Fandom Universe"
   }
 }

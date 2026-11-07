@@ -765,5 +765,13 @@
       "lives_zero": "0 lives left",
       "unit_zero": "0 wins"
     }
+  },
+  "music": {
+    "region": "Universe soundtrack",
+    "play": "Play soundtrack",
+    "mute": "Mute soundtrack",
+    "volume": "Soundtrack volume",
+    "tapToPlay": "Tap anywhere to listen",
+    "original": "Fandom Universe original score"
   }
 }

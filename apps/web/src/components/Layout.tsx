@@ -8,6 +8,7 @@ import { useAuth } from '@/auth/AuthProvider';
 import { STAFF_VIEW_ROLES, useMe } from '@/hooks/data';
 import { LanguageSwitcher } from './LanguageSwitcher';
 import { Logo } from './Logo';
+import { UniverseMusic } from './UniverseMusic';
 
 function NavItems({ onNavigate }: { onNavigate?: () => void }) {
   const { t } = useTranslation();
@@ -188,6 +189,7 @@ export function AppLayout() {
         </motion.main>
       </AnimatePresence>
       <Footer />
+      <UniverseMusic />
     </div>
   );
 }

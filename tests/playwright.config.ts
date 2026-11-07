@@ -70,6 +70,7 @@ export default defineConfig({
         PORT: String(WEB_PORT),
         WEB_ROOT: '../apps/web/dist-e2e',
         VITE_API_URL: api,
+        VITE_MUSIC_DEBUG: '1',
       },
     },
   ],
