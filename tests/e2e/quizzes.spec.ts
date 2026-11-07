@@ -41,9 +41,9 @@ test('join a universe, play its quiz, earn XP and appear in the ranking', async 
   await page.getByRole('button', { name: /Jedi/ }).click();
   await expect(page.getByRole('button', { name: /Jedi/ })).toHaveAttribute('aria-pressed', 'true');
 
-  await page.getByRole('tab', { name: 'Quizzes' }).click();
+  await page.getByRole('tab', { name: 'Jogos e quizzes' }).click();
   await expect(page.getByRole('heading', { name: 'Academia Jedi' })).toBeVisible();
-  await page.getByRole('link', { name: 'Jogar' }).click();
+  await page.locator('div.glass').filter({ has: page.getByRole('heading', { name: 'Academia Jedi' }) }).last().getByRole('link', { name: 'Jogar' }).click();
   await answerAll(page, 6);
   await expect(page.getByText(/^\d\/6$/)).toBeVisible();
   await expect(page.getByText(/\+\d+ XP/).first()).toBeVisible();

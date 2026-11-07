@@ -32,7 +32,7 @@ test('universe page shows the identity system', async ({ page }) => {
   await page.goto('/universes/harry-potter');
   await expect(page.getByRole('heading', { name: 'Grifinória' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Lufa-Lufa' })).toBeVisible();
-  await page.getByRole('tab', { name: 'Quizzes' }).click();
+  await page.getByRole('tab', { name: 'Jogos e quizzes' }).click();
   await expect(page.getByRole('heading', { name: 'Qual é a sua casa?' })).toBeVisible();
   await page.getByRole('tab', { name: 'Ranking' }).click();
   await expect(page.getByRole('radio', { name: 'Semanal' })).toBeVisible();

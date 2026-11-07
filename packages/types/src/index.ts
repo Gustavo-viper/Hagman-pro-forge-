@@ -404,3 +404,85 @@ export interface AdminEvent extends UniverseEvent {
   externalUrl: string | null;
   quizId: string | null;
 }
+
+// ---------------------------------------------------------------- mini-games
+
+export type GameKind = 'daily' | 'speed' | 'hangman';
+
+/** A question as served by a game: never includes the answer. */
+export interface GameQuestion {
+  id: string;
+  prompt: LocalizedText;
+  options: { key: string; text: LocalizedText }[];
+}
+
+export interface GameReviewItem {
+  questionId: string;
+  chosen: string;
+  correctKey: string;
+  correct: boolean;
+  explanation: LocalizedText | null;
+}
+
+export interface DailyResult {
+  score: number;
+  total: number;
+  xpAwarded: number;
+  finishedAt: string;
+  review: GameReviewItem[];
+}
+
+export interface DailyChallenge {
+  /** Challenge date (America/Sao_Paulo), YYYY-MM-DD. Same questions for everyone that day. */
+  day: string;
+  questions: GameQuestion[];
+  /** Present once the user has played today (questions stay visible for the review). */
+  result: DailyResult | null;
+  /** Consecutive days played, including today when played. */
+  streak: number;
+  xpPerCorrect: number;
+  perfectBonus: number;
+}
+
+export interface SpeedRound {
+  id: string;
+  status: 'active' | 'finished';
+  endsAt: string;
+  durationSeconds: number;
+  score: number;
+  answered: number;
+  question: GameQuestion | null;
+  xpAwarded: number;
+  /** Present after an answer. */
+  last?: { questionId: string; correct: boolean; correctKey: string };
+}
+
+export interface HangmanGame {
+  id: string;
+  status: 'active' | 'won' | 'lost';
+  /** One entry per character: the character when revealed (or not a letter), null when hidden. */
+  mask: (string | null)[];
+  hint: LocalizedText;
+  guessed: string[];
+  wrong: string[];
+  livesLeft: number;
+  maxLives: number;
+  /** Revealed when the game ends. */
+  word: string | null;
+  xpAwarded: number;
+}
+
+export interface GamesOverview {
+  daily: { playedToday: boolean; score: number | null; total: number | null; streak: number };
+  speed: { best: number; weekBest: number; xpLeftToday: number };
+  hangman: { wins: number; played: number; rewardedWinsLeft: number; activeId: string | null };
+}
+
+export interface GameLeaderboardEntry {
+  rank: number;
+  userId: string;
+  username: string | null;
+  displayName: string | null;
+  score: number;
+  total: number | null;
+}

@@ -31,5 +31,8 @@ export const MISSION_SECTIONS = Object.keys(FEATURE_ENGINE).filter((k) => FEATUR
 /** Forum categories restricted to members sharing the same identity (e.g. a house). */
 export const IDENTITY_SCOPED_CATEGORIES = ['common_rooms'];
 
-export const MISSION_OBJECTIVES = ['quiz_complete', 'quiz_perfect', 'forum_topic', 'forum_reply', 'identity_set', 'event_join'] as const;
+export const MISSION_OBJECTIVES = [
+  'quiz_complete', 'quiz_perfect', 'forum_topic', 'forum_reply', 'identity_set', 'event_join',
+  'hangman_win', 'daily_complete', 'daily_perfect', 'speed_score',
+] as const;
 export type MissionObjective = (typeof MISSION_OBJECTIVES)[number];

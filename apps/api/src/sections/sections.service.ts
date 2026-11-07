@@ -38,6 +38,15 @@ export async function objectiveProgress(
     case 'event_join':
       return q(`SELECT count(*)::int AS n FROM event_participants p JOIN events e ON e.id = p.event_id
                  WHERE p.user_id = $1 AND e.universe_id = $2 AND p.registered_at BETWEEN $3 AND $4`);
+    case 'hangman_win':
+      return q(`SELECT count(*)::int AS n FROM game_sessions WHERE user_id = $1 AND universe_id = $2 AND game = 'hangman' AND status = 'won' AND finished_at BETWEEN $3 AND $4`);
+    case 'daily_complete':
+      return q(`SELECT count(*)::int AS n FROM game_sessions WHERE user_id = $1 AND universe_id = $2 AND game = 'daily' AND status <> 'active' AND finished_at BETWEEN $3 AND $4`);
+    case 'daily_perfect':
+      return q(`SELECT count(*)::int AS n FROM game_sessions WHERE user_id = $1 AND universe_id = $2 AND game = 'daily' AND status <> 'active' AND total > 0 AND score = total AND finished_at BETWEEN $3 AND $4`);
+    case 'speed_score':
+      // Best number of correct answers in a single speed round.
+      return q(`SELECT COALESCE(max(score), 0)::int AS n FROM game_sessions WHERE user_id = $1 AND universe_id = $2 AND game = 'speed' AND status <> 'active' AND finished_at BETWEEN $3 AND $4`);
   }
 }
 

@@ -80,5 +80,6 @@ export const XP_SOURCES = [
   'achievement',
   'admin_adjustment',
   'onboarding',
+  'game',
 ] as const;
 export type XpSource = (typeof XP_SOURCES)[number];

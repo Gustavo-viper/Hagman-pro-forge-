@@ -7,3 +7,4 @@ export * from './admin.js';
 export * from './quiz.js';
 export * from './sections.js';
 export * from './events.js';
+export * from './games.js';

@@ -19,6 +19,9 @@ const PremiumPage = lazy(() => import('@/pages/PremiumPage'));
 const QuizPage = lazy(() => import('@/pages/QuizPage'));
 const TopicPage = lazy(() => import('@/pages/TopicPage'));
 const EventRoomPage = lazy(() => import('@/pages/EventRoomPage'));
+const DailyPage = lazy(() => import('@/pages/games/DailyPage'));
+const SpeedPage = lazy(() => import('@/pages/games/SpeedPage'));
+const HangmanPage = lazy(() => import('@/pages/games/HangmanPage'));
 const SubscriptionPage = lazy(() => import('@/pages/account/SubscriptionPage'));
 const AdminPage = lazy(() => import('@/pages/admin/AdminPage'));
 const AdminUserPage = lazy(() => import('@/pages/admin/AdminUserPage'));
@@ -40,6 +43,9 @@ export const routes = [
       { path: '/universes/:slug', element: s(<UniverseDetailPage />) },
       { path: '/universes/:slug/forum/:topicId', element: s(<TopicPage />) },
       { path: '/universes/:slug/quizzes/:quizId', element: <RequireAuth>{s(<QuizPage />)}</RequireAuth> },
+      { path: '/universes/:slug/games/daily', element: <RequireAuth>{s(<DailyPage />)}</RequireAuth> },
+      { path: '/universes/:slug/games/speed', element: <RequireAuth>{s(<SpeedPage />)}</RequireAuth> },
+      { path: '/universes/:slug/games/hangman', element: <RequireAuth>{s(<HangmanPage />)}</RequireAuth> },
       { path: '/universes/:slug/events/:eventId', element: <RequireAuth>{s(<EventRoomPage />)}</RequireAuth> },
       { path: '/dashboard', element: <RequireAuth>{s(<DashboardPage />)}</RequireAuth> },
       { path: '/premium', element: s(<PremiumPage />) },

@@ -17,6 +17,7 @@ import { formatNumber, localized } from '@/lib/format';
 import { currentLocale } from '@/lib/i18n';
 import { CommunityTab } from '@/components/universe/CommunityTab';
 import { ArchiveTab, EventsTab, MissionsTab, StandingsCard } from '@/components/universe/SectionTabs';
+import { GamesPanel } from '@/components/universe/GamesPanel';
 import NotFoundPage from './NotFoundPage';
 
 type Tab = 'overview' | 'quizzes' | 'archive' | 'community' | 'missions' | 'events' | 'ranking';
@@ -168,10 +169,14 @@ function QuizzesTab({ universe }: { universe: UniverseDetail }) {
   const { member } = useMembership(universe.slug);
   const quizzes = useUniverseQuizzes(universe.slug);
   const progress = useQuizProgress(universe.slug, Boolean(session && member));
-  if (quizzes.isPending) return <div className="grid gap-4 md:grid-cols-2"><Skeleton className="h-44" /><Skeleton className="h-44" /></div>;
-  if (quizzes.isError) return <ErrorState error={quizzes.error} onRetry={() => void quizzes.refetch()} />;
-  if (quizzes.data.length === 0) return <EmptyState>{t('universe.noQuizzes')}</EmptyState>;
+  const games = <GamesPanel universe={universe} isMember={Boolean(member)} signedIn={Boolean(session)} />;
+  if (quizzes.isPending) return <>{games}<div className="grid gap-4 md:grid-cols-2"><Skeleton className="h-44" /><Skeleton className="h-44" /></div></>;
+  if (quizzes.isError) return <>{games}<ErrorState error={quizzes.error} onRetry={() => void quizzes.refetch()} /></>;
+  if (quizzes.data.length === 0) return <>{games}<EmptyState>{t('universe.noQuizzes')}</EmptyState></>;
   return (
+    <>
+    {games}
+    <h2 className="mb-5 font-display text-2xl font-bold tracking-wide">{t('universe.quizzesTitle')}</h2>
     <div className="grid gap-4 md:grid-cols-2">
       {quizzes.data.map((q) => {
         const p = progress.data?.find((x) => x.quizId === q.id);
@@ -204,6 +209,7 @@ function QuizzesTab({ universe }: { universe: UniverseDetail }) {
         );
       })}
     </div>
+    </>
   );
 }
 

@@ -134,7 +134,7 @@ describe.runIf(enabled)('Universe sections: archive, forum, missions, events, st
     expect((await http.post(`/v1/missions/${oath.id}/claim`).set(bearer(u.token)).expect(200)).body.xpAwarded).toBe(0);
     const m = (await http.get('/v1/me/dashboard').set(bearer(u.token))).body.memberships.find((x: { slug: string }) => x.slug === 'star-wars');
     expect(m.xp).toBe(15);
-    await http.get('/v1/universes/bts/missions').expect(404);
+    await http.get('/v1/universes/nope/missions').expect(404);
   });
 
   it('handles events: registration, capacity, premium-only rooms', async () => {

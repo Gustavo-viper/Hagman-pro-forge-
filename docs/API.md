@@ -98,6 +98,20 @@ Cada funcionalidade em `universe_settings.features` é ligada a um motor (`packa
 | Eventos | `GET /v1/universes/:slug/events` · `GET …/events/mine` · `POST/DELETE /v1/events/:id/registration` | membro; capacidade com bloqueio de linha; eventos Premium checados no servidor (`premium_required`) |
 | Disputa | `GET /v1/universes/:slug/standings` | XP somado por identidade (taça das casas) |
 
+### Jogos dos universos
+
+Todos os jogos são conferidos no servidor: respostas e palavras secretas nunca saem da API antes da hora, o XP entra pelo livro-razão (`source = 'game'`) uma única vez por partida e há limites diários (dia no fuso America/Sao_Paulo).
+
+| Rota | Regras |
+|---|---|
+| `GET /v1/universes/:slug/games/me` | resumo do jogador: desafio de hoje, sequência de dias, recordes, vitórias e partida de forca em andamento |
+| `GET /v1/universes/:slug/games/leaderboard?game=daily\|speed\|hangman` | público; diário = resultados de hoje; relógio = melhor rodada em 7 dias; forca = vitórias em 7 dias |
+| `GET /v1/universes/:slug/games/daily` · `POST …/games/daily { answers }` | 5 perguntas sorteadas de forma determinística por dia (iguais para todos) do banco de perguntas de trivia do universo; 1 envio por dia (`daily_already_played`); 8 XP por acerto + 10 XP se gabaritar |
+| `POST /v1/universes/:slug/games/speed` · `POST /v1/games/speed/:id/answers { questionId, key }` · `POST /v1/games/speed/:id/finish` | 60 s com prazo controlado pelo servidor (tolerância de 3 s); uma pergunta por vez (`wrong_question`); 3 XP por acerto, máx. 60 XP/dia; iniciar uma nova rodada encerra a anterior |
+| `POST /v1/universes/:slug/games/hangman` · `GET /v1/games/hangman/:id` · `POST /v1/games/hangman/:id/guesses { letter }` | palavra sorteada (evita as 15 últimas); letras A–Z sem diferenciar acento/maiúscula; 6 vidas; 15 XP por vitória nas 5 primeiras vitórias do dia; letra repetida não custa vida |
+
+Jogar exige ser membro do universo (`membership_required`). Novos objetivos de missões: `daily_complete`, `daily_perfect`, `speed_score` (melhor rodada) e `hangman_win`.
+
 ### Sala do evento (tempo real)
 
 | Rota | Regras |

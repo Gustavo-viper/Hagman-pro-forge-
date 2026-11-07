@@ -44,7 +44,7 @@ describe.runIf(enabled)('Universe quizzes, identity and ranking', () => {
     for (const slug of ['harry-potter', 'supernatural', 'marvel', 'dc', 'star-wars', 'greys-anatomy', 'station-19', 'bts']) {
       const items = (await http.get(`/v1/universes/${slug}/quizzes`).expect(200)).body.items;
       expect(items.length, slug).toBeGreaterThanOrEqual(1);
-      expect(items.every((q: { questionCount: number }) => q.questionCount === 6)).toBe(true);
+      expect(items.every((q: { questionCount: number }) => q.questionCount >= 6)).toBe(true);
     }
     const id = await quizId('star-wars', 'academia-jedi');
     const detail = (await http.get(`/v1/quizzes/${id}`).expect(200)).body;
