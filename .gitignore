@@ -13,3 +13,6 @@ playwright-report/
 test-results/
 .vite/
 dist-e2e/
+
+# Local Redis snapshots
+dump.rdb
