@@ -2,7 +2,8 @@ import type { QuizSummary, UniverseMembership } from '@fandom/types';
 import { Badge, Button, cn, Skeleton } from '@fandom/ui';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Brain, Check, Medal, Play, Sparkles, Trophy, Users, Wand2 } from 'lucide-react';
+import { FEATURE_ENGINE } from '@fandom/shared';
+import { ArrowLeft, BookOpen, Brain, CalendarDays, Check, Medal, MessagesSquare, Play, Sparkles, Target, Trophy, Users, Wand2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Link, useParams, useSearchParams } from 'react-router';
 import { useAuth } from '@/auth/AuthProvider';
@@ -14,15 +15,28 @@ import { api, ApiError } from '@/lib/api';
 import { errorMessage } from '@/lib/errors';
 import { formatNumber, localized } from '@/lib/format';
 import { currentLocale } from '@/lib/i18n';
+import { CommunityTab } from '@/components/universe/CommunityTab';
+import { ArchiveTab, EventsTab, MissionsTab, StandingsCard } from '@/components/universe/SectionTabs';
 import NotFoundPage from './NotFoundPage';
 
-/** Features implemented today; the rest are shown as "coming soon" (honest roadmap). */
-const AVAILABLE_FEATURES = new Set([
-  'quizzes', 'rankings', 'hunter_ranking', 'house_sorting', 'hunter_identity', 'faction_identity',
-  'specialty_identity', 'station_role', 'fandom_role',
-]);
-const TABS = ['overview', 'quizzes', 'ranking'] as const;
-type Tab = (typeof TABS)[number];
+type Tab = 'overview' | 'quizzes' | 'archive' | 'community' | 'missions' | 'events' | 'ranking';
+
+/** Engine → tab. Identity lives in the overview; house cup inside the ranking tab. */
+const ENGINE_TAB: Record<string, Tab> = {
+  identity: 'overview', quizzes: 'quizzes', archive: 'archive', forum: 'community', missions: 'missions',
+  events: 'events', ranking: 'ranking', house_cup: 'ranking',
+};
+const TAB_ORDER: Tab[] = ['overview', 'quizzes', 'archive', 'community', 'missions', 'events', 'ranking'];
+const TAB_ICONS = { overview: Sparkles, quizzes: Brain, archive: BookOpen, community: MessagesSquare, missions: Target, events: CalendarDays, ranking: Trophy };
+
+function tabsFor(features: string[]): Tab[] {
+  const set = new Set<Tab>(['overview', 'ranking']);
+  for (const f of features) {
+    const engine = FEATURE_ENGINE[f];
+    if (engine) set.add(ENGINE_TAB[engine]!);
+  }
+  return TAB_ORDER.filter((t) => set.has(t));
+}
 
 function humanize(key: string): string {
   return key.replace(/_/g, ' ').replace(/^\w/, (c) => c.toUpperCase());
@@ -254,10 +268,14 @@ export default function UniverseDetailPage() {
   const { t } = useTranslation();
   const locale = currentLocale();
   const [params, setParams] = useSearchParams();
-  const tab: Tab = (TABS as readonly string[]).includes(params.get('tab') ?? '') ? (params.get('tab') as Tab) : 'overview';
   const universe = useUniverse(slug);
   const quizzes = useUniverseQuizzes(slug);
   const sortingQuiz = quizzes.data?.find((q) => q.setsIdentity);
+  const { member } = useMembership(slug);
+  const tabs = universe.data ? tabsFor(universe.data.features) : (['overview'] as Tab[]);
+  const tab: Tab = tabs.includes(params.get('tab') as Tab) ? (params.get('tab') as Tab) : 'overview';
+  const section = params.get('section') ?? '';
+  const go = (t: Tab, sec?: string) => setParams(t === 'overview' ? {} : { tab: t, ...(sec ? { section: sec } : {}) }, { replace: true });
 
   if (universe.isError && universe.error instanceof ApiError && [404, 422].includes(universe.error.status)) return <NotFoundPage />;
 
@@ -288,21 +306,24 @@ export default function UniverseDetailPage() {
           </motion.section>
 
           <nav role="tablist" aria-label={t('universe.sections')} className="sticky top-16 z-30 -mx-4 mt-8 flex gap-1 overflow-x-auto bg-void/80 px-4 py-2 backdrop-blur-xl sm:mx-0 sm:rounded-2xl">
-            {TABS.map((k) => (
-              <button
-                key={k}
-                role="tab"
-                aria-selected={tab === k}
-                onClick={() => setParams(k === 'overview' ? {} : { tab: k }, { replace: true })}
-                className={cn(
-                  'inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition',
-                  tab === k ? 'bg-[color:var(--u-primary)] text-white shadow-lg' : 'text-mist/70 hover:bg-white/5 hover:text-mist',
-                )}
-              >
-                {k === 'overview' ? <Sparkles className="size-4" /> : k === 'quizzes' ? <Brain className="size-4" /> : <Trophy className="size-4" />}
-                {t(`universe.tabs.${k}`)}
-              </button>
-            ))}
+            {tabs.map((k) => {
+              const Icon = TAB_ICONS[k];
+              return (
+                <button
+                  key={k}
+                  role="tab"
+                  aria-selected={tab === k}
+                  onClick={() => go(k)}
+                  className={cn(
+                    'inline-flex shrink-0 items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition',
+                    tab === k ? 'bg-[color:var(--u-primary)] text-white shadow-lg' : 'text-mist/70 hover:bg-white/5 hover:text-mist',
+                  )}
+                >
+                  <Icon className="size-4" />
+                  {t(`universe.tabs.${k}`)}
+                </button>
+              );
+            })}
           </nav>
 
           <div className="mt-8" role="tabpanel">
@@ -313,14 +334,19 @@ export default function UniverseDetailPage() {
                   <h2 className="font-display text-2xl font-bold tracking-wide">{t('universe.features')}</h2>
                   <div className="mt-6 flex flex-wrap gap-2.5">
                     {universe.data.features.map((f) => {
-                      const available = AVAILABLE_FEATURES.has(f);
+                      const engine = FEATURE_ENGINE[f];
+                      const target = engine ? ENGINE_TAB[engine] : undefined;
                       return (
-                        <span key={f} className={cn('inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm', available ? 'border-[color:var(--u-accent)]/50 bg-white/10 text-mist' : 'border-white/10 bg-white/5 text-mist/55')}>
+                        <button
+                          key={f}
+                          type="button"
+                          disabled={!target}
+                          onClick={() => target && go(target, engine === 'archive' || engine === 'forum' ? f : undefined)}
+                          className="inline-flex items-center gap-2 rounded-full border border-[color:var(--u-accent)]/50 bg-white/10 px-4 py-2 text-sm text-mist transition hover:bg-white/15 disabled:opacity-60"
+                        >
                           {t(`universe.featureNames.${f}`, { defaultValue: humanize(f) })}
-                          <span className={cn('text-[10px] font-bold uppercase tracking-wider', available ? 'text-emerald-300' : 'text-mist/40')}>
-                            {available ? t('universe.available') : t('universe.soon')}
-                          </span>
-                        </span>
+                          <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-300">{t('universe.available')}</span>
+                        </button>
                       );
                     })}
                   </div>
@@ -328,7 +354,16 @@ export default function UniverseDetailPage() {
               </>
             )}
             {tab === 'quizzes' && <QuizzesTab universe={universe.data} />}
-            {tab === 'ranking' && <RankingTab universe={universe.data} />}
+            {tab === 'archive' && <ArchiveTab universe={universe.data} section={section} onSection={(sec) => go('archive', sec)} />}
+            {tab === 'community' && <CommunityTab universe={universe.data} category={section} onCategory={(sec) => go('community', sec)} isMember={Boolean(member)} />}
+            {tab === 'missions' && <MissionsTab universe={universe.data} isMember={Boolean(member)} />}
+            {tab === 'events' && <EventsTab universe={universe.data} isMember={Boolean(member)} />}
+            {tab === 'ranking' && (
+              <>
+                {universe.data.features.includes('house_cup') && <StandingsCard universe={universe.data} />}
+                <RankingTab universe={universe.data} />
+              </>
+            )}
           </div>
           <p className="mt-12 text-xs text-mist/45">{t('landing.disclaimer.body')}</p>
         </div>

@@ -9,7 +9,9 @@ import { EmptyState, ErrorState } from '@/components/states';
 import { api } from '@/lib/api';
 import { formatDate, formatNumber, money } from '@/lib/format';
 import { currentLocale } from '@/lib/i18n';
+import { MODERATION_ROLES, USER_ADMIN_ROLES, useMe } from '@/hooks/data';
 import { RequireStaff } from './AdminLayout';
+import { ReportsSection } from './ReportsSection';
 
 function useDebounced<T>(v: T, ms = 350): T {
   const [d, setD] = useState(v);
@@ -155,16 +157,25 @@ function UsersTable() {
   );
 }
 
-export default function AdminPage() {
+function AdminContent() {
   const { t } = useTranslation();
+  const roles = useMe().data?.profile.roles ?? [];
+  const usersAccess = roles.some((r) => USER_ADMIN_ROLES.includes(r));
+  return (
+    <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
+      <p className="text-xs font-semibold uppercase tracking-[0.3em] text-gold-300">Forge Studios</p>
+      <h1 className="mt-2 font-display text-3xl font-bold tracking-wide">{t('admin.title')}</h1>
+      {usersAccess && <div className="mt-8"><Stats /></div>}
+      <ReportsSection canResolve={roles.some((r) => MODERATION_ROLES.includes(r))} />
+      {usersAccess && <UsersTable />}
+    </div>
+  );
+}
+
+export default function AdminPage() {
   return (
     <RequireStaff>
-      <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
-        <p className="text-xs font-semibold uppercase tracking-[0.3em] text-gold-300">Forge Studios</p>
-        <h1 className="mt-2 font-display text-3xl font-bold tracking-wide">{t('admin.title')}</h1>
-        <div className="mt-8"><Stats /></div>
-        <UsersTable />
-      </div>
+      <AdminContent />
     </RequireStaff>
   );
 }

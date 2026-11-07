@@ -17,6 +17,8 @@ export function configureTestEnv(overrides: Record<string, string> = {}): void {
     RATE_LIMIT_MAX: '10000',
     AUTH_RATE_LIMIT_MAX: '10000',
     CHECKOUT_RATE_LIMIT_MAX: '10000',
+    QUIZ_RATE_LIMIT_MAX: '10000',
+    FORUM_RATE_LIMIT_MAX: '10000',
     BOOTSTRAP_SUPER_ADMIN_EMAILS: 'founder@forge.test',
     API_PUBLIC_URL: 'https://api.fandom.test',
     INFINITEPAY_HANDLE: 'fandomtest',

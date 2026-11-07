@@ -1,6 +1,8 @@
 import { Body, Controller, Get, HttpCode, Param, ParseUUIDPipe, Post, Query, Req } from '@nestjs/common';
 import type { Request } from 'express';
 import {
+  resolveReportSchema,
+  type ResolveReportInput,
   adminReasonSchema,
   adminUserListSchema,
   grantPlanSchema,
@@ -8,7 +10,8 @@ import {
   type AdminUserListInput,
   type GrantPlanInput,
 } from '@fandom/schemas';
-import type { AdminStats, AdminUserDetails, AdminUserRow, CursorPage } from '@fandom/types';
+import type { AdminReport, AdminStats, AdminUserDetails, AdminUserRow, CursorPage } from '@fandom/types';
+import { z } from 'zod';
 import type { AuthenticatedUser } from '../auth/auth.types.js';
 import { CurrentUser, Roles } from '../common/decorators.js';
 import { ZodPipe } from '../common/zod.pipe.js';
@@ -84,5 +87,23 @@ export class AdminController {
     @Req() req: Request,
   ): Promise<AdminUserDetails> {
     return this.admin.setAccountStatus(me, id, 'active', body.reason, req.ip ?? null);
+  }
+
+  @Roles('admin', 'support', 'global_moderator')
+  @Get('reports')
+  async reports(@Query(new ZodPipe(z.object({ status: z.enum(['open', 'resolved', 'dismissed']).default('open') }))) q: { status: 'open' | 'resolved' | 'dismissed' }): Promise<{ items: AdminReport[] }> {
+    return { items: await this.admin.reports(q.status) };
+  }
+
+  @Roles('admin', 'global_moderator')
+  @Post('reports/:id/resolve')
+  @HttpCode(204)
+  async resolve(
+    @CurrentUser() me: AuthenticatedUser,
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body(new ZodPipe(resolveReportSchema)) body: ResolveReportInput,
+    @Req() req: Request,
+  ): Promise<void> {
+    await this.admin.resolveReport(me, id, body.action, body.note, req.ip ?? null);
   }
 }

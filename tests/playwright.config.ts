@@ -53,6 +53,8 @@ export default defineConfig({
         INFINITEPAY_API_KEY: 'inchk_e2e_key',
         INFINITEPAY_WEBHOOK_TOKEN: 'e2e-webhook-token-0123456789abcdef',
         CHECKOUT_RATE_LIMIT_MAX: '10000',
+        QUIZ_RATE_LIMIT_MAX: '10000',
+        FORUM_RATE_LIMIT_MAX: '10000',
         WEB_ORIGINS: web,
         RATE_LIMIT_MAX: '10000',
       },

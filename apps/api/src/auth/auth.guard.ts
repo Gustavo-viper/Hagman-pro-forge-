@@ -2,7 +2,7 @@ import { type CanActivate, type ExecutionContext, Injectable } from '@nestjs/com
 import { Reflector } from '@nestjs/core';
 import type { Request } from 'express';
 import { AppError } from '../common/app-error.js';
-import { IS_PUBLIC } from '../common/decorators.js';
+import { IS_PUBLIC, OPTIONAL_AUTH } from '../common/decorators.js';
 import type { AuthenticatedUser } from './auth.types.js';
 import { TokenVerifierService } from './token-verifier.service.js';
 import { UsersService } from './users.service.js';
@@ -19,9 +19,22 @@ export class AuthGuard implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     if (context.getType() !== 'http') return true;
     const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC, [context.getHandler(), context.getClass()]);
-    if (isPublic) return true;
-
     const req = context.switchToHttp().getRequest<Request & { user?: AuthenticatedUser }>();
+    if (isPublic) {
+      // Optional auth: identify the caller when possible, never reject the request.
+      const optional = this.reflector.getAllAndOverride<boolean>(OPTIONAL_AUTH, [context.getHandler(), context.getClass()]);
+      const h = req.headers.authorization;
+      if (optional && h?.startsWith('Bearer ')) {
+        try {
+          const u = await this.users.resolve(await this.verifier.verify(h.slice(7).trim()));
+          if (u && u.status === 'active') req.user = u;
+        } catch {
+          /* anonymous */
+        }
+      }
+      return true;
+    }
+
     const header = req.headers.authorization;
     if (!header?.startsWith('Bearer ')) throw AppError.unauthorized();
     const token = header.slice(7).trim();

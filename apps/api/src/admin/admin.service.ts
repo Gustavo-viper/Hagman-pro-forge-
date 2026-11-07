@@ -1,7 +1,7 @@
 import { HttpStatus, Inject, Injectable, Logger } from '@nestjs/common';
 import type { BillingInterval, Locale, PlanCode, SubscriptionStatus } from '@fandom/shared';
 import type { AdminUserListInput, GrantPlanInput } from '@fandom/schemas';
-import type { AdminStats, AdminUserDetails, AdminUserRow, CursorPage } from '@fandom/types';
+import type { AdminReport, AdminStats, AdminUserDetails, AdminUserRow, CursorPage } from '@fandom/types';
 import { AuditService } from '../audit/audit.service.js';
 import type { AuthenticatedUser } from '../auth/auth.types.js';
 import { UsersService } from '../auth/users.service.js';
@@ -319,5 +319,71 @@ export class AdminService {
     await this.users.invalidate(userId);
     if (revoked.length) await this.users.invalidateSession(...revoked);
     return this.user(userId);
+  }
+
+  // ---------------------------------------------------------------- moderation
+
+  async reports(status: 'open' | 'resolved' | 'dismissed'): Promise<AdminReport[]> {
+    const { rows } = await this.db.query<{
+      id: string; target_type: 'topic' | 'reply'; target_id: string; reason: string; details: string | null; status: AdminReport['status'];
+      created_at: Date; reporter: string; on_target: number; t_title: string | null; t_body: string | null; t_author: string | null;
+      t_status: string | null; universe_slug: string | null; topic_id: string | null;
+    }>(
+      `SELECT r.id, r.target_type, r.target_id, r.reason, r.details, r.status, r.created_at, ru.email::text AS reporter,
+              (SELECT count(*)::int FROM reports r2 WHERE r2.target_type = r.target_type AND r2.target_id = r.target_id AND r2.status = 'open') AS on_target,
+              COALESCE(t.title, rt.title) AS t_title, COALESCE(t.body, fr.body) AS t_body,
+              COALESCE(ta.email::text, fa.email::text) AS t_author, COALESCE(t.status, fr.status) AS t_status,
+              COALESCE(tu.slug, rtu.slug) AS universe_slug, COALESCE(t.id, rt.id) AS topic_id
+         FROM reports r
+         JOIN users ru ON ru.id = r.reporter_id
+         LEFT JOIN forum_topics t ON r.target_type = 'topic' AND t.id = r.target_id
+         LEFT JOIN users ta ON ta.id = t.author_id
+         LEFT JOIN universes tu ON tu.id = t.universe_id
+         LEFT JOIN forum_replies fr ON r.target_type = 'reply' AND fr.id = r.target_id
+         LEFT JOIN users fa ON fa.id = fr.author_id
+         LEFT JOIN forum_topics rt ON rt.id = fr.topic_id
+         LEFT JOIN universes rtu ON rtu.id = rt.universe_id
+        WHERE r.status = $1
+        ORDER BY r.created_at DESC LIMIT 100`,
+      [status],
+    );
+    return rows.map((r) => ({
+      id: r.id, targetType: r.target_type, targetId: r.target_id, reason: r.reason, details: r.details, status: r.status,
+      createdAt: r.created_at.toISOString(), reporter: r.reporter, reportsOnTarget: r.on_target,
+      content: r.t_body !== null
+        ? { title: r.t_title, body: r.t_body, author: r.t_author ?? '', status: r.t_status ?? '', universeSlug: r.universe_slug ?? '', topicId: r.topic_id ?? '' }
+        : null,
+    }));
+  }
+
+  /** hide: removes the content from the community and resolves every open report on it. */
+  async resolveReport(staff: AuthenticatedUser, reportId: string, action: 'hide' | 'dismiss', note: string | undefined, ip: string | null): Promise<void> {
+    await this.db.transaction(async (tx) => {
+      const { rows } = await tx.query<{ target_type: 'topic' | 'reply'; target_id: string; status: string }>(
+        'SELECT target_type, target_id, status FROM reports WHERE id = $1 FOR UPDATE',
+        [reportId],
+      );
+      const r = rows[0];
+      if (!r) throw AppError.notFound('report_not_found', 'Report not found');
+      if (r.status !== 'open') throw AppError.conflict('report_closed', 'Report already handled');
+      if (action === 'hide') {
+        if (r.target_type === 'topic') {
+          await tx.query("UPDATE forum_topics SET status = 'hidden' WHERE id = $1", [r.target_id]);
+        } else {
+          const h = await tx.query<{ topic_id: string }>("UPDATE forum_replies SET status = 'hidden' WHERE id = $1 AND status = 'visible' RETURNING topic_id", [r.target_id]);
+          if (h.rowCount) await tx.query('UPDATE forum_topics SET reply_count = GREATEST(reply_count - 1, 0) WHERE id = $1', [h.rows[0]!.topic_id]);
+        }
+        await tx.query(
+          "UPDATE reports SET status = 'resolved', resolved_by = $3, resolved_at = now() WHERE target_type = $1 AND target_id = $2 AND status = 'open'",
+          [r.target_type, r.target_id, staff.id],
+        );
+      } else {
+        await tx.query("UPDATE reports SET status = 'dismissed', resolved_by = $2, resolved_at = now() WHERE id = $1", [reportId, staff.id]);
+      }
+      await this.audit.log(tx, {
+        actorUserId: staff.id, action: action === 'hide' ? 'moderation.content_hidden' : 'moderation.report_dismissed',
+        targetType: r.target_type, targetId: r.target_id, ipAddress: ip, metadata: { reportId, note: note ?? null },
+      });
+    });
   }
 }

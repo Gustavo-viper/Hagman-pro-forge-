@@ -269,7 +269,11 @@
     "tabs": {
       "overview": "Overview",
       "quizzes": "Quizzes",
-      "ranking": "Ranking"
+      "ranking": "Ranking",
+      "archive": "Archive",
+      "community": "Community",
+      "missions": "Missions",
+      "events": "Events"
     },
     "sections": "Universe sections",
     "retakeSorting": "Retake the test",
@@ -345,7 +349,23 @@
     "incomplete_answers": "Answer every question.",
     "quiz_not_found": "Quiz not found.",
     "identity_requires_quiz": "In this universe your identity is set by the test.",
-    "invalid_identity": "Invalid identity option."
+    "invalid_identity": "Invalid identity option.",
+    "section_not_found": "This section does not exist in this universe.",
+    "identity_required": "Choose your identity first.",
+    "posting_too_fast": "Easy! Wait a moment before posting again.",
+    "topic_not_found": "Topic not found.",
+    "reply_not_found": "Reply not found.",
+    "content_not_found": "Content not found.",
+    "cannot_report_own": "You can't report your own content.",
+    "mission_not_found": "Mission not found.",
+    "mission_incomplete": "You haven't completed the objective yet.",
+    "mission_ended": "This mission has ended.",
+    "event_not_found": "Event not found.",
+    "event_ended": "This event has ended.",
+    "event_full": "This event is full.",
+    "registration_not_found": "You're not registered.",
+    "report_not_found": "Report not found.",
+    "report_closed": "This report was already handled."
   },
   "premium": {
     "title": "Unlock your Premium side",
@@ -489,6 +509,21 @@
       "auth.refresh_token_reused": "Alert: session reused (revoked)",
       "role.bootstrap_super_admin": "Initial super admin",
       "role.granted_by_operator": "Role granted"
+    },
+    "reports": {
+      "title": "Reports",
+      "empty": "No open reports. The community is at peace.",
+      "type": {
+        "topic": "Topic",
+        "reply": "Reply"
+      },
+      "count_one": "{{count}} report",
+      "count_other": "{{count}} reports",
+      "by": "by",
+      "open": "open",
+      "gone": "Content already removed.",
+      "hide": "Hide content",
+      "dismiss": "Dismiss"
     }
   },
   "quiz": {
@@ -526,5 +561,61 @@
     "empty": "Nobody has scored yet. Play a quiz and be the first!",
     "you": "you",
     "fair": "Rankings only count XP earned in community activities. Premium plans give no advantage."
+  },
+  "sections": {
+    "archiveEmpty": "No entries in this section yet.",
+    "archiveNote": "Original texts by the Fandom Universe community, citing facts from the works descriptively.",
+    "noMissions": "No active missions right now.",
+    "missionDone": "Completed",
+    "claim": "Claim reward",
+    "inProgress": "In progress",
+    "claimed": "Mission complete! +{{xp}} XP",
+    "noEvents": "No events scheduled.",
+    "ended": "Ended",
+    "registered": "registered",
+    "youreIn": "You're in",
+    "leaveEvent": "Cancel registration",
+    "joinEvent": "Join",
+    "full": "Full",
+    "premiumLocked": "This event is exclusive to Fandom Premium subscribers.",
+    "eventKinds": {
+      "community": "Meetup",
+      "tournament": "Tournament",
+      "watch_party": "Special room",
+      "challenge": "Challenge"
+    },
+    "members_one": "{{count}} member",
+    "members_other": "{{count}} members",
+    "topicTitle": "Title",
+    "topicBody": "Message",
+    "publish": "Publish",
+    "newTopic": "New topic",
+    "rules": "Be respectful. No unmarked spoilers, personal data, hate or harassment. Reported content is reviewed by moderators.",
+    "commonRoomOf": "{{name}} common room: only members of your house see these topics.",
+    "noTopics": "No topics yet. Why not start the conversation?",
+    "locked": {
+      "unauthorized": "Sign in to access this space.",
+      "identity_required": "Find your identity (house) to enter the common room.",
+      "membership_required": "Join the universe to access this space."
+    },
+    "report": "Report",
+    "send": "Send",
+    "reported": "Report sent. Thank you!",
+    "delete": "Delete",
+    "deleteConfirm": "Delete this topic?",
+    "replies_one": "{{count}} reply",
+    "replies_other": "{{count}} replies",
+    "yourReply": "Your reply",
+    "sendReply": "Reply",
+    "reasons": {
+      "spam": "Spam",
+      "harassment": "Harassment",
+      "hate": "Hate speech",
+      "sexual": "Sexual content",
+      "violence": "Violence",
+      "personal_data": "Personal data",
+      "spoiler": "Unmarked spoiler",
+      "other": "Other"
+    }
   }
 }

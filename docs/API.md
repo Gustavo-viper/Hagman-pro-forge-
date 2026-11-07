@@ -86,6 +86,20 @@ Primeiro admin: `BOOTSTRAP_SUPER_ADMIN_EMAILS` (concedido no login ou na verific
 | PUT | `/v1/universes/:slug/identity` | membro | `{ key }` — escolha manual (`409 identity_requires_quiz` quando o universo usa teste, como a seleção de casa) |
 | GET | `/v1/universes/:slug/ranking?period=all\|month\|week` | pública | top 50 por XP do universo |
 
+## Seções dos universos
+
+Cada funcionalidade em `universe_settings.features` é ligada a um motor (`packages/shared/src/sections.ts`). Novos universos reutilizam os motores.
+
+| Motor | Rotas | Regras |
+|---|---|---|
+| Arquivo | `GET /v1/universes/:slug/archive/:section` | pública; 404 se a seção não pertence ao universo |
+| Comunidade | `GET /v1/universes/:slug/forum/:category` (cursor) · `POST` (criar) · `GET /v1/forum/topics/:id` · `POST /v1/forum/topics/:id/replies` · `DELETE /v1/forum/topics/:id` · `DELETE /v1/forum/replies/:id` · `POST /v1/reports` | leitura pública; postar exige ser membro e ter e-mail verificado; texto puro (renderizado escapado); máx. 5 posts/min por pessoa + limite por IP; salões comunais visíveis só para quem tem a mesma identidade; autor apaga o próprio conteúdo |
+| Missões | `GET /v1/universes/:slug/missions` · `GET …/missions/progress` · `POST /v1/missions/:id/claim` | progresso calculado da atividade real (quizzes, gabaritos, tópicos, respostas a outros, identidade, eventos); XP uma única vez |
+| Eventos | `GET /v1/universes/:slug/events` · `GET …/events/mine` · `POST/DELETE /v1/events/:id/registration` | membro; capacidade com bloqueio de linha; eventos Premium checados no servidor (`premium_required`) |
+| Disputa | `GET /v1/universes/:slug/standings` | XP somado por identidade (taça das casas) |
+
+Moderação: `GET /v1/admin/reports?status=open` (admin, suporte, moderador global) e `POST /v1/admin/reports/:id/resolve { action: hide|dismiss }` (admin, moderador global), auditados.
+
 ## Planos
 
 | Método | Rota | Acesso | Descrição |

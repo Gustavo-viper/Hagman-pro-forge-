@@ -269,7 +269,11 @@
     "tabs": {
       "overview": "Visão geral",
       "quizzes": "Quizzes",
-      "ranking": "Ranking"
+      "ranking": "Ranking",
+      "archive": "Arquivo",
+      "community": "Comunidade",
+      "missions": "Missões",
+      "events": "Eventos"
     },
     "sections": "Seções do universo",
     "retakeSorting": "Refazer o teste",
@@ -345,7 +349,23 @@
     "incomplete_answers": "Responda todas as perguntas.",
     "quiz_not_found": "Quiz não encontrado.",
     "identity_requires_quiz": "Neste universo a identidade é definida pelo teste.",
-    "invalid_identity": "Opção de identidade inválida."
+    "invalid_identity": "Opção de identidade inválida.",
+    "section_not_found": "Esta seção não existe neste universo.",
+    "identity_required": "Escolha sua identidade primeiro.",
+    "posting_too_fast": "Calma! Espere um pouco antes de postar de novo.",
+    "topic_not_found": "Tópico não encontrado.",
+    "reply_not_found": "Resposta não encontrada.",
+    "content_not_found": "Conteúdo não encontrado.",
+    "cannot_report_own": "Você não pode denunciar o próprio conteúdo.",
+    "mission_not_found": "Missão não encontrada.",
+    "mission_incomplete": "Você ainda não completou o objetivo.",
+    "mission_ended": "Esta missão terminou.",
+    "event_not_found": "Evento não encontrado.",
+    "event_ended": "Este evento já terminou.",
+    "event_full": "Este evento está lotado.",
+    "registration_not_found": "Você não está inscrito.",
+    "report_not_found": "Denúncia não encontrada.",
+    "report_closed": "Esta denúncia já foi tratada."
   },
   "premium": {
     "title": "Desbloqueie o seu lado Premium",
@@ -489,6 +509,21 @@
       "auth.refresh_token_reused": "Alerta: sessão reutilizada (revogada)",
       "role.bootstrap_super_admin": "Super admin inicial",
       "role.granted_by_operator": "Papel concedido"
+    },
+    "reports": {
+      "title": "Denúncias",
+      "empty": "Nenhuma denúncia aberta. A comunidade está em paz.",
+      "type": {
+        "topic": "Tópico",
+        "reply": "Resposta"
+      },
+      "count_one": "{{count}} denúncia",
+      "count_other": "{{count}} denúncias",
+      "by": "por",
+      "open": "abrir",
+      "gone": "Conteúdo já removido.",
+      "hide": "Ocultar conteúdo",
+      "dismiss": "Descartar"
     }
   },
   "quiz": {
@@ -526,5 +561,61 @@
     "empty": "Ninguém pontuou ainda. Jogue um quiz e seja o primeiro!",
     "you": "você",
     "fair": "O ranking considera só XP ganho em atividades da comunidade. Planos Premium não dão vantagem."
+  },
+  "sections": {
+    "archiveEmpty": "Ainda não há verbetes nesta seção.",
+    "archiveNote": "Textos originais da comunidade Fandom Universe, com fatos das obras citados de forma descritiva.",
+    "noMissions": "Nenhuma missão ativa no momento.",
+    "missionDone": "Concluída",
+    "claim": "Resgatar recompensa",
+    "inProgress": "Em andamento",
+    "claimed": "Missão concluída! +{{xp}} XP",
+    "noEvents": "Nenhum evento agendado.",
+    "ended": "Encerrado",
+    "registered": "inscritos",
+    "youreIn": "Inscrito",
+    "leaveEvent": "Cancelar inscrição",
+    "joinEvent": "Participar",
+    "full": "Lotado",
+    "premiumLocked": "Este evento é exclusivo para assinantes Fandom Premium.",
+    "eventKinds": {
+      "community": "Encontro",
+      "tournament": "Torneio",
+      "watch_party": "Sala especial",
+      "challenge": "Desafio"
+    },
+    "members_one": "{{count}} membro",
+    "members_other": "{{count}} membros",
+    "topicTitle": "Título",
+    "topicBody": "Mensagem",
+    "publish": "Publicar",
+    "newTopic": "Novo tópico",
+    "rules": "Seja respeitoso. Sem spoilers sem aviso, dados pessoais, ódio ou assédio. Conteúdos denunciados são revisados pela moderação.",
+    "commonRoomOf": "Salão comunal de {{name}}: só membros da sua casa veem estes tópicos.",
+    "noTopics": "Nenhum tópico ainda. Que tal começar a conversa?",
+    "locked": {
+      "unauthorized": "Entre na sua conta para acessar este espaço.",
+      "identity_required": "Descubra sua identidade (casa) para entrar no salão comunal.",
+      "membership_required": "Entre no universo para acessar este espaço."
+    },
+    "report": "Denunciar",
+    "send": "Enviar",
+    "reported": "Denúncia enviada. Obrigado!",
+    "delete": "Excluir",
+    "deleteConfirm": "Excluir este tópico?",
+    "replies_one": "{{count}} resposta",
+    "replies_other": "{{count}} respostas",
+    "yourReply": "Sua resposta",
+    "sendReply": "Responder",
+    "reasons": {
+      "spam": "Spam",
+      "harassment": "Assédio",
+      "hate": "Discurso de ódio",
+      "sexual": "Conteúdo sexual",
+      "violence": "Violência",
+      "personal_data": "Dados pessoais",
+      "spoiler": "Spoiler sem aviso",
+      "other": "Outro"
+    }
   }
 }

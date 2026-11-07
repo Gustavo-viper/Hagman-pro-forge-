@@ -17,6 +17,7 @@ const UniverseDetailPage = lazy(() => import('@/pages/UniverseDetailPage'));
 const LegalPage = lazy(() => import('@/pages/legal/LegalPage'));
 const PremiumPage = lazy(() => import('@/pages/PremiumPage'));
 const QuizPage = lazy(() => import('@/pages/QuizPage'));
+const TopicPage = lazy(() => import('@/pages/TopicPage'));
 const SubscriptionPage = lazy(() => import('@/pages/account/SubscriptionPage'));
 const AdminPage = lazy(() => import('@/pages/admin/AdminPage'));
 const AdminUserPage = lazy(() => import('@/pages/admin/AdminUserPage'));
@@ -36,6 +37,7 @@ export const routes = [
       { path: '/verify-email', element: s(<VerifyEmailPage />) },
       { path: '/universes', element: s(<UniversesPage />) },
       { path: '/universes/:slug', element: s(<UniverseDetailPage />) },
+      { path: '/universes/:slug/forum/:topicId', element: s(<TopicPage />) },
       { path: '/universes/:slug/quizzes/:quizId', element: <RequireAuth>{s(<QuizPage />)}</RequireAuth> },
       { path: '/dashboard', element: <RequireAuth>{s(<DashboardPage />)}</RequireAuth> },
       { path: '/premium', element: s(<PremiumPage />) },

@@ -79,7 +79,9 @@ export function useMe() {
   });
 }
 
-export const STAFF_VIEW_ROLES = ['super_admin', 'admin', 'support'];
+export const STAFF_VIEW_ROLES = ['super_admin', 'admin', 'support', 'global_moderator'];
+export const USER_ADMIN_ROLES = ['super_admin', 'admin', 'support'];
+export const MODERATION_ROLES = ['super_admin', 'admin', 'global_moderator'];
 export const STAFF_EDIT_ROLES = ['super_admin', 'admin'];
 
 export function useUniverseQuizzes(slug: string) {

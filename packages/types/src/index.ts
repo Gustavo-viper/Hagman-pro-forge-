@@ -268,3 +268,98 @@ export interface RankingEntry {
   level: number;
   identity: string | null;
 }
+
+export interface LoreEntry {
+  id: string;
+  slug: string;
+  section: string;
+  title: LocalizedText;
+  subtitle: LocalizedText | null;
+  summary: LocalizedText;
+  tags: string[];
+}
+
+export interface ForumAuthor {
+  id: string;
+  username: string | null;
+  displayName: string | null;
+  identity: string | null;
+}
+
+export interface ForumTopicSummary {
+  id: string;
+  category: string;
+  title: string;
+  excerpt: string;
+  author: ForumAuthor;
+  replyCount: number;
+  identityScope: string | null;
+  createdAt: string;
+  lastActivityAt: string;
+}
+
+export interface ForumReply {
+  id: string;
+  body: string;
+  author: ForumAuthor;
+  createdAt: string;
+  mine: boolean;
+}
+
+export interface ForumTopicDetail extends Omit<ForumTopicSummary, 'excerpt'> {
+  universeSlug: string;
+  body: string;
+  mine: boolean;
+  replies: ForumReply[];
+}
+
+export interface MissionSummary {
+  id: string;
+  slug: string;
+  section: string;
+  title: LocalizedText;
+  description: LocalizedText;
+  objectiveType: string;
+  objectiveCount: number;
+  xpReward: number;
+  endsAt: string | null;
+}
+
+export interface MissionProgress {
+  missionId: string;
+  progress: number;
+  completed: boolean;
+  completedAt: string | null;
+}
+
+export interface UniverseEvent {
+  id: string;
+  slug: string;
+  title: LocalizedText;
+  description: LocalizedText;
+  kind: 'community' | 'tournament' | 'watch_party' | 'challenge';
+  startsAt: string;
+  endsAt: string;
+  premiumPlan: 'plus' | 'ultra' | null;
+  capacity: number | null;
+  participantCount: number;
+}
+
+export interface IdentityStanding {
+  identity: string;
+  members: number;
+  xp: number;
+}
+
+export interface AdminReport {
+  id: string;
+  targetType: 'topic' | 'reply';
+  targetId: string;
+  reason: string;
+  details: string | null;
+  status: 'open' | 'resolved' | 'dismissed';
+  createdAt: string;
+  reporter: string;
+  reportsOnTarget: number;
+  content: { title: string | null; body: string; author: string; status: string; universeSlug: string; topicId: string } | null;
+}
