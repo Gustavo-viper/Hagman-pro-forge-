@@ -343,6 +343,9 @@ export interface UniverseEvent {
   premiumPlan: 'plus' | 'ultra' | null;
   capacity: number | null;
   participantCount: number;
+  hasQuiz: boolean;
+  hasExternalLink: boolean;
+  status: 'published' | 'cancelled' | 'draft';
 }
 
 export interface IdentityStanding {
@@ -362,4 +365,42 @@ export interface AdminReport {
   reporter: string;
   reportsOnTarget: number;
   content: { title: string | null; body: string; author: string; status: string; universeSlug: string; topicId: string } | null;
+}
+
+export interface EventMessage {
+  id: number;
+  body: string;
+  createdAt: string;
+  author: ForumAuthor;
+  mine: boolean;
+}
+
+export interface EventLeaderboardEntry {
+  rank: number;
+  userId: string;
+  displayName: string | null;
+  username: string | null;
+  score: number;
+  total: number;
+  finishedAt: string;
+}
+
+export interface EventRoom {
+  event: UniverseEvent;
+  universeSlug: string;
+  /** The room opens 30 min before the start and closes 1 h after the end. */
+  opensAt: string;
+  closesAt: string;
+  open: boolean;
+  externalUrl: string | null;
+  quiz: { id: string; title: LocalizedText; questionCount: number } | null;
+  messages: EventMessage[];
+  leaderboard: EventLeaderboardEntry[];
+  canModerate: boolean;
+}
+
+export interface AdminEvent extends UniverseEvent {
+  universeSlug: string;
+  externalUrl: string | null;
+  quizId: string | null;
 }

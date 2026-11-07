@@ -16,6 +16,7 @@ import { MailModule } from './mail/mail.module.js';
 import { MeModule } from './me/me.module.js';
 import { PlansModule } from './plans/plans.module.js';
 import { QuizzesModule } from './quizzes/quizzes.module.js';
+import { RealtimeModule } from './realtime/realtime.module.js';
 import { RedisModule } from './redis/redis.module.js';
 import { SectionsModule } from './sections/sections.module.js';
 import { RedisService } from './redis/redis.service.js';
@@ -36,6 +37,7 @@ import { XpModule } from './xp/xp.module.js';
       }),
     }),
     MailModule,
+    RealtimeModule,
     AuthModule,
     SubscriptionsModule,
     XpModule,

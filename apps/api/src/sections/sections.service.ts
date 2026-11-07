@@ -8,6 +8,7 @@ import { RedisService } from '../redis/redis.service.js';
 import { EntitlementsService } from '../subscriptions/entitlements.service.js';
 import { UniversesService } from '../universes/universes.service.js';
 import { XpService } from '../xp/xp.service.js';
+import { EVENT_SELECT, toEvent } from './event-room.service.js';
 
 /** Counts real activity of a user inside a universe for a mission objective (optionally windowed). */
 export async function objectiveProgress(
@@ -158,20 +159,11 @@ export class SectionsService {
 
   async events(slug: string): Promise<UniverseEvent[]> {
     const universe = await this.universeWith(slug, 'events', 'events');
-    const { rows } = await this.db.query<{
-      id: string; slug: string; title: UniverseEvent['title']; description: UniverseEvent['description']; kind: UniverseEvent['kind'];
-      starts_at: Date; ends_at: Date; premium_plan: UniverseEvent['premiumPlan']; capacity: number | null; participant_count: number;
-    }>(
-      `SELECT id, slug, title, description, kind, starts_at, ends_at, premium_plan, capacity, participant_count FROM events
-        WHERE universe_id = $1 AND status = 'published' AND ends_at > now() - interval '30 days'
-        ORDER BY starts_at`,
+    const { rows } = await this.db.query<Parameters<typeof toEvent>[0]>(
+      `${EVENT_SELECT} WHERE e.universe_id = $1 AND e.status IN ('published', 'cancelled') AND e.ends_at > now() - interval '30 days' ORDER BY e.starts_at`,
       [universe.id],
     );
-    return rows.map((r) => ({
-      id: r.id, slug: r.slug, title: r.title, description: r.description, kind: r.kind,
-      startsAt: r.starts_at.toISOString(), endsAt: r.ends_at.toISOString(), premiumPlan: r.premium_plan,
-      capacity: r.capacity, participantCount: r.participant_count,
-    }));
+    return rows.map(toEvent);
   }
 
   async myEvents(user: AuthenticatedUser, slug: string): Promise<string[]> {

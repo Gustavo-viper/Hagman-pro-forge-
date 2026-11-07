@@ -10,6 +10,7 @@ export const JOBS = {
   subscriptionLifecycle: 'subscription-lifecycle',
   authCleanup: 'auth-cleanup',
   renewalReminders: 'renewal-reminders',
+  eventReminders: 'event-reminders',
   sendEmail: 'send-email',
 } as const;
 
@@ -18,6 +19,8 @@ export const EMAIL_TEMPLATES = [
   'password_reset',
   'subscription_activated',
   'subscription_renewal_reminder',
+  'event_reminder',
+  'event_cancelled',
 ] as const;
 export type EmailTemplate = (typeof EMAIL_TEMPLATES)[number];
 
@@ -30,5 +33,5 @@ export interface EmailJobData {
   /** Link validity, shown in auth emails. */
   expiresInMinutes?: number;
   /** Billing emails: already-formatted, localized values. */
-  details?: { plan: string; until: string; amount?: string };
+  details?: { plan?: string; until?: string; amount?: string; title?: string; when?: string; startsIn?: '24h' | '1h' };
 }

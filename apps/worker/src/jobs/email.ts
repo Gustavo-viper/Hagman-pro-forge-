@@ -12,6 +12,42 @@ interface Copy {
 const none = () => '';
 
 const COPY: Record<EmailTemplate, Record<Locale, Copy>> = {
+  event_reminder: {
+    'pt-BR': {
+      subject: 'Seu evento está chegando — Fandom Universe',
+      heading: 'Está quase na hora!',
+      body: (d) => `${d.title} começa ${d.startsIn === '1h' ? 'em 1 hora' : 'amanhã'} (${d.when}). A sala abre 30 minutos antes para os inscritos.`,
+      cta: 'Abrir a sala do evento',
+      expiry: none,
+      ignore: 'Você recebeu este aviso porque se inscreveu no evento. Cancele a inscrição na página do universo se não puder participar.',
+    },
+    en: {
+      subject: 'Your event is coming up — Fandom Universe',
+      heading: "It's almost time!",
+      body: (d) => `${d.title} starts ${d.startsIn === '1h' ? 'in 1 hour' : 'tomorrow'} (${d.when}). The room opens 30 minutes earlier for registered fans.`,
+      cta: 'Open the event room',
+      expiry: none,
+      ignore: "You received this because you signed up for the event. Cancel your registration on the universe page if you can't make it.",
+    },
+  },
+  event_cancelled: {
+    'pt-BR': {
+      subject: 'Evento cancelado — Fandom Universe',
+      heading: 'Evento cancelado',
+      body: (d) => `Infelizmente o evento ${d.title} (${d.when}) foi cancelado. Confira outros eventos no universo.`,
+      cta: 'Ver outros eventos',
+      expiry: none,
+      ignore: 'Você recebeu este aviso porque estava inscrito no evento.',
+    },
+    en: {
+      subject: 'Event cancelled — Fandom Universe',
+      heading: 'Event cancelled',
+      body: (d) => `Unfortunately ${d.title} (${d.when}) was cancelled. Check out other events in the universe.`,
+      cta: 'See other events',
+      expiry: none,
+      ignore: 'You received this because you were registered for the event.',
+    },
+  },
   subscription_activated: {
     'pt-BR': {
       subject: 'Pagamento confirmado — Fandom Universe',
@@ -92,7 +128,7 @@ const escape = (s: string) =>
 export function renderEmail(job: EmailJobData): { subject: string; text: string; html: string } {
   const c = COPY[job.template][job.locale] ?? COPY[job.template]['pt-BR'];
   const link = escape(job.link);
-  const body = typeof c.body === 'function' ? c.body(job.details ?? { plan: '', until: '' }) : c.body;
+  const body = typeof c.body === 'function' ? c.body(job.details ?? {}) : c.body;
   const expiry = job.expiresInMinutes ? c.expiry(job.expiresInMinutes) : '';
   const text = `${c.heading}\n\n${body}\n\n${job.link}\n\n${expiry ? `${expiry}\n` : ''}${c.ignore}\n\n— Fandom Universe · Forge Studios`;
   const html = `<!doctype html><html lang="${job.locale}"><body style="margin:0;background:#05040a;font-family:Arial,Helvetica,sans-serif;color:#ece9f6">

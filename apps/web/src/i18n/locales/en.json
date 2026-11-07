@@ -365,7 +365,12 @@
     "event_full": "This event is full.",
     "registration_not_found": "You're not registered.",
     "report_not_found": "Report not found.",
-    "report_closed": "This report was already handled."
+    "report_closed": "This report was already handled.",
+    "registration_required": "Register for the event to enter the room.",
+    "room_closed": "This event room isn't open right now.",
+    "message_not_found": "Message not found.",
+    "invalid_quiz": "The selected quiz doesn't belong to this universe.",
+    "event_cancelled": "This event was cancelled."
   },
   "premium": {
     "title": "Unlock your Premium side",
@@ -524,6 +529,35 @@
       "gone": "Content already removed.",
       "hide": "Hide content",
       "dismiss": "Dismiss"
+    },
+    "events": {
+      "title": "Events",
+      "new": "New event",
+      "create": "Create event",
+      "edit": "Edit event",
+      "save": "Save changes",
+      "close": "Close",
+      "cancel": "Cancel event",
+      "confirmCancel": "Cancel this event? Every registered member will get an email.",
+      "empty": "No events yet.",
+      "scheduled": "Scheduled",
+      "universe": "Universe",
+      "choose": "Choose…",
+      "kind": "Type",
+      "titlePt": "Title (Portuguese)",
+      "titleEn": "Title (English, optional)",
+      "descPt": "Description (Portuguese)",
+      "descEn": "Description (English, optional)",
+      "startsAt": "Start",
+      "endsAt": "End",
+      "capacity": "Spots",
+      "unlimited": "Unlimited",
+      "plan": "Access",
+      "everyone": "All members",
+      "externalUrl": "Live/meeting link (optional)",
+      "externalHint": "https only. Visible only to registered members inside the room.",
+      "quiz": "Quiz of the night (optional)",
+      "noQuiz": "No quiz"
     }
   },
   "quiz": {
@@ -617,5 +651,32 @@
       "spoiler": "Unmarked spoiler",
       "other": "Other"
     }
+  },
+  "eventRoom": {
+    "backToEvents": "Back to events",
+    "backToRoom": "Back to the event room",
+    "cancelled": "Cancelled",
+    "cancelledInfo": "This event was cancelled by the team. Registered members were notified by email.",
+    "live": "Live",
+    "open": "Room open",
+    "closed": "Room closed",
+    "opensIn": "The room opens in",
+    "reminders": "You'll get email reminders 24 h and 1 h before. The room opens 30 minutes before the start.",
+    "ended": "This event has ended and the room is closed.",
+    "chat": "Event chat",
+    "noMessages": "No messages yet. Say hi!",
+    "message": "Write a message…",
+    "send": "Send",
+    "externalInfo": "The stream/meeting link is for registered members only.",
+    "openExternal": "Open live stream",
+    "quizInfo_one": "{{count}} question · the scoreboard updates live",
+    "quizInfo_other": "{{count}} questions · the scoreboard updates live",
+    "playQuiz": "Play tonight's quiz",
+    "scoreboard": "Live scoreboard",
+    "noScores": "Nobody has played yet. Be the first!",
+    "hasQuiz": "Live quiz",
+    "hasLive": "Stream",
+    "enter": "Enter room",
+    "view": "View room"
   }
 }

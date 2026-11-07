@@ -365,7 +365,12 @@
     "event_full": "Este evento está lotado.",
     "registration_not_found": "Você não está inscrito.",
     "report_not_found": "Denúncia não encontrada.",
-    "report_closed": "Esta denúncia já foi tratada."
+    "report_closed": "Esta denúncia já foi tratada.",
+    "registration_required": "Inscreva-se no evento para entrar na sala.",
+    "room_closed": "A sala deste evento não está aberta agora.",
+    "message_not_found": "Mensagem não encontrada.",
+    "invalid_quiz": "O quiz escolhido não pertence a este universo.",
+    "event_cancelled": "Este evento foi cancelado."
   },
   "premium": {
     "title": "Desbloqueie o seu lado Premium",
@@ -524,6 +529,35 @@
       "gone": "Conteúdo já removido.",
       "hide": "Ocultar conteúdo",
       "dismiss": "Descartar"
+    },
+    "events": {
+      "title": "Eventos",
+      "new": "Novo evento",
+      "create": "Criar evento",
+      "edit": "Editar evento",
+      "save": "Salvar alterações",
+      "close": "Fechar",
+      "cancel": "Cancelar evento",
+      "confirmCancel": "Cancelar este evento? Todos os inscritos receberão um e-mail.",
+      "empty": "Nenhum evento criado.",
+      "scheduled": "Agendado",
+      "universe": "Universo",
+      "choose": "Escolha…",
+      "kind": "Tipo",
+      "titlePt": "Título (português)",
+      "titleEn": "Título (inglês, opcional)",
+      "descPt": "Descrição (português)",
+      "descEn": "Descrição (inglês, opcional)",
+      "startsAt": "Início",
+      "endsAt": "Fim",
+      "capacity": "Vagas",
+      "unlimited": "Ilimitado",
+      "plan": "Acesso",
+      "everyone": "Todos os membros",
+      "externalUrl": "Link da live/reunião (opcional)",
+      "externalHint": "Somente https. Visível apenas para inscritos dentro da sala.",
+      "quiz": "Quiz da noite (opcional)",
+      "noQuiz": "Sem quiz"
     }
   },
   "quiz": {
@@ -617,5 +651,32 @@
       "spoiler": "Spoiler sem aviso",
       "other": "Outro"
     }
+  },
+  "eventRoom": {
+    "backToEvents": "Voltar aos eventos",
+    "backToRoom": "Voltar para a sala do evento",
+    "cancelled": "Cancelado",
+    "cancelledInfo": "Este evento foi cancelado pela equipe. Os inscritos foram avisados por e-mail.",
+    "live": "Ao vivo",
+    "open": "Sala aberta",
+    "closed": "Sala fechada",
+    "opensIn": "A sala abre em",
+    "reminders": "Você receberá lembretes por e-mail 24 h e 1 h antes. A sala abre 30 minutos antes do início.",
+    "ended": "Este evento já terminou e a sala foi fechada.",
+    "chat": "Chat do evento",
+    "noMessages": "Nenhuma mensagem ainda. Diga olá!",
+    "message": "Escreva uma mensagem…",
+    "send": "Enviar",
+    "externalInfo": "O link da transmissão/reunião é exclusivo para inscritos.",
+    "openExternal": "Abrir transmissão ao vivo",
+    "quizInfo_one": "{{count}} pergunta · o placar atualiza ao vivo",
+    "quizInfo_other": "{{count}} perguntas · o placar atualiza ao vivo",
+    "playQuiz": "Jogar o quiz da noite",
+    "scoreboard": "Placar ao vivo",
+    "noScores": "Ninguém jogou ainda. Seja o primeiro!",
+    "hasQuiz": "Quiz ao vivo",
+    "hasLive": "Transmissão",
+    "enter": "Entrar na sala",
+    "view": "Ver sala"
   }
 }

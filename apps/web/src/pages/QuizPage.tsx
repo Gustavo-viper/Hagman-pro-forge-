@@ -2,10 +2,10 @@ import type { QuizAttemptResult } from '@fandom/types';
 import { Badge, Button, Card, cn, Progress, Skeleton } from '@fandom/ui';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { AnimatePresence, motion } from 'framer-motion';
-import { ArrowLeft, ArrowRight, Check, PartyPopper, RotateCcw, Sparkles, X } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Check, PartyPopper, Radio, RotateCcw, Sparkles, X } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link, useParams } from 'react-router';
+import { Link, useParams, useSearchParams } from 'react-router';
 import { ErrorState } from '@/components/states';
 import { universeStyle } from '@/components/UniverseCard';
 import { useQuiz, useUniverse } from '@/hooks/data';
@@ -16,6 +16,8 @@ import { currentLocale } from '@/lib/i18n';
 
 export default function QuizPage() {
   const { slug = '', quizId = '' } = useParams();
+  const [search] = useSearchParams();
+  const eventId = /^[0-9a-f-]{36}$/i.test(search.get('event') ?? '') ? search.get('event') : null;
   const { t } = useTranslation();
   const locale = currentLocale();
   const qc = useQueryClient();
@@ -103,8 +105,9 @@ export default function QuizPage() {
           )}
 
           <div className="flex flex-wrap gap-3">
+            {eventId && <Button asChild variant="gold"><Link to={`/universes/${slug}/events/${eventId}`}><Radio /> {t('eventRoom.backToRoom')}</Link></Button>}
             <Button onClick={restart} variant="glass"><RotateCcw /> {t('quiz.playAgain')}</Button>
-            <Button asChild><Link to={`/universes/${slug}?tab=${q.setsIdentity ? 'overview' : 'ranking'}`}>{q.setsIdentity ? t('quiz.seeIdentity') : t('quiz.seeRanking')}</Link></Button>
+            <Button asChild variant={eventId ? 'glass' : 'primary'}><Link to={`/universes/${slug}?tab=${q.setsIdentity ? 'overview' : 'ranking'}`}>{q.setsIdentity ? t('quiz.seeIdentity') : t('quiz.seeRanking')}</Link></Button>
           </div>
         </motion.div>
       ) : (

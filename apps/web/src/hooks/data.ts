@@ -79,7 +79,10 @@ export function useMe() {
   });
 }
 
-export const STAFF_VIEW_ROLES = ['super_admin', 'admin', 'support', 'global_moderator'];
+export const STAFF_VIEW_ROLES = ['super_admin', 'admin', 'support', 'global_moderator', 'editor'];
+export const REPORT_VIEW_ROLES = ['super_admin', 'admin', 'support', 'global_moderator'];
+export const EVENT_VIEW_ROLES = ['super_admin', 'admin', 'support', 'editor'];
+export const EVENT_EDIT_ROLES = ['super_admin', 'admin', 'editor'];
 export const USER_ADMIN_ROLES = ['super_admin', 'admin', 'support'];
 export const MODERATION_ROLES = ['super_admin', 'admin', 'global_moderator'];
 export const STAFF_EDIT_ROLES = ['super_admin', 'admin'];
@@ -89,6 +92,7 @@ export function useUniverseQuizzes(slug: string) {
     queryKey: ['universes', slug, 'quizzes'],
     queryFn: ({ signal }) =>
       api<{ items: import('@fandom/types').QuizSummary[] }>(`/v1/universes/${encodeURIComponent(slug)}/quizzes`, { signal, auth: false }).then((r) => r.items),
+    enabled: Boolean(slug),
   });
 }
 

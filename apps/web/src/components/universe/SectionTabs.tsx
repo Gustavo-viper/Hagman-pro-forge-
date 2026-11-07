@@ -3,7 +3,7 @@ import type { IdentityStanding, LoreEntry, MissionProgress, MissionSummary, Univ
 import { Badge, Button, cn, Progress, Skeleton } from '@fandom/ui';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
-import { CalendarDays, Check, Crown, Lock, Target, Trophy, Users } from 'lucide-react';
+import { Brain, CalendarDays, Check, Crown, DoorOpen, Lock, Radio, Target, Trophy, Users, Video } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 import { useAuth } from '@/auth/AuthProvider';
@@ -183,6 +183,8 @@ export function EventsTab({ universe, isMember }: { universe: UniverseDetail; is
       {events.data.map((e) => {
         const registered = mine.data?.includes(e.id) ?? false;
         const ended = new Date(e.endsAt) < new Date();
+        const cancelled = e.status === 'cancelled';
+        const roomOpen = !cancelled && Date.now() >= new Date(e.startsAt).getTime() - 30 * 60_000 && Date.now() <= new Date(e.endsAt).getTime() + 60 * 60_000;
         const full = e.capacity !== null && e.participantCount >= e.capacity && !registered;
         const premiumError = toggle.isError && toggle.variables?.id === e.id && 'code' in toggle.error && toggle.error.code === 'premium_required';
         return (
@@ -191,7 +193,9 @@ export function EventsTab({ universe, isMember }: { universe: UniverseDetail; is
               <div className="flex flex-wrap items-center gap-2">
                 <Badge>{t(`sections.eventKinds.${e.kind}`)}</Badge>
                 {e.premiumPlan && <Badge variant="gold"><Crown className="size-3" /> {t(`dashboard.planNames.${e.premiumPlan}`)}+</Badge>}
-                {ended && <Badge>{t('sections.ended')}</Badge>}
+                {cancelled ? <Badge variant="danger">{t('eventRoom.cancelled')}</Badge> : ended && <Badge>{t('sections.ended')}</Badge>}
+                {e.hasQuiz && <Badge variant="mystic"><Brain className="size-3" /> {t('eventRoom.hasQuiz')}</Badge>}
+                {e.hasExternalLink && <Badge variant="mystic"><Video className="size-3" /> {t('eventRoom.hasLive')}</Badge>}
               </div>
               <h3 className="mt-3 font-display text-xl font-bold">{localized(e.title, locale)}</h3>
               <p className="mt-1 text-sm text-mist/65">{localized(e.description, locale)}</p>
@@ -201,11 +205,14 @@ export function EventsTab({ universe, isMember }: { universe: UniverseDetail; is
               </p>
             </div>
             <div className="mt-4 shrink-0 sm:mt-0">
-              {ended ? null : !session || !isMember ? (
+              {cancelled || (ended && !roomOpen) ? null : !session || !isMember ? (
                 <p className="max-w-48 text-sm text-mist/55">{t('universe.identityJoinFirst')}</p>
               ) : registered ? (
                 <div className="flex flex-col items-start gap-2">
                   <Badge variant="success" className="px-3 py-1.5"><Check className="size-4" /> {t('sections.youreIn')}</Badge>
+                  <Button asChild size="sm" variant={roomOpen ? 'gold' : 'glass'}>
+                    <Link to={`/universes/${universe.slug}/events/${e.id}`}>{roomOpen ? <Radio /> : <DoorOpen />} {roomOpen ? t('eventRoom.enter') : t('eventRoom.view')}</Link>
+                  </Button>
                   <Button size="sm" variant="ghost" loading={toggle.isPending && toggle.variables?.id === e.id} onClick={() => toggle.mutate({ id: e.id, join: false })}>{t('sections.leaveEvent')}</Button>
                 </div>
               ) : (

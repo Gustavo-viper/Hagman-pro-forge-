@@ -13,6 +13,7 @@ import type {
 import type { AuthenticatedUser } from '../auth/auth.types.js';
 import { AppError } from '../common/app-error.js';
 import { DatabaseService } from '../database/database.service.js';
+import { RealtimeService } from '../realtime/realtime.service.js';
 import { RedisService } from '../redis/redis.service.js';
 import { UniversesService } from '../universes/universes.service.js';
 import { XpService } from '../xp/xp.service.js';
@@ -78,6 +79,7 @@ export class QuizzesService {
     private readonly redis: RedisService,
     private readonly xp: XpService,
     private readonly universes: UniversesService,
+    private readonly realtime: RealtimeService,
   ) {}
 
   async list(universeSlug: string): Promise<QuizSummary[]> {
@@ -183,6 +185,14 @@ export class QuizzesService {
       return { attemptId, xpAwarded, xpRemaining: Math.max(0, quiz.xp_reward - earned - xpAwarded) };
     });
 
+    // Live quiz nights: tell open event rooms that use this quiz to refresh their scoreboard.
+    const rooms = await this.db.query<{ id: string }>(
+      `SELECT e.id FROM events e JOIN event_participants p ON p.event_id = e.id AND p.user_id = $2
+        WHERE e.quiz_id = $1 AND e.status = 'published'
+          AND now() BETWEEN e.starts_at - interval '30 minutes' AND e.ends_at + interval '1 hour'`,
+      [quizId, user.id],
+    );
+    for (const r of rooms.rows) await this.realtime.publish(`event-room:${r.id}`, { type: 'leaderboard-changed' });
     if (result.xpAwarded > 0) {
       await this.redis.invalidate(...['all', 'month', 'week'].map((p) => `ranking:v1:${quiz.universe_id}:${p}`));
     }

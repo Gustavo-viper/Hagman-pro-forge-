@@ -98,6 +98,23 @@ Cada funcionalidade em `universe_settings.features` é ligada a um motor (`packa
 | Eventos | `GET /v1/universes/:slug/events` · `GET …/events/mine` · `POST/DELETE /v1/events/:id/registration` | membro; capacidade com bloqueio de linha; eventos Premium checados no servidor (`premium_required`) |
 | Disputa | `GET /v1/universes/:slug/standings` | XP somado por identidade (taça das casas) |
 
+### Sala do evento (tempo real)
+
+| Rota | Regras |
+|---|---|
+| `GET /v1/events/:id/room` | inscrito no evento (ou moderador); devolve evento, `opensAt`/`closesAt` (abre 30 min antes, fecha 1 h depois do fim), link externo (só para inscritos e só com a sala aberta), quiz da noite, últimas mensagens e placar |
+| `GET /v1/events/:id/room/stream` | Server-Sent Events autenticados pelo cabeçalho `Authorization` (nunca pela URL); eventos `ready`, `message`, `removed`, `leaderboard-changed`, `cancelled` e `ping` a cada 20 s; fan-out entre réplicas via Redis pub/sub |
+| `POST /v1/events/:id/room/messages { body }` | sala aberta; texto puro 1–500 caracteres; 1 mensagem a cada 2 s por pessoa (`posting_too_fast`) |
+| `DELETE /v1/events/:id/room/messages/:messageId` | autor ou moderador |
+
+O placar é o melhor resultado de cada inscrito no quiz vinculado, contado só durante a janela da sala.
+
+### Eventos no admin
+
+`GET /v1/admin/events` (admin, editor, suporte) · `POST /v1/admin/events` · `PATCH /v1/admin/events/:id` · `POST /v1/admin/events/:id/cancel` (admin, editor). Datas ISO com fuso; link externo só `https://`; o quiz precisa ser do mesmo universo (`invalid_quiz`). Mudar o início rearma os lembretes; cancelar envia e-mail a cada inscrito e fecha a sala ao vivo. Tudo auditado.
+
+Lembretes: o worker verifica a cada 5 min e envia e-mail 24 h e 1 h antes do início, uma única vez por inscrito, com link para a sala.
+
 Moderação: `GET /v1/admin/reports?status=open` (admin, suporte, moderador global) e `POST /v1/admin/reports/:id/resolve { action: hide|dismiss }` (admin, moderador global), auditados.
 
 ## Planos

@@ -9,8 +9,9 @@ import { EmptyState, ErrorState } from '@/components/states';
 import { api } from '@/lib/api';
 import { formatDate, formatNumber, money } from '@/lib/format';
 import { currentLocale } from '@/lib/i18n';
-import { MODERATION_ROLES, USER_ADMIN_ROLES, useMe } from '@/hooks/data';
+import { EVENT_EDIT_ROLES, EVENT_VIEW_ROLES, MODERATION_ROLES, REPORT_VIEW_ROLES, USER_ADMIN_ROLES, useMe } from '@/hooks/data';
 import { RequireStaff } from './AdminLayout';
+import { EventsSection } from './EventsSection';
 import { ReportsSection } from './ReportsSection';
 
 function useDebounced<T>(v: T, ms = 350): T {
@@ -166,7 +167,8 @@ function AdminContent() {
       <p className="text-xs font-semibold uppercase tracking-[0.3em] text-gold-300">Forge Studios</p>
       <h1 className="mt-2 font-display text-3xl font-bold tracking-wide">{t('admin.title')}</h1>
       {usersAccess && <div className="mt-8"><Stats /></div>}
-      <ReportsSection canResolve={roles.some((r) => MODERATION_ROLES.includes(r))} />
+      {roles.some((r) => REPORT_VIEW_ROLES.includes(r)) && <ReportsSection canResolve={roles.some((r) => MODERATION_ROLES.includes(r))} />}
+      {roles.some((r) => EVENT_VIEW_ROLES.includes(r)) && <EventsSection canEdit={roles.some((r) => EVENT_EDIT_ROLES.includes(r))} />}
       {usersAccess && <UsersTable />}
     </div>
   );

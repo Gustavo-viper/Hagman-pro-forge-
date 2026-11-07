@@ -5,6 +5,7 @@ import pg from 'pg';
 import { JOBS, pgSslConfig, QUEUES, stripSslParams, type EmailJobData } from '@fandom/shared';
 import { loadEnv } from './env.js';
 import { runAuthCleanup } from './jobs/auth-cleanup.js';
+import { collectEventReminders } from './jobs/event-reminders.js';
 import { collectRenewalReminders } from './jobs/renewal-reminders.js';
 import { renderEmail } from './jobs/email.js';
 import { runSubscriptionLifecycle } from './jobs/subscription-lifecycle.js';
@@ -52,6 +53,7 @@ async function main(): Promise<void> {
   await maintenance.upsertJobScheduler(JOBS.subscriptionLifecycle, { every: env.SUBSCRIPTION_SWEEP_EVERY_MS }, { name: JOBS.subscriptionLifecycle, opts: repeatOpts });
   await maintenance.upsertJobScheduler(JOBS.authCleanup, { every: 6 * 3_600_000 }, { name: JOBS.authCleanup, opts: repeatOpts });
   await maintenance.upsertJobScheduler(JOBS.renewalReminders, { every: 3_600_000 }, { name: JOBS.renewalReminders, opts: repeatOpts });
+  await maintenance.upsertJobScheduler(JOBS.eventReminders, { every: 5 * 60_000 }, { name: JOBS.eventReminders, opts: repeatOpts });
   const emailQueue = new Queue<EmailJobData>(QUEUES.email, { connection });
 
   const withClient = async <T>(fn: (c: pg.PoolClient) => Promise<T>): Promise<T> => {
@@ -82,6 +84,14 @@ async function main(): Promise<void> {
             await emailQueue.add(JOBS.sendEmail, e, { attempts: 5, backoff: { type: 'exponential', delay: 15_000 }, removeOnComplete: 1000, removeOnFail: 5000 });
           }
           log('info', 'renewal reminders', { jobId: job.id, queued: emails.length });
+          return { queued: emails.length };
+        }
+        case JOBS.eventReminders: {
+          const emails = await withClient((c) => collectEventReminders(c, env.APP_PUBLIC_URL));
+          for (const e of emails) {
+            await emailQueue.add(JOBS.sendEmail, e, { attempts: 5, backoff: { type: 'exponential', delay: 15_000 }, removeOnComplete: 1000, removeOnFail: 5000 });
+          }
+          if (emails.length) log('info', 'event reminders', { jobId: job.id, queued: emails.length });
           return { queued: emails.length };
         }
         case JOBS.authCleanup: {
