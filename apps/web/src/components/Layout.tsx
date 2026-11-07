@@ -3,7 +3,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { LayoutDashboard, LogOut, Menu, Orbit, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router';
+import { Link, NavLink, useLocation, useNavigate, useOutlet } from 'react-router';
 import { useAuth } from '@/auth/AuthProvider';
 import { LanguageSwitcher } from './LanguageSwitcher';
 import { Logo } from './Logo';
@@ -139,6 +139,17 @@ export function Footer() {
   );
 }
 
+/**
+ * Freezes the route element captured on mount. Without this, the page that is animating
+ * out would render the NEW route (Outlet reads the current location), mounting it twice:
+ * anything typed during the transition was lost when the exit finished.
+ */
+function FrozenOutlet() {
+  const outlet = useOutlet();
+  const [frozen] = useState(outlet);
+  return frozen;
+}
+
 /** Page transition wrapper keyed by route. */
 export function AppLayout() {
   const { t } = useTranslation();
@@ -162,7 +173,7 @@ export function AppLayout() {
           exit={{ opacity: 0, y: -8, filter: 'blur(4px)' }}
           transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
         >
-          <Outlet />
+          <FrozenOutlet />
         </motion.main>
       </AnimatePresence>
       <Footer />

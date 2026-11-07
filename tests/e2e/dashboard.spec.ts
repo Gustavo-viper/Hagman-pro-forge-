@@ -62,8 +62,12 @@ test('session survives reload, sign out ends it, sign in restores it', async ({ 
   await page.getByRole('button', { name: 'Sair' }).filter({ visible: true }).click();
   await page.goto('/dashboard');
   await expect(page).toHaveURL(/\/login$/);
+  // Wait for the page transition to finish before typing.
+  await expect(page.getByRole('heading', { name: 'Bem-vindo de volta' })).toBeVisible();
+  await expect(page.getByLabel('E-mail')).toBeEditable();
 
   await page.getByLabel('E-mail').fill(email);
+  await expect(page.getByLabel('E-mail')).toHaveValue(email);
   await page.getByLabel('Senha').fill('SenhaErrada1');
   await page.getByRole('button', { name: 'Entrar' }).last().click();
   await expect(page.getByText('E-mail ou senha incorretos.')).toBeVisible();

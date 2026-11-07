@@ -252,7 +252,17 @@
       "multiverse_guide": "Guia do multiverso",
       "galaxy_atlas": "Atlas da galáxia",
       "starship_archive": "Arquivo de naves",
-      "species_archive": "Arquivo de espécies"
+      "species_archive": "Arquivo de espécies",
+      "specialty_identity": "Identidade de especialidade",
+      "episode_guide": "Guia de episódios",
+      "medical_cases": "Casos médicos da ficção",
+      "station_role": "Função no quartel",
+      "rescue_missions": "Missões de resgate",
+      "fandom_role": "Jeito de ser fã",
+      "discography": "Discografia",
+      "fan_projects": "Projetos de fãs",
+      "translations": "Traduções",
+      "fan_art": "Fan arts"
     }
   },
   "universes": {

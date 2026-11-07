@@ -53,7 +53,7 @@ describe.runIf(enabled)('Fandom API (PostgreSQL + Redis)', () => {
   describe('public catalog', () => {
     it('lists active universes with theme tokens', async () => {
       const res = await http.get('/v1/universes').expect(200);
-      expect(res.body.items.map((u: { slug: string }) => u.slug)).toEqual(['harry-potter', 'supernatural', 'marvel', 'dc', 'star-wars']);
+      expect(res.body.items.map((u: { slug: string }) => u.slug)).toEqual(['harry-potter', 'supernatural', 'marvel', 'dc', 'star-wars', 'greys-anatomy', 'station-19', 'bts']);
       expect(res.body.items[0].theme.primary).toMatch(/^#/);
     });
 
@@ -68,6 +68,16 @@ describe.runIf(enabled)('Fandom API (PostgreSQL + Redis)', () => {
       expect(sw.body.theme.accent).toBe('#ffe81f');
       expect((await http.get('/v1/universes/marvel').expect(200)).body.identityConfig.options).toHaveLength(5);
       expect((await http.get('/v1/universes/dc').expect(200)).body.features).toContain('multiverse_guide');
+    });
+
+    it("serves Grey's Anatomy, Station 19 and BTS (fandom roles, never real people as identities)", async () => {
+      const greys = await http.get('/v1/universes/greys-anatomy').expect(200);
+      expect(greys.body.name['pt-BR']).toBe("Grey's Anatomy");
+      expect(greys.body.identityConfig.options.map((o: { key: string }) => o.key)).toContain('cardio');
+      expect((await http.get('/v1/universes/station-19').expect(200)).body.features).toContain('rescue_missions');
+      const bts = await http.get('/v1/universes/bts').expect(200);
+      expect(bts.body.identityConfig.type).toBe('fandom_role');
+      expect(bts.body.description['pt-BR']).toContain('Respeito aos artistas');
     });
 
     it('404s unknown universes and rejects invalid slugs', async () => {

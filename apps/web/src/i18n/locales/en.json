@@ -252,7 +252,17 @@
       "multiverse_guide": "Multiverse guide",
       "galaxy_atlas": "Galaxy atlas",
       "starship_archive": "Starship archive",
-      "species_archive": "Species archive"
+      "species_archive": "Species archive",
+      "specialty_identity": "Specialty identity",
+      "episode_guide": "Episode guide",
+      "medical_cases": "Fictional medical cases",
+      "station_role": "Station role",
+      "rescue_missions": "Rescue missions",
+      "fandom_role": "Fandom role",
+      "discography": "Discography",
+      "fan_projects": "Fan projects",
+      "translations": "Translations",
+      "fan_art": "Fan art"
     }
   },
   "universes": {
