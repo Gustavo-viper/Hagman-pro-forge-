@@ -1,6 +1,6 @@
 # Banco de dados
 
-PostgreSQL 16 (Supabase em produção). Estrutura:
+PostgreSQL 16 — serviço **`fandom-postgres` na Railway** em produção (rede privada). Estrutura:
 
 ```
 database/
@@ -37,12 +37,13 @@ Planejadas para as próximas etapas (ver `ROADMAP.md`): posts, comments, reactio
 
 `policies/0001_rls.sql` habilita RLS em **todas** as tabelas. No Supabase (onde existem as roles `anon`/`authenticated` e o schema `auth`), revoga todos os privilégios dessas roles e libera somente leitura do catálogo público (universos ativos, planos e preços ativos) e do próprio perfil. A API conecta como dono das tabelas e aplica a autorização em código. Testado: `anon` lê universos e recebe *permission denied* em `users`.
 
-## Conexão Supabase
+## Conexão
 
-- API/worker: **pooler** (Supavisor) — transaction mode `:6543` ou session mode `:5432`, IPv4.
-- Migrations: conexão de sessão (`DATABASE_MIGRATION_URL`, porta 5432).
-- TLS: `DATABASE_SSL=verify-full` + `DATABASE_CA_CERT` (certificado em *Database Settings → SSL*). `require` criptografa sem validar o certificado.
+- Produção (Railway): `DATABASE_URL=${{fandom-postgres.DATABASE_URL}}` — host `fandom-postgres.railway.internal`, só acessível pela rede privada do projeto; `DATABASE_SSL=disable`.
+- Acesso externo pontual: `DATABASE_PUBLIC_URL` com `DATABASE_SSL=require`.
+- O executor de migrations usa `DATABASE_MIGRATION_URL` se definido, senão `DATABASE_URL`.
+- Compatível também com Supabase PostgreSQL (pooler + `verify-full`), caso a hospedagem mude.
 
 ## Backups e recuperação
 
-Supabase realiza backups diários (planos pagos com PITR). Procedimento de restauração e testes periódicos estão listados em `ROADMAP.md` (Etapa 12).
+Railway: habilite *Backups* agendados no serviço `fandom-postgres` (diário/semanal, restauração pelo painel). Procedimento de restauração e testes periódicos estão listados em `ROADMAP.md` (Etapa 12).

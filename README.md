@@ -22,7 +22,9 @@ Fandom Universe é uma plataforma **multiuniverso**: cada universo (Harry Potter
 | **fandom-api** | `apps/api` | NestJS 12 · REST versionada (`/v1`) · Zod · Supabase Auth (JWT) | `apps/api/railway.json` |
 | **fandom-worker** | `apps/worker` | BullMQ · jobs agendados | `apps/worker/railway.json` |
 | **fandom-redis** | — | Redis 7 (cache, rate limit distribuído, filas) | template Redis |
-| Banco | `database/` | PostgreSQL (Supabase) · migrations SQL versionadas · RLS | — |
+| **fandom-postgres** | `database/` | PostgreSQL · migrations SQL versionadas · RLS | template PostgreSQL |
+
+Autenticação: **Supabase Auth** (somente auth; o banco roda na Railway).
 
 Pacotes compartilhados: `packages/shared` (regras de domínio), `packages/schemas` (Zod — mesma validação no browser e na API), `packages/types` (contratos da API), `packages/ui` (design system).
 
@@ -80,7 +82,7 @@ pnpm build && pnpm test && pnpm test:e2e
 - [Arquitetura e decisões técnicas](docs/ARCHITECTURE.md)
 - [API REST v1](docs/API.md)
 - [Banco de dados](docs/DATABASE.md)
-- [Implantação na Railway + Supabase](docs/DEPLOYMENT.md)
+- [Implantação na Railway (app + banco) e Supabase Auth](docs/DEPLOYMENT.md)
 - [Segurança, LGPD e proteção de menores](docs/SECURITY.md)
 - [Roadmap e pendências](docs/ROADMAP.md)
 

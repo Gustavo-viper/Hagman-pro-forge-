@@ -22,7 +22,7 @@ Legenda: ✅ concluído e validado · 🟡 parcial (fundação pronta) · ⏳ pr
 | Item | Dependência | O que já está pronto |
 |---|---|---|
 | Login/cadastro reais | Projeto Supabase (URL, publishable key, JWT/JWKS) | Fluxos completos de cadastro, login, confirmação de e-mail, recuperação e redefinição de senha; verificação JWT na API (testada) |
-| Deploy | Conta Railway + projeto Supabase | Dockerfiles, `railway.json` dos 3 serviços, pre-deploy de migrations, health checks, guia passo a passo |
+| Deploy no projeto Railway `trila demo` | Token da API Railway (não fornecido) ou execução manual pelo painel/CLI + projeto Supabase Auth | Dockerfiles, `railway.json` dos 3 serviços, pre-deploy de migrations, health checks, guia passo a passo |
 | Build Docker | Validado indiretamente: o sandbox de desenvolvimento não tem rede dentro do `docker build`. O empacotamento `pnpm deploy` usado pelos Dockerfiles foi executado e testado localmente | Executar `docker build` (DEPLOYMENT.md §7) ou o primeiro deploy na Railway |
 | Pagamentos | Escolha e credenciais do provedor (Mercado Pago ou Stripe) | Tabelas de planos/preços/assinaturas/histórico, colunas `provider*`, lógica de entitlement e expiração |
 | Preços internacionais | Definição comercial por moeda | `plan_prices` aceita qualquer moeda ISO; a API só exibe preços explicitamente configurados |

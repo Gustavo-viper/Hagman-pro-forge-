@@ -21,6 +21,11 @@ describe('loadEnv', () => {
       loadEnv({ ...base, NODE_ENV: 'production', DATABASE_URL: 'postgres://x@db.supabase.co/db', DATABASE_SSL: 'require', REDIS_URL: 'redis://r' }),
     ).not.toThrow();
   });
+  it('accepts Railway private-network Postgres without TLS in production', () => {
+    const railway = { ...base, NODE_ENV: 'production', REDIS_URL: 'redis://fandom-redis.railway.internal:6379' };
+    expect(() => loadEnv({ ...railway, DATABASE_URL: 'postgresql://postgres:x@fandom-postgres.railway.internal:5432/railway' })).not.toThrow();
+    expect(() => loadEnv({ ...railway, DATABASE_URL: 'postgresql://postgres:x@shuttle.proxy.rlwy.net:41234/railway' })).toThrow(/DATABASE_SSL/);
+  });
   it('parses CSV origins', () => {
     expect(loadEnv({ ...base, WEB_ORIGINS: 'https://a.com, https://b.com' }).WEB_ORIGINS).toEqual(['https://a.com', 'https://b.com']);
   });

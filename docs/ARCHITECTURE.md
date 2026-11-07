@@ -9,7 +9,7 @@
        │  Supabase Auth     │ HTTPS  Authorization: Bearer <access token Supabase>
        │  (login, e-mail)   ▼
        │         ┌────────────────────────┐      ┌───────────────────────┐
-       └───────► │ fandom-api (Railway)   │ ───► │ PostgreSQL (Supabase) │
+       └───────► │ fandom-api (Railway)   │ ───► │ PostgreSQL (Railway)  │
                  │ NestJS · REST /v1      │      │ migrations · RLS      │
                  └──────────┬─────────────┘      └──────────▲────────────┘
                             │ cache · rate limit           │
@@ -41,8 +41,9 @@ infrastructure/ Dockerfiles, docker-compose local, scripts
 
 | # | Decisão | Motivo |
 |---|---|---|
+| 0 | **Banco na Railway (`fandom-postgres`, rede privada); Supabase apenas para Auth.** | Tudo no mesmo projeto Railway, latência mínima API↔banco, banco sem exposição pública. |
 | 1 | **Backend é a única porta de dados.** O navegador nunca consulta tabelas via PostgREST. | Autorização centralizada e testável; regras de XP/assinatura nunca no cliente. RLS habilitado em todas as tabelas como defesa em profundidade contra uso indevido da chave pública. |
-| 2 | **SQL puro versionado + executor próprio** (`database/src/runner.ts`) em vez de ORM. | Supabase é PostgreSQL: RLS, triggers e índices parciais são SQL nativo. O executor usa *advisory lock* (deploys concorrentes), uma transação por migration e **checksum** (bloqueia edição de migration já aplicada). |
+| 2 | **SQL puro versionado + executor próprio** (`database/src/runner.ts`) em vez de ORM. | Portável entre Railway PostgreSQL e Supabase: RLS, triggers e índices parciais são SQL nativo. O executor usa *advisory lock* (deploys concorrentes), uma transação por migration e **checksum** (bloqueia edição de migration já aplicada). |
 | 3 | **Supabase Auth + verificação local de JWT** (`jose`). JWKS (`/auth/v1/.well-known/jwks.json`) para chaves assimétricas e HS256 legado. | Sem chamada de rede por requisição; *issuer*, *audience*, `role=authenticated` e tokens anônimos validados. |
 | 4 | **Espelho de usuários** em `public.users` criado no primeiro request autenticado. | Funciona com qualquer emissor compatível, não depende de trigger em `auth.users` (schema gerenciado pelo Supabase). |
 | 5 | **Guards globais seguros por padrão**: Throttler → Auth → Access (`@Roles`, `@RequiresPlan`). Rotas públicas exigem `@Public()` explícito. | Esquecer um decorator falha fechado, não aberto. |
