@@ -265,7 +265,21 @@
       "fan_projects": "Fan projects",
       "translations": "Translations",
       "fan_art": "Fan art"
-    }
+    },
+    "tabs": {
+      "overview": "Overview",
+      "quizzes": "Quizzes",
+      "ranking": "Ranking"
+    },
+    "sections": "Universe sections",
+    "retakeSorting": "Retake the test",
+    "identityJoinFirst": "Join the universe to take part.",
+    "identityByQuiz": "Your identity here is set by the test. Take it and find yours!",
+    "identityChoose": "Choose your identity in this universe — you can change it anytime.",
+    "yours": "Yours",
+    "available": "available",
+    "soon": "soon",
+    "noQuizzes": "No quizzes published yet."
   },
   "universes": {
     "title": "Explore the universes",
@@ -326,7 +340,12 @@
     "cannot_reactivate": "There is no subscription to reactivate. Subscribe again from the Premium page.",
     "user_not_found": "User not found.",
     "cannot_suspend_self": "You can't suspend your own account.",
-    "invalid_cursor": "Invalid pagination. Reload the page."
+    "invalid_cursor": "Invalid pagination. Reload the page.",
+    "membership_required": "Join the universe to take part.",
+    "incomplete_answers": "Answer every question.",
+    "quiz_not_found": "Quiz not found.",
+    "identity_requires_quiz": "In this universe your identity is set by the test.",
+    "invalid_identity": "Invalid identity option."
   },
   "premium": {
     "title": "Unlock your Premium side",
@@ -471,5 +490,41 @@
       "role.bootstrap_super_admin": "Initial super admin",
       "role.granted_by_operator": "Role granted"
     }
+  },
+  "quiz": {
+    "personality": "Personality",
+    "difficulty": {
+      "easy": "Easy",
+      "normal": "Medium",
+      "hard": "Hard"
+    },
+    "questions_one": "{{count}} question",
+    "questions_other": "{{count}} questions",
+    "best": "best: {{score}}/{{total}}",
+    "earned": "{{xp}} XP earned",
+    "done": "completed",
+    "play": "Play",
+    "playAgain": "Play again",
+    "questionOf": "Question {{n}} of {{total}}",
+    "previous": "Previous",
+    "next": "Next",
+    "finish": "See result",
+    "yourResult": "Your result",
+    "perfect": "Perfect! You master this universe.",
+    "good": "Nice! How about a perfect score?",
+    "keepTrying": "Keep trying — every right answer counts.",
+    "remaining": "{{xp}} XP still to earn",
+    "noMoreXp": "You've earned all the XP from this quiz. Play for fun!",
+    "correctWas": "Correct answer:",
+    "seeIdentity": "See my identity",
+    "seeRanking": "See ranking"
+  },
+  "ranking": {
+    "all": "All time",
+    "month": "Monthly",
+    "week": "Weekly",
+    "empty": "Nobody has scored yet. Play a quiz and be the first!",
+    "you": "you",
+    "fair": "Rankings only count XP earned in community activities. Premium plans give no advantage."
   }
 }

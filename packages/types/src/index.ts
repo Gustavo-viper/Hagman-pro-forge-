@@ -214,3 +214,57 @@ export interface AdminUserDetails extends AdminUserRow {
   history: { at: string; from: string | null; to: string; reason: string; actor: string }[];
   audit: { at: string; action: string; actor: string | null; metadata: Record<string, unknown> }[];
 }
+
+export interface QuizSummary {
+  id: string;
+  slug: string;
+  kind: 'trivia' | 'personality';
+  title: LocalizedText;
+  description: LocalizedText;
+  difficulty: 'easy' | 'normal' | 'hard';
+  xpReward: number;
+  setsIdentity: boolean;
+  questionCount: number;
+}
+
+export interface QuizQuestionPublic {
+  id: string;
+  position: number;
+  prompt: LocalizedText;
+  options: { key: string; text: LocalizedText }[];
+}
+
+export interface QuizDetail extends QuizSummary {
+  universeSlug: string;
+  questions: QuizQuestionPublic[];
+}
+
+export interface QuizAttemptResult {
+  attemptId: string;
+  score: number;
+  total: number;
+  xpAwarded: number;
+  /** XP still available from this quiz by improving the score. */
+  xpRemaining: number;
+  /** Personality quizzes: identity key assigned in the universe. */
+  resultIdentity: string | null;
+  review: { questionId: string; chosen: string; correctKey: string | null; correct: boolean | null; explanation: LocalizedText | null }[];
+}
+
+export interface QuizProgress {
+  quizId: string;
+  attempts: number;
+  bestScore: number;
+  total: number;
+  xpEarned: number;
+}
+
+export interface RankingEntry {
+  rank: number;
+  userId: string;
+  username: string | null;
+  displayName: string | null;
+  xp: number;
+  level: number;
+  identity: string | null;
+}

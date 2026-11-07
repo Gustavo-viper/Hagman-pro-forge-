@@ -75,6 +75,17 @@ Primeiro admin: `BOOTSTRAP_SUPER_ADMIN_EMAILS` (concedido no login ou na verific
 | POST | `/v1/universes/:slug/membership` | autenticado + onboarding | Entra no universo (idempotente) → `UniverseMembership` |
 | DELETE | `/v1/universes/:slug/membership` | autenticado | Sai do universo → `204` (`404 membership_not_found`) |
 
+## Quizzes, identidade e ranking
+
+| Método | Rota | Acesso | Descrição |
+|---|---|---|---|
+| GET | `/v1/universes/:slug/quizzes` | pública | quizzes publicados (sem respostas) |
+| GET | `/v1/quizzes/:id` | pública | perguntas e opções — **nunca** a resposta certa |
+| POST | `/v1/quizzes/:id/attempts` | membro do universo | `{ answers: { [questionId]: key } }` → correção no servidor, revisão com explicações, XP. XP escala com a nota e é limitado à recompensa do quiz (melhorar paga só a diferença; repetir não gera XP). Quizzes de personalidade definem a identidade (ex.: casa) |
+| GET | `/v1/universes/:slug/quiz-progress` | autenticado | tentativas, melhor nota e XP por quiz |
+| PUT | `/v1/universes/:slug/identity` | membro | `{ key }` — escolha manual (`409 identity_requires_quiz` quando o universo usa teste, como a seleção de casa) |
+| GET | `/v1/universes/:slug/ranking?period=all\|month\|week` | pública | top 50 por XP do universo |
+
 ## Planos
 
 | Método | Rota | Acesso | Descrição |

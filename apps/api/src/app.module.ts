@@ -15,6 +15,7 @@ import { HealthModule } from './health/health.module.js';
 import { MailModule } from './mail/mail.module.js';
 import { MeModule } from './me/me.module.js';
 import { PlansModule } from './plans/plans.module.js';
+import { QuizzesModule } from './quizzes/quizzes.module.js';
 import { RedisModule } from './redis/redis.module.js';
 import { RedisService } from './redis/redis.service.js';
 import { SubscriptionsModule } from './subscriptions/subscriptions.module.js';
@@ -43,6 +44,7 @@ import { XpModule } from './xp/xp.module.js';
     MeModule,
     BillingModule,
     AdminModule,
+    QuizzesModule,
   ],
   providers: [
     // Order matters: rate limit → authenticate → authorize (roles / plan).

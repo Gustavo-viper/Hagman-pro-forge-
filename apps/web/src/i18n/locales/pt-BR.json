@@ -265,7 +265,21 @@
       "fan_projects": "Projetos de fãs",
       "translations": "Traduções",
       "fan_art": "Fan arts"
-    }
+    },
+    "tabs": {
+      "overview": "Visão geral",
+      "quizzes": "Quizzes",
+      "ranking": "Ranking"
+    },
+    "sections": "Seções do universo",
+    "retakeSorting": "Refazer o teste",
+    "identityJoinFirst": "Entre no universo para participar.",
+    "identityByQuiz": "Sua identidade aqui é definida pelo teste. Faça e descubra a sua!",
+    "identityChoose": "Escolha a sua identidade neste universo — você pode mudar quando quiser.",
+    "yours": "Sua",
+    "available": "disponível",
+    "soon": "em breve",
+    "noQuizzes": "Nenhum quiz publicado ainda."
   },
   "universes": {
     "title": "Explore os universos",
@@ -326,7 +340,12 @@
     "cannot_reactivate": "Não há assinatura para reativar. Assine novamente pela página Premium.",
     "user_not_found": "Usuário não encontrado.",
     "cannot_suspend_self": "Você não pode suspender a própria conta.",
-    "invalid_cursor": "Paginação inválida. Recarregue a página."
+    "invalid_cursor": "Paginação inválida. Recarregue a página.",
+    "membership_required": "Entre no universo para participar.",
+    "incomplete_answers": "Responda todas as perguntas.",
+    "quiz_not_found": "Quiz não encontrado.",
+    "identity_requires_quiz": "Neste universo a identidade é definida pelo teste.",
+    "invalid_identity": "Opção de identidade inválida."
   },
   "premium": {
     "title": "Desbloqueie o seu lado Premium",
@@ -471,5 +490,41 @@
       "role.bootstrap_super_admin": "Super admin inicial",
       "role.granted_by_operator": "Papel concedido"
     }
+  },
+  "quiz": {
+    "personality": "Personalidade",
+    "difficulty": {
+      "easy": "Fácil",
+      "normal": "Médio",
+      "hard": "Difícil"
+    },
+    "questions_one": "{{count}} pergunta",
+    "questions_other": "{{count}} perguntas",
+    "best": "melhor: {{score}}/{{total}}",
+    "earned": "{{xp}} XP ganhos",
+    "done": "concluído",
+    "play": "Jogar",
+    "playAgain": "Jogar de novo",
+    "questionOf": "Pergunta {{n}} de {{total}}",
+    "previous": "Anterior",
+    "next": "Próxima",
+    "finish": "Ver resultado",
+    "yourResult": "Seu resultado",
+    "perfect": "Perfeito! Você domina este universo.",
+    "good": "Mandou bem! Que tal buscar a nota máxima?",
+    "keepTrying": "Continue tentando — cada acerto conta.",
+    "remaining": "ainda há {{xp}} XP para conquistar",
+    "noMoreXp": "Você já ganhou todo o XP deste quiz. Jogue por diversão!",
+    "correctWas": "Resposta certa:",
+    "seeIdentity": "Ver minha identidade",
+    "seeRanking": "Ver ranking"
+  },
+  "ranking": {
+    "all": "Geral",
+    "month": "Mensal",
+    "week": "Semanal",
+    "empty": "Ninguém pontuou ainda. Jogue um quiz e seja o primeiro!",
+    "you": "você",
+    "fair": "O ranking considera só XP ganho em atividades da comunidade. Planos Premium não dão vantagem."
   }
 }

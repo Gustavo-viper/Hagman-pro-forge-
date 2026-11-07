@@ -8,11 +8,11 @@ Legenda: ✅ concluído e validado · 🟡 parcial (fundação pronta) · ⏳ pr
 | 2 | Banco de dados e autenticação | 🟡 núcleo pronto (users, profiles, consents, roles, audit, XP, assinaturas). Faltam tabelas sociais/jogos/loja e fluxos de conta (exclusão, exportação) |
 | 3 | Design system e interface | 🟡 identidade, tokens, componentes base, partículas, transições. Faltam componentes de feed, modais, toasts, tema por assinante |
 | 4 | Perfis e usuários | ⏳ perfil público, avatar/capa (armazenamento de objetos — Railway Volume ou bucket S3 compatível), bio, seguidores, amigos, bloqueios, privacidade, histórico, exclusão de conta |
-| 5 | Motor multiuniverso | 🟡 universos como dados, temas, identidade, participação. Faltam: teste de seleção de casa, salões comunais, bestiário, investigações, conteúdo por universo |
+| 5 | Motor multiuniverso | 🟡 8 universos como dados, temas, identidade (escolha ou teste de seleção de casa), participação, abas por universo. Faltam salões comunais, bestiário, biblioteca, investigações |
 | 6 | Feed e rede social | ⏳ posts, imagens, enquetes, reações, comentários aninhados, compartilhar, salvar, denúncias, paginação por cursor |
 | 7 | Grupos e comunidades | ⏳ grupos públicos/privados, fóruns, tópicos, moderação |
 | 8 | Mensagens e notificações | ⏳ WebSocket (gateway NestJS + Redis adapter), DMs, grupos, notificações em tempo real |
-| 9 | Jogos e gamificação | 🟡 livro-razão de XP idempotente e curva de níveis prontos. Faltam quizzes, missões, conquistas, rankings semanais/mensais/gerais |
+| 9 | Jogos e gamificação | 🟡 quizzes com correção no servidor e XP anti-farm, rankings geral/mensal/semanal por universo. Faltam missões, conquistas/medalhas, eventos, editor de quizzes no admin |
 | 10 | Premium, pagamentos, marketplace | 🟡 InfinitePay (checkout, confirmação server-side, webhooks, períodos pré-pagos, lembretes), `/premium`, `/account/subscription`. Faltam áreas exclusivas com conteúdo, Fandom Coins, inventário, loja |
 | 11 | Painel administrativo | 🟡 `/admin`: indicadores, usuários, liberar/bloquear plano, suspender conta, auditoria. Faltam gestão de universos, conteúdo, moderação, cupons e papéis pela interface |
 | 12 | Segurança, testes, otimização, lançamento | 🟡 ver SECURITY.md |

@@ -81,3 +81,36 @@ export function useMe() {
 
 export const STAFF_VIEW_ROLES = ['super_admin', 'admin', 'support'];
 export const STAFF_EDIT_ROLES = ['super_admin', 'admin'];
+
+export function useUniverseQuizzes(slug: string) {
+  return useQuery({
+    queryKey: ['universes', slug, 'quizzes'],
+    queryFn: ({ signal }) =>
+      api<{ items: import('@fandom/types').QuizSummary[] }>(`/v1/universes/${encodeURIComponent(slug)}/quizzes`, { signal, auth: false }).then((r) => r.items),
+  });
+}
+
+export function useQuizProgress(slug: string, enabled: boolean) {
+  return useQuery({
+    queryKey: ['me', 'quiz-progress', slug],
+    queryFn: ({ signal }) =>
+      api<{ items: import('@fandom/types').QuizProgress[] }>(`/v1/universes/${encodeURIComponent(slug)}/quiz-progress`, { signal }).then((r) => r.items),
+    enabled,
+  });
+}
+
+export function useRanking(slug: string, period: 'all' | 'month' | 'week') {
+  return useQuery({
+    queryKey: ['universes', slug, 'ranking', period],
+    queryFn: ({ signal }) =>
+      api<{ items: import('@fandom/types').RankingEntry[] }>(`/v1/universes/${encodeURIComponent(slug)}/ranking?period=${period}`, { signal, auth: false }).then((r) => r.items),
+    staleTime: 15_000,
+  });
+}
+
+export function useQuiz(id: string) {
+  return useQuery({
+    queryKey: ['quiz', id],
+    queryFn: ({ signal }) => api<import('@fandom/types').QuizDetail>(`/v1/quizzes/${encodeURIComponent(id)}`, { signal, auth: false }),
+  });
+}

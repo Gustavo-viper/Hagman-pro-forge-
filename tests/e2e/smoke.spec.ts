@@ -32,6 +32,11 @@ test('universe page shows the identity system', async ({ page }) => {
   await page.goto('/universes/harry-potter');
   await expect(page.getByRole('heading', { name: 'Grifinória' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Lufa-Lufa' })).toBeVisible();
+  await page.getByRole('tab', { name: 'Quizzes' }).click();
+  await expect(page.getByRole('heading', { name: 'Qual é a sua casa?' })).toBeVisible();
+  await page.getByRole('tab', { name: 'Ranking' }).click();
+  await expect(page.getByRole('radio', { name: 'Semanal' })).toBeVisible();
+  await page.getByRole('tab', { name: 'Visão geral' }).click();
   await expect(page.getByRole('link', { name: 'Entre para participar' })).toBeVisible();
 });
 
@@ -39,7 +44,7 @@ test('Star Wars page shows factions and translated features', async ({ page }) =
   await page.goto('/universes/star-wars');
   await expect(page.getByRole('heading', { name: 'Star Wars', level: 1 })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Caçador de recompensas' })).toBeVisible();
-  await expect(page.getByText('Atlas da galáxia', { exact: true })).toBeVisible();
+  await expect(page.getByText(/Atlas da galáxia/).first()).toBeVisible();
 });
 
 test('unknown routes and universes render 404', async ({ page }) => {
