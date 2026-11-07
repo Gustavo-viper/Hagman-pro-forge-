@@ -1,0 +1,24 @@
+# Local development dependencies. Usage: pnpm infra:up
+# (If PostgreSQL/Redis are already installed natively you can skip this.)
+name: fandom-universe
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: fandom
+      POSTGRES_PASSWORD: fandom   # local-only credential, never used outside your machine
+      POSTGRES_DB: fandom
+    ports: ["5432:5432"]
+    volumes: [pgdata:/var/lib/postgresql/data, ./docker/init-test-db.sql:/docker-entrypoint-initdb.d/init.sql:ro]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U fandom"]
+      interval: 5s
+      retries: 10
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--appendonly", "yes"]
+    ports: ["6379:6379"]
+    volumes: [redisdata:/data]
+volumes:
+  pgdata:
+  redisdata:

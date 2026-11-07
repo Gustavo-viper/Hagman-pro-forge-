@@ -1,0 +1,8 @@
+import { Module } from '@nestjs/common';
+import { AuditModule } from '../audit/audit.module.js';
+import { UniversesModule } from '../universes/universes.module.js';
+import { MeController } from './me.controller.js';
+import { MeService } from './me.service.js';
+
+@Module({ imports: [UniversesModule, AuditModule], controllers: [MeController], providers: [MeService] })
+export class MeModule {}

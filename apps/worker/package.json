@@ -1,0 +1,29 @@
+{
+  "name": "@fandom/worker",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsc -p tsconfig.build.json && (tsc -p tsconfig.build.json --watch --preserveWatchOutput & node --env-file-if-exists=../../.env --watch-path=dist dist/main.js)",
+    "build": "tsc -p tsconfig.build.json",
+    "start": "node dist/main.js",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@fandom/shared": "workspace:*",
+    "bullmq": "^5.76.0",
+    "ioredis": "^5.8.0",
+    "pg": "^8.23.1",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@types/node": "^22.19.0",
+    "@types/pg": "^8.15.0",
+    "typescript": "^7.0.2",
+    "vitest": "^5.1.0"
+  },
+  "files": [
+    "dist"
+  ]
+}

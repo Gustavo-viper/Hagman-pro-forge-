@@ -1,0 +1,304 @@
+{
+  "common": {
+    "appName": "Fandom Universe",
+    "slogan": "ONE PLATFORM. INFINITE UNIVERSES.",
+    "company": "Forge Studios Tecnologias em Softwares LTDA.",
+    "loading": "Loading…",
+    "retry": "Try again",
+    "back": "Back",
+    "continue": "Continue",
+    "skipToContent": "Skip to content",
+    "language": "Language",
+    "languages": {
+      "pt-BR": "Português (Brasil)",
+      "en": "English"
+    }
+  },
+  "nav": {
+    "home": "Home",
+    "universes": "Universes",
+    "dashboard": "Dashboard",
+    "signIn": "Sign in",
+    "signUp": "Sign up",
+    "signOut": "Sign out",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu"
+  },
+  "landing": {
+    "hero": {
+      "eyebrow": "The social network of fandoms",
+      "title": "All your universes. One identity.",
+      "subtitle": "Join living communities, find your house, hunt legendary creatures, climb the rankings and meet people who love the same stories you do.",
+      "ctaPrimary": "Create free account",
+      "ctaSecondary": "Explore universes",
+      "ctaDashboard": "Go to dashboard"
+    },
+    "universes": {
+      "eyebrow": "Active universes",
+      "title": "Choose where to begin",
+      "subtitle": "Each universe has its own identity, community and challenges — and new universes keep arriving.",
+      "empty": "No universes available right now.",
+      "error": "Could not load universes.",
+      "enter": "Enter universe",
+      "members_zero": "Be the first member",
+      "members_one": "{{count}} member",
+      "members_other": "{{count}} members"
+    },
+    "features": {
+      "eyebrow": "Platform",
+      "title": "Built for people who live the stories",
+      "items": {
+        "identity": {
+          "title": "Identity per universe",
+          "body": "One account, with its own identity in every universe: your house, your hunter rank and more."
+        },
+        "community": {
+          "title": "Communities and groups",
+          "body": "Common rooms, forums, theories and moderated discussions where you can talk safely."
+        },
+        "gamification": {
+          "title": "XP, levels and achievements",
+          "body": "Quizzes, missions and events with rewards computed on the server — fair for everyone."
+        },
+        "events": {
+          "title": "Events and competitions",
+          "body": "House tournaments, hunter challenges and special events all year long."
+        },
+        "safety": {
+          "title": "Safety and privacy",
+          "body": "Data protection under LGPD, active moderation and stronger defaults for minors."
+        },
+        "global": {
+          "title": "Brazilian and international",
+          "body": "Portuguese and English from day one, with dates, currencies and time zones in your format."
+        }
+      }
+    },
+    "plans": {
+      "eyebrow": "Fandom Premium",
+      "title": "Free forever. Premium if you want.",
+      "subtitle": "Essential community features are free. Premium plans add customization and exclusive spaces — never ranking advantages.",
+      "monthly": "Monthly",
+      "yearly": "Yearly",
+      "perMonth": "/mo",
+      "perYear": "/yr",
+      "save": "save {{percent}}%",
+      "equivalent": "equals {{price}}/mo",
+      "startFree": "Start for free",
+      "soon": "Subscriptions coming soon",
+      "popular": "Most popular",
+      "error": "Could not load plans.",
+      "noPrice": "Price not available in this currency."
+    },
+    "disclaimer": {
+      "title": "Independent community",
+      "body": "Fandom Universe is an independent, unofficial fan community. It is not affiliated with, sponsored or endorsed by the rights holders of the works mentioned. All trademarks belong to their respective owners."
+    },
+    "cta": {
+      "title": "Your next universe is one click away.",
+      "body": "Create your free account and start building your fan identity.",
+      "button": "Get started"
+    }
+  },
+  "auth": {
+    "email": "Email",
+    "password": "Password",
+    "confirmPassword": "Confirm password",
+    "passwordHint": "At least 8 characters, with letters and numbers.",
+    "notConfigured": {
+      "title": "Authentication not configured yet",
+      "body": "This environment does not have Supabase Auth credentials yet (VITE_SUPABASE_URL and VITE_SUPABASE_PUBLISHABLE_KEY). See docs/DEPLOYMENT.md."
+    },
+    "login": {
+      "title": "Welcome back",
+      "subtitle": "Sign in to continue your journey.",
+      "submit": "Sign in",
+      "forgot": "Forgot my password",
+      "noAccount": "Don't have an account?",
+      "createAccount": "Create a free account"
+    },
+    "register": {
+      "title": "Create your account",
+      "subtitle": "One account for every universe.",
+      "submit": "Create account",
+      "hasAccount": "Already have an account?",
+      "checkEmailTitle": "Confirm your email",
+      "checkEmailBody": "We sent a confirmation link to {{email}}. Open it to activate your account."
+    },
+    "forgot": {
+      "title": "Recover password",
+      "subtitle": "We'll send you a secure link to reset your password.",
+      "submit": "Send link",
+      "sent": "If an account exists for that email, you'll receive a reset link shortly.",
+      "backToLogin": "Back to sign in"
+    },
+    "reset": {
+      "title": "New password",
+      "subtitle": "Choose a new password for your account.",
+      "submit": "Save new password",
+      "success": "Password updated successfully.",
+      "invalidLink": "This reset link is invalid or has expired. Request a new one."
+    },
+    "callback": {
+      "verifying": "Verifying your access…",
+      "failed": "We couldn't verify this link. It may have expired."
+    }
+  },
+  "validation": {
+    "invalid_email": "Enter a valid email.",
+    "password_too_short": "Password must have at least 8 characters.",
+    "password_too_long": "Password can have at most 72 characters.",
+    "password_weak": "Use letters and numbers in your password.",
+    "password_mismatch": "Passwords don't match.",
+    "required": "Required field.",
+    "invalid_username": "Use 3 to 24 characters: lowercase letters, numbers, _ or dot.",
+    "invalid_country": "Select a country.",
+    "invalid_timezone": "Select a valid time zone.",
+    "invalid_characters": "Contains characters that are not allowed.",
+    "invalid_date": "Enter a valid date.",
+    "must_accept": "You must accept to continue."
+  },
+  "onboarding": {
+    "eyebrow": "First step",
+    "title": "Create your fan identity",
+    "subtitle": "This information builds your profile and keeps the community safe.",
+    "username": "Username",
+    "usernameAvailable": "Available!",
+    "usernameTaken": "Already taken.",
+    "checking": "Checking…",
+    "displayName": "Display name",
+    "birthdate": "Date of birth",
+    "birthdateHint": "Never shown publicly. Used to protect underage users.",
+    "country": "Country",
+    "selectCountry": "Select…",
+    "locale": "Platform language",
+    "timezone": "Time zone",
+    "acceptTermsPrefix": "I have read and accept the",
+    "terms": "Terms of Use",
+    "acceptPrivacyPrefix": "I have read and accept the",
+    "privacy": "Privacy Policy",
+    "marketing": "Send me news and events by email (optional).",
+    "submit": "Finish and earn 50 XP",
+    "minorNotice": "Accounts of users under 18 get stronger privacy settings."
+  },
+  "dashboard": {
+    "greeting": "Hi, {{name}}",
+    "subtitle": "Your command center across every universe.",
+    "level": "Level {{level}}",
+    "xpTotal": "{{xp}} XP",
+    "xpToNext": "{{xp}} XP to level {{level}}",
+    "maxLevel": "Maximum level reached",
+    "plan": "Plan",
+    "planNames": {
+      "free": "Free",
+      "plus": "Fandom Plus",
+      "ultra": "Fandom Ultra"
+    },
+    "statuses": {
+      "free": "Free",
+      "pending": "Pending",
+      "active": "Active",
+      "past_due": "Past due",
+      "cancelled": "Cancelled",
+      "expired": "Expired"
+    },
+    "validUntil": "Valid until {{date}}",
+    "seePlans": "See plans",
+    "myUniverses": "My universes",
+    "noUniverses": "You haven't joined any universe yet. Pick one below to begin.",
+    "discover": "Discover universes",
+    "join": "Join",
+    "leave": "Leave universe",
+    "open": "Open",
+    "joined": "Member",
+    "memberSince": "Since {{date}}",
+    "emailNotVerified": "Your email is not verified yet. Check your inbox.",
+    "error": "Could not load your dashboard.",
+    "profile": "Profile",
+    "staff": "Forge Studios staff"
+  },
+  "universe": {
+    "back": "All universes",
+    "features": "What you'll find here",
+    "identity": "Identity system",
+    "join": "Join this universe",
+    "leave": "Leave universe",
+    "joined": "You are a member of this universe",
+    "signInToJoin": "Sign in to take part",
+    "completeOnboarding": "Complete your profile to take part",
+    "notFound": "Universe not found.",
+    "minLevel": "from level {{level}}",
+    "featureNames": {
+      "house_sorting": "House sorting",
+      "common_rooms": "Common rooms",
+      "quizzes": "Quizzes",
+      "rankings": "Rankings",
+      "library": "Knowledge library",
+      "creatures": "Creatures",
+      "spells": "Spells",
+      "discussions": "Discussions",
+      "theories": "Theories",
+      "events": "Events",
+      "house_cup": "House competition",
+      "hunter_identity": "Hunter identity",
+      "bestiary": "Bestiary",
+      "creature_archive": "Creature archive",
+      "investigations": "Investigation center",
+      "missions": "Missions",
+      "hunter_ranking": "Hunter ranking",
+      "discussion_groups": "Discussion groups",
+      "challenges": "Challenges"
+    }
+  },
+  "universes": {
+    "title": "Explore the universes",
+    "subtitle": "Each universe is a community with its own identity. Join as many as you like with the same account."
+  },
+  "notFound": {
+    "title": "This portal leads nowhere",
+    "body": "The page you are looking for doesn't exist or was moved.",
+    "home": "Back to home"
+  },
+  "footer": {
+    "rights": "© {{year}} Forge Studios Tecnologias em Softwares LTDA. All rights reserved.",
+    "terms": "Terms of Use",
+    "privacy": "Privacy",
+    "unofficial": "Independent, unofficial fan community."
+  },
+  "legal": {
+    "version": "Version {{version}}",
+    "reviewNotice": "Document in force for the platform's initial phase, subject to legal review before public launch."
+  },
+  "errors": {
+    "generic": "Something went wrong. Please try again.",
+    "network_error": "Can't reach the server. Check your connection.",
+    "unauthorized": "Your session expired. Please sign in again.",
+    "invalid_token": "Your session is invalid. Please sign in again.",
+    "token_expired": "Your session expired. Please sign in again.",
+    "account_suspended": "Your account is suspended. Contact support.",
+    "account_deleted": "This account was deleted.",
+    "onboarding_required": "Complete your profile before continuing.",
+    "onboarding_already_completed": "Your profile is already set up.",
+    "username_taken": "This username is already taken.",
+    "age_restricted": "You must be at least 13 years old to use Fandom Universe.",
+    "invalid_birthdate": "Invalid date of birth.",
+    "validation_failed": "Check the highlighted fields.",
+    "universe_not_found": "Universe not found.",
+    "membership_not_found": "You are not a member of this universe.",
+    "rate_limited": "Too many attempts. Please wait a moment.",
+    "premium_required": "This feature is part of Fandom Premium.",
+    "insufficient_role": "You don't have permission for this.",
+    "internal_error": "Internal error. Our team has been notified.",
+    "auth": {
+      "invalid_credentials": "Incorrect email or password.",
+      "email_not_confirmed": "Confirm your email before signing in.",
+      "user_already_exists": "An account with this email already exists.",
+      "email_exists": "An account with this email already exists.",
+      "weak_password": "Password too weak. Choose another one.",
+      "same_password": "The new password must differ from the current one.",
+      "over_email_send_rate_limit": "Too many emails sent. Wait a few minutes.",
+      "over_request_rate_limit": "Too many attempts. Please wait a moment.",
+      "otp_expired": "The link has expired. Request a new one."
+    }
+  }
+}

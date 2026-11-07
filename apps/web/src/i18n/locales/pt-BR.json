@@ -1,0 +1,304 @@
+{
+  "common": {
+    "appName": "Fandom Universe",
+    "slogan": "ONE PLATFORM. INFINITE UNIVERSES.",
+    "company": "Forge Studios Tecnologias em Softwares LTDA.",
+    "loading": "Carregando…",
+    "retry": "Tentar novamente",
+    "back": "Voltar",
+    "continue": "Continuar",
+    "skipToContent": "Pular para o conteúdo",
+    "language": "Idioma",
+    "languages": {
+      "pt-BR": "Português (Brasil)",
+      "en": "English"
+    }
+  },
+  "nav": {
+    "home": "Início",
+    "universes": "Universos",
+    "dashboard": "Painel",
+    "signIn": "Entrar",
+    "signUp": "Criar conta",
+    "signOut": "Sair",
+    "openMenu": "Abrir menu",
+    "closeMenu": "Fechar menu"
+  },
+  "landing": {
+    "hero": {
+      "eyebrow": "A rede social dos fandoms",
+      "title": "Todos os seus universos. Uma só identidade.",
+      "subtitle": "Entre em comunidades vivas, descubra sua casa, cace criaturas lendárias, suba nos rankings e encontre pessoas que amam as mesmas histórias que você.",
+      "ctaPrimary": "Criar conta grátis",
+      "ctaSecondary": "Explorar universos",
+      "ctaDashboard": "Ir para o painel"
+    },
+    "universes": {
+      "eyebrow": "Universos ativos",
+      "title": "Escolha por onde começar",
+      "subtitle": "Cada universo tem identidade, comunidade e desafios próprios — e novos universos chegam sem parar.",
+      "empty": "Nenhum universo disponível no momento.",
+      "error": "Não foi possível carregar os universos.",
+      "enter": "Entrar no universo",
+      "members_zero": "Seja o primeiro membro",
+      "members_one": "{{count}} membro",
+      "members_other": "{{count}} membros"
+    },
+    "features": {
+      "eyebrow": "Plataforma",
+      "title": "Feita para quem vive as histórias",
+      "items": {
+        "identity": {
+          "title": "Identidade por universo",
+          "body": "Uma conta única, com uma identidade própria em cada universo: sua casa, sua patente de caçador e muito mais."
+        },
+        "community": {
+          "title": "Comunidades e grupos",
+          "body": "Salões comunais, fóruns, teorias e discussões moderadas para conversar com segurança."
+        },
+        "gamification": {
+          "title": "XP, níveis e conquistas",
+          "body": "Quizzes, missões e eventos com recompensas calculadas no servidor — justas para todos."
+        },
+        "events": {
+          "title": "Eventos e competições",
+          "body": "Torneios entre casas, desafios de caçadores e eventos especiais ao longo do ano."
+        },
+        "safety": {
+          "title": "Segurança e privacidade",
+          "body": "Proteção de dados conforme a LGPD, moderação ativa e configurações reforçadas para menores."
+        },
+        "global": {
+          "title": "Brasileira e internacional",
+          "body": "Português e inglês desde o primeiro dia, com datas, moedas e fusos no seu formato."
+        }
+      }
+    },
+    "plans": {
+      "eyebrow": "Fandom Premium",
+      "title": "Grátis para sempre. Premium se você quiser.",
+      "subtitle": "Os recursos essenciais da comunidade são gratuitos. Os planos premium oferecem personalização e espaços exclusivos — nunca vantagens nos rankings.",
+      "monthly": "Mensal",
+      "yearly": "Anual",
+      "perMonth": "/mês",
+      "perYear": "/ano",
+      "save": "economize {{percent}}%",
+      "equivalent": "equivale a {{price}}/mês",
+      "startFree": "Começar grátis",
+      "soon": "Assinaturas em breve",
+      "popular": "Mais popular",
+      "error": "Não foi possível carregar os planos.",
+      "noPrice": "Preço não disponível nesta moeda."
+    },
+    "disclaimer": {
+      "title": "Comunidade independente",
+      "body": "O Fandom Universe é uma comunidade de fãs independente e não oficial. Não é afiliado, patrocinado ou endossado pelos detentores dos direitos das obras citadas. Todas as marcas pertencem aos seus respectivos proprietários."
+    },
+    "cta": {
+      "title": "Seu próximo universo está a um clique.",
+      "body": "Crie sua conta gratuita e comece a construir sua identidade de fã.",
+      "button": "Começar agora"
+    }
+  },
+  "auth": {
+    "email": "E-mail",
+    "password": "Senha",
+    "confirmPassword": "Confirmar senha",
+    "passwordHint": "Mínimo de 8 caracteres, com letras e números.",
+    "notConfigured": {
+      "title": "Autenticação ainda não configurada",
+      "body": "Este ambiente ainda não possui as credenciais do Supabase Auth (VITE_SUPABASE_URL e VITE_SUPABASE_PUBLISHABLE_KEY). Consulte docs/DEPLOYMENT.md."
+    },
+    "login": {
+      "title": "Bem-vindo de volta",
+      "subtitle": "Entre para continuar sua jornada.",
+      "submit": "Entrar",
+      "forgot": "Esqueci minha senha",
+      "noAccount": "Ainda não tem conta?",
+      "createAccount": "Criar conta grátis"
+    },
+    "register": {
+      "title": "Crie sua conta",
+      "subtitle": "Uma conta para todos os universos.",
+      "submit": "Criar conta",
+      "hasAccount": "Já tem conta?",
+      "checkEmailTitle": "Confirme seu e-mail",
+      "checkEmailBody": "Enviamos um link de confirmação para {{email}}. Abra-o para ativar sua conta."
+    },
+    "forgot": {
+      "title": "Recuperar senha",
+      "subtitle": "Enviaremos um link seguro para redefinir sua senha.",
+      "submit": "Enviar link",
+      "sent": "Se existir uma conta com esse e-mail, você receberá um link de redefinição em instantes.",
+      "backToLogin": "Voltar para o login"
+    },
+    "reset": {
+      "title": "Nova senha",
+      "subtitle": "Escolha uma nova senha para sua conta.",
+      "submit": "Salvar nova senha",
+      "success": "Senha atualizada com sucesso.",
+      "invalidLink": "Este link de redefinição é inválido ou expirou. Solicite um novo."
+    },
+    "callback": {
+      "verifying": "Validando seu acesso…",
+      "failed": "Não foi possível validar este link. Ele pode ter expirado."
+    }
+  },
+  "validation": {
+    "invalid_email": "Informe um e-mail válido.",
+    "password_too_short": "A senha precisa ter pelo menos 8 caracteres.",
+    "password_too_long": "A senha pode ter no máximo 72 caracteres.",
+    "password_weak": "Use letras e números na senha.",
+    "password_mismatch": "As senhas não coincidem.",
+    "required": "Campo obrigatório.",
+    "invalid_username": "Use de 3 a 24 caracteres: letras minúsculas, números, _ ou ponto.",
+    "invalid_country": "Selecione um país.",
+    "invalid_timezone": "Selecione um fuso horário válido.",
+    "invalid_characters": "Contém caracteres não permitidos.",
+    "invalid_date": "Informe uma data válida.",
+    "must_accept": "É necessário aceitar para continuar."
+  },
+  "onboarding": {
+    "eyebrow": "Primeiro passo",
+    "title": "Crie sua identidade de fã",
+    "subtitle": "Essas informações montam seu perfil e mantêm a comunidade segura.",
+    "username": "Nome de usuário",
+    "usernameAvailable": "Disponível!",
+    "usernameTaken": "Já está em uso.",
+    "checking": "Verificando…",
+    "displayName": "Nome de exibição",
+    "birthdate": "Data de nascimento",
+    "birthdateHint": "Não é exibida publicamente. É usada para proteger usuários menores de idade.",
+    "country": "País",
+    "selectCountry": "Selecione…",
+    "locale": "Idioma da plataforma",
+    "timezone": "Fuso horário",
+    "acceptTermsPrefix": "Li e aceito os",
+    "terms": "Termos de Uso",
+    "acceptPrivacyPrefix": "Li e aceito a",
+    "privacy": "Política de Privacidade",
+    "marketing": "Quero receber novidades e eventos por e-mail (opcional).",
+    "submit": "Concluir e ganhar 50 XP",
+    "minorNotice": "Contas de menores de 18 anos recebem configurações de privacidade reforçadas."
+  },
+  "dashboard": {
+    "greeting": "Olá, {{name}}",
+    "subtitle": "Seu centro de comando em todos os universos.",
+    "level": "Nível {{level}}",
+    "xpTotal": "{{xp}} XP",
+    "xpToNext": "{{xp}} XP para o nível {{level}}",
+    "maxLevel": "Nível máximo alcançado",
+    "plan": "Plano",
+    "planNames": {
+      "free": "Free",
+      "plus": "Fandom Plus",
+      "ultra": "Fandom Ultra"
+    },
+    "statuses": {
+      "free": "Gratuito",
+      "pending": "Pendente",
+      "active": "Ativa",
+      "past_due": "Pagamento pendente",
+      "cancelled": "Cancelada",
+      "expired": "Expirada"
+    },
+    "validUntil": "Válido até {{date}}",
+    "seePlans": "Ver planos",
+    "myUniverses": "Meus universos",
+    "noUniverses": "Você ainda não entrou em nenhum universo. Escolha um abaixo para começar.",
+    "discover": "Descobrir universos",
+    "join": "Entrar",
+    "leave": "Sair do universo",
+    "open": "Abrir",
+    "joined": "Membro",
+    "memberSince": "Desde {{date}}",
+    "emailNotVerified": "Seu e-mail ainda não foi verificado. Verifique sua caixa de entrada.",
+    "error": "Não foi possível carregar seu painel.",
+    "profile": "Perfil",
+    "staff": "Equipe Forge Studios"
+  },
+  "universe": {
+    "back": "Todos os universos",
+    "features": "O que você encontra aqui",
+    "identity": "Sistema de identidade",
+    "join": "Entrar neste universo",
+    "leave": "Sair do universo",
+    "joined": "Você é membro deste universo",
+    "signInToJoin": "Entre para participar",
+    "completeOnboarding": "Conclua seu perfil para participar",
+    "notFound": "Universo não encontrado.",
+    "minLevel": "a partir do nível {{level}}",
+    "featureNames": {
+      "house_sorting": "Seleção de casa",
+      "common_rooms": "Salões comunais",
+      "quizzes": "Quizzes",
+      "rankings": "Rankings",
+      "library": "Biblioteca de conhecimento",
+      "creatures": "Criaturas",
+      "spells": "Feitiços",
+      "discussions": "Discussões",
+      "theories": "Teorias",
+      "events": "Eventos",
+      "house_cup": "Competição entre casas",
+      "hunter_identity": "Identidade de caçador",
+      "bestiary": "Bestiário",
+      "creature_archive": "Arquivo de criaturas",
+      "investigations": "Central de investigações",
+      "missions": "Missões",
+      "hunter_ranking": "Ranking de caçadores",
+      "discussion_groups": "Grupos de discussão",
+      "challenges": "Desafios"
+    }
+  },
+  "universes": {
+    "title": "Explore os universos",
+    "subtitle": "Cada universo é uma comunidade com identidade própria. Entre em quantos quiser com a mesma conta."
+  },
+  "notFound": {
+    "title": "Este portal não leva a lugar nenhum",
+    "body": "A página que você procura não existe ou foi movida.",
+    "home": "Voltar ao início"
+  },
+  "footer": {
+    "rights": "© {{year}} Forge Studios Tecnologias em Softwares LTDA. Todos os direitos reservados.",
+    "terms": "Termos de Uso",
+    "privacy": "Privacidade",
+    "unofficial": "Comunidade de fãs independente e não oficial."
+  },
+  "legal": {
+    "version": "Versão {{version}}",
+    "reviewNotice": "Documento em vigor para a fase inicial da plataforma, sujeito a revisão jurídica antes do lançamento público."
+  },
+  "errors": {
+    "generic": "Algo deu errado. Tente novamente.",
+    "network_error": "Sem conexão com o servidor. Verifique sua internet.",
+    "unauthorized": "Sua sessão expirou. Entre novamente.",
+    "invalid_token": "Sua sessão é inválida. Entre novamente.",
+    "token_expired": "Sua sessão expirou. Entre novamente.",
+    "account_suspended": "Sua conta está suspensa. Fale com o suporte.",
+    "account_deleted": "Esta conta foi excluída.",
+    "onboarding_required": "Conclua seu perfil antes de continuar.",
+    "onboarding_already_completed": "Seu perfil já foi configurado.",
+    "username_taken": "Este nome de usuário já está em uso.",
+    "age_restricted": "É necessário ter pelo menos 13 anos para usar o Fandom Universe.",
+    "invalid_birthdate": "Data de nascimento inválida.",
+    "validation_failed": "Confira os campos destacados.",
+    "universe_not_found": "Universo não encontrado.",
+    "membership_not_found": "Você não é membro deste universo.",
+    "rate_limited": "Muitas tentativas. Aguarde um momento.",
+    "premium_required": "Este recurso faz parte do Fandom Premium.",
+    "insufficient_role": "Você não tem permissão para isso.",
+    "internal_error": "Erro interno. Nossa equipe foi notificada.",
+    "auth": {
+      "invalid_credentials": "E-mail ou senha incorretos.",
+      "email_not_confirmed": "Confirme seu e-mail antes de entrar.",
+      "user_already_exists": "Já existe uma conta com este e-mail.",
+      "email_exists": "Já existe uma conta com este e-mail.",
+      "weak_password": "Senha muito fraca. Escolha outra.",
+      "same_password": "A nova senha deve ser diferente da atual.",
+      "over_email_send_rate_limit": "Muitos e-mails enviados. Aguarde alguns minutos.",
+      "over_request_rate_limit": "Muitas tentativas. Aguarde um momento.",
+      "otp_expired": "O link expirou. Solicite um novo."
+    }
+  }
+}

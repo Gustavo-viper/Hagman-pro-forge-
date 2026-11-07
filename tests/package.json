@@ -1,0 +1,17 @@
+{
+  "name": "@fandom/e2e",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "End-to-end tests: real web build + real API + PostgreSQL + Redis.",
+  "scripts": {
+    "test:e2e": "playwright test --trace off",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.63.0",
+    "@types/node": "^22.19.0",
+    "jose": "^6.2.15",
+    "typescript": "^7.0.2"
+  }
+}

@@ -1,0 +1,108 @@
+@import 'tailwindcss';
+@import '@fontsource/cinzel/500.css';
+@import '@fontsource/cinzel/700.css';
+@import '@fontsource-variable/inter';
+
+/* Scan the shared design system package for class names. */
+@source '../../../../packages/ui/src';
+
+/*
+ * Fandom Universe — hybrid identity: technology + fantasy.
+ * void (deep black) · arcane (tech purple) · mystic (magic blue) · gold · mist (soft white)
+ */
+@theme {
+  --font-sans: 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Cinzel', 'Times New Roman', serif;
+
+  --color-void: #05040a;
+  --color-night: #0c0a18;
+  --color-dusk: #151129;
+  --color-mist: #ece9f6;
+
+  --color-arcane-100: #ede5ff;
+  --color-arcane-200: #d6c7ff;
+  --color-arcane-300: #b79bff;
+  --color-arcane-400: #9a6bff;
+  --color-arcane-500: #7c3aed;
+  --color-arcane-600: #6425d0;
+  --color-arcane-700: #4c1ba3;
+  --color-arcane-900: #1f0b4a;
+
+  --color-mystic-100: #e0f2ff;
+  --color-mystic-200: #b9e3ff;
+  --color-mystic-300: #7cccff;
+  --color-mystic-400: #38b2f8;
+  --color-mystic-500: #1d8fe0;
+  --color-mystic-600: #136fb8;
+
+  --color-gold-100: #fff4d6;
+  --color-gold-200: #fbe3a3;
+  --color-gold-300: #f2cb6b;
+  --color-gold-400: #e8b64c;
+  --color-gold-500: #c9922a;
+
+  --spacing-13: 3.25rem;
+
+  --animate-float: float 7s ease-in-out infinite;
+  --animate-shimmer: shimmer 6s linear infinite;
+  --animate-spin-slow: spin 24s linear infinite;
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-12px); }
+  }
+  @keyframes shimmer {
+    from { background-position: 0% 50%; }
+    to { background-position: 200% 50%; }
+  }
+}
+
+@utility glass {
+  background: linear-gradient(145deg, rgb(255 255 255 / 0.07), rgb(255 255 255 / 0.02));
+  border: 1px solid rgb(255 255 255 / 0.1);
+  backdrop-filter: blur(18px) saturate(140%);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+  box-shadow: 0 1px 0 0 rgb(255 255 255 / 0.06) inset, 0 20px 50px -20px rgb(0 0 0 / 0.6);
+}
+
+@utility text-gradient {
+  background-image: linear-gradient(100deg, var(--color-gold-200), var(--color-arcane-300) 35%, var(--color-mystic-300) 65%, var(--color-gold-200));
+  background-size: 200% auto;
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+}
+
+@utility glow-ring {
+  box-shadow: 0 0 0 1px rgb(154 107 255 / 0.35), 0 0 40px -8px rgb(124 58 237 / 0.55);
+}
+
+@layer base {
+  html {
+    color-scheme: dark;
+    -webkit-tap-highlight-color: transparent;
+  }
+  body {
+    @apply min-h-dvh bg-void font-sans text-mist antialiased;
+    background-image:
+      radial-gradient(1200px 600px at 10% -10%, rgb(124 58 237 / 0.18), transparent 60%),
+      radial-gradient(900px 500px at 100% 0%, rgb(29 143 224 / 0.14), transparent 60%),
+      radial-gradient(800px 600px at 50% 120%, rgb(232 182 76 / 0.08), transparent 60%);
+    background-attachment: fixed;
+  }
+  ::selection {
+    background: rgb(124 58 237 / 0.45);
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-mystic-400);
+    outline-offset: 2px;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}

@@ -1,0 +1,13 @@
+**/node_modules
+**/dist
+**/dist-e2e
+**/.turbo
+**/coverage
+**/test-results
+**/playwright-report
+.git
+.env
+.env.*
+!.env.example
+legacy
+docs

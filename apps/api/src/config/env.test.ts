@@ -1,0 +1,27 @@
+import { describe, expect, it } from 'vitest';
+import { loadEnv } from './env.js';
+
+const base = { DATABASE_URL: 'postgres://x@localhost/db', SUPABASE_JWT_SECRET: 'x'.repeat(32) };
+
+describe('loadEnv', () => {
+  it('applies safe defaults', () => {
+    const env = loadEnv(base);
+    expect(env.PORT).toBe(3000);
+    expect(env.WEB_ORIGINS).toEqual(['http://localhost:5173']);
+    expect(env.SUBSCRIPTION_GRACE_DAYS).toBe(3);
+  });
+  it('requires a token verification method', () => {
+    expect(() => loadEnv({ DATABASE_URL: base.DATABASE_URL })).toThrow(/SUPABASE_URL/);
+  });
+  it('requires redis and TLS for remote databases in production', () => {
+    expect(() => loadEnv({ ...base, NODE_ENV: 'production', DATABASE_URL: 'postgres://x@db.supabase.co/db' })).toThrow(
+      /REDIS_URL[\s\S]*DATABASE_SSL/,
+    );
+    expect(() =>
+      loadEnv({ ...base, NODE_ENV: 'production', DATABASE_URL: 'postgres://x@db.supabase.co/db', DATABASE_SSL: 'require', REDIS_URL: 'redis://r' }),
+    ).not.toThrow();
+  });
+  it('parses CSV origins', () => {
+    expect(loadEnv({ ...base, WEB_ORIGINS: 'https://a.com, https://b.com' }).WEB_ORIGINS).toEqual(['https://a.com', 'https://b.com']);
+  });
+});

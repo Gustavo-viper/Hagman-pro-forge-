@@ -1,0 +1,31 @@
+{
+  "name": "@fandom/database",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Versioned SQL migrations, RLS policies and reference seeds for Fandom Universe.",
+  "scripts": {
+    "migrate": "node --env-file-if-exists=../.env src/cli.ts migrate",
+    "seed": "node --env-file-if-exists=../.env src/cli.ts seed",
+    "status": "node --env-file-if-exists=../.env src/cli.ts status",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "dependencies": {
+    "@fandom/shared": "workspace:*",
+    "pg": "^8.23.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.19.0",
+    "@types/pg": "^8.15.0",
+    "typescript": "^7.0.2",
+    "vitest": "^5.1.0"
+  },
+  "files": [
+    "src/cli.ts",
+    "src/runner.ts",
+    "migrations",
+    "policies",
+    "seeds"
+  ]
+}

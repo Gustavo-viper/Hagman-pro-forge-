@@ -1,0 +1,29 @@
+{
+  "name": "fandom-universe",
+  "private": true,
+  "description": "Fandom Universe — ONE PLATFORM. INFINITE UNIVERSES. Forge Studios Tecnologias em Softwares LTDA.",
+  "license": "UNLICENSED",
+  "packageManager": "pnpm@10.28.0",
+  "engines": {
+    "node": ">=22.22.0"
+  },
+  "type": "module",
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "typecheck": "turbo run typecheck",
+    "test": "turbo run test --concurrency=1",
+    "lint": "turbo run lint",
+    "test:e2e": "pnpm --filter @fandom/e2e test:e2e",
+    "db:migrate": "pnpm --filter @fandom/database migrate",
+    "db:seed": "pnpm --filter @fandom/database seed",
+    "db:status": "pnpm --filter @fandom/database status",
+    "infra:up": "docker compose -f infrastructure/docker-compose.yml up -d",
+    "infra:down": "docker compose -f infrastructure/docker-compose.yml down",
+    "check:secrets": "node infrastructure/scripts/check-secrets.mjs"
+  },
+  "devDependencies": {
+    "turbo": "^2.11.10",
+    "typescript": "^7.0.2"
+  }
+}
