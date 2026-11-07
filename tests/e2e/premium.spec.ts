@@ -20,6 +20,8 @@ test('subscribe to Fandom Plus through the checkout and manage the subscription'
   await db.connect();
   await db.query('UPDATE users SET email_verified = true WHERE email = $1', [email]);
   await db.end();
+  // The API caches the user for 60s; signing in again refreshes it (as a real user would).
+  expect((await request.post(`${API}/v1/auth/login`, { data: { email, password: PASSWORD } })).status()).toBe(200);
   const session = JSON.parse((await page.evaluate(() => localStorage.getItem('fandom.session')))!);
   const onboard = await request.post(`${API}/v1/me/onboarding`, {
     headers: { Authorization: `Bearer ${session.accessToken}` },

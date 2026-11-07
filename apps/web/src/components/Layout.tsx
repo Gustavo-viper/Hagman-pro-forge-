@@ -1,16 +1,19 @@
 import { Button, cn } from '@fandom/ui';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Crown, LayoutDashboard, LogOut, Menu, Orbit, X } from 'lucide-react';
+import { Crown, LayoutDashboard, LogOut, Menu, Orbit, ShieldCheck, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, NavLink, useLocation, useNavigate, useOutlet } from 'react-router';
 import { useAuth } from '@/auth/AuthProvider';
+import { STAFF_VIEW_ROLES, useMe } from '@/hooks/data';
 import { LanguageSwitcher } from './LanguageSwitcher';
 import { Logo } from './Logo';
 
 function NavItems({ onNavigate }: { onNavigate?: () => void }) {
   const { t } = useTranslation();
   const { session } = useAuth();
+  const me = useMe();
+  const isStaff = me.data?.profile.roles.some((r) => STAFF_VIEW_ROLES.includes(r)) ?? false;
   const linkClass = ({ isActive }: { isActive: boolean }) =>
     cn(
       'inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
@@ -27,6 +30,11 @@ function NavItems({ onNavigate }: { onNavigate?: () => void }) {
       {session && (
         <NavLink to="/dashboard" className={linkClass} onClick={onNavigate}>
           <LayoutDashboard className="size-4" /> {t('nav.dashboard')}
+        </NavLink>
+      )}
+      {session && isStaff && (
+        <NavLink to="/admin" className={linkClass} onClick={onNavigate}>
+          <ShieldCheck className="size-4" /> {t('nav.admin')}
         </NavLink>
       )}
     </>

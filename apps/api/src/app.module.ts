@@ -3,6 +3,7 @@ import { APP_FILTER, APP_GUARD } from '@nestjs/core';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { AccessGuard } from './auth/access.guard.js';
 import { AuthGuard } from './auth/auth.guard.js';
+import { AdminModule } from './admin/admin.module.js';
 import { AuthModule } from './auth/auth.module.js';
 import { BillingModule } from './billing/billing.module.js';
 import { HttpExceptionFilter } from './common/http-exception.filter.js';
@@ -41,6 +42,7 @@ import { XpModule } from './xp/xp.module.js';
     PlansModule,
     MeModule,
     BillingModule,
+    AdminModule,
   ],
   providers: [
     // Order matters: rate limit → authenticate → authorize (roles / plan).

@@ -2,13 +2,7 @@ import { randomUUID, timingSafeEqual } from 'node:crypto';
 import { HttpStatus, Inject, Injectable, Logger } from '@nestjs/common';
 import { formatMoney, type BillingInterval, type Locale, type PlanCode } from '@fandom/shared';
 import type { CheckoutInput, ConfirmPaymentInput } from '@fandom/schemas';
-import type {
-  BillingConfig,
-  CheckoutResponse,
-  ConfirmPaymentResponse,
-  PaymentSummary,
-  SubscriptionDetails,
-} from '@fandom/types';
+import type { BillingConfig, CheckoutResponse, ConfirmPaymentResponse, PaymentSummary, SubscriptionDetails } from '@fandom/types';
 import { AuditService } from '../audit/audit.service.js';
 import type { AuthenticatedUser } from '../auth/auth.types.js';
 import { AppError } from '../common/app-error.js';
@@ -18,6 +12,7 @@ import { DatabaseService, type Queryable } from '../database/database.service.js
 import { MailService } from '../mail/mail.service.js';
 import { EntitlementsService, entitledPlan } from '../subscriptions/entitlements.service.js';
 import { InfinitePayClient, PaymentProviderError } from './infinitepay.client.js';
+import { PAYMENT_COLUMNS, toPaymentSummary } from './payments.mapper.js';
 
 const PLAN_NAMES: Record<Exclude<PlanCode, 'free'>, string> = { plus: 'Fandom Plus', ultra: 'Fandom Ultra' };
 const INTERVAL_NAMES: Record<Locale, Record<BillingInterval, string>> = {
@@ -339,10 +334,7 @@ export class BillingService {
       this.entitlements.snapshot(user.id),
       this.openSubscription(user.id),
       this.db.query<Record<string, unknown>>(
-        `SELECT id, plan_code, billing_interval, amount_minor, paid_amount_minor, currency, status, capture_method,
-                installments, receipt_url, period_start, period_end, created_at, paid_at,
-                (status = 'pending' AND checkout_expires_at < now()) AS link_expired
-           FROM payment_transactions WHERE user_id = $1 ORDER BY created_at DESC LIMIT 20`,
+        `SELECT ${PAYMENT_COLUMNS} FROM payment_transactions WHERE user_id = $1 ORDER BY created_at DESC LIMIT 20`,
         [user.id],
       ),
       this.eligibility(user),
@@ -353,26 +345,10 @@ export class BillingService {
           [open.id],
         )
       : null;
-    const iso = (d: unknown) => (d instanceof Date ? d.toISOString() : null);
     return {
       subscription: snapshot,
       currentPrice: price ? { amountMinor: price.amount_minor, currency: price.currency } : null,
-      payments: payments.rows.map((r) => ({
-        id: r.id as string,
-        planCode: r.plan_code as PlanCode,
-        interval: r.billing_interval as BillingInterval,
-        amountMinor: r.amount_minor as number,
-        paidAmountMinor: (r.paid_amount_minor as number | null) ?? null,
-        currency: r.currency as string,
-        status: (r.link_expired ? 'expired' : r.status) as PaymentSummary['status'],
-        captureMethod: (r.capture_method as string | null) ?? null,
-        installments: (r.installments as number | null) ?? null,
-        receiptUrl: (r.receipt_url as string | null) ?? null,
-        periodStart: iso(r.period_start),
-        periodEnd: iso(r.period_end),
-        createdAt: iso(r.created_at)!,
-        paidAt: iso(r.paid_at),
-      })),
+      payments: payments.rows.map(toPaymentSummary),
       canCheckout: this.enabled && elig.ok,
       renewablePlan: open && snapshot.planCode !== 'free' ? open.plan_code : null,
     };

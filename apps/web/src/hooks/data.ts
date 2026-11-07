@@ -68,3 +68,16 @@ export function useSubscriptionDetails() {
     enabled: Boolean(session),
   });
 }
+
+export function useMe() {
+  const { session } = useAuth();
+  return useQuery({
+    queryKey: queryKeys.me,
+    queryFn: ({ signal }) => api<import('@fandom/types').MeResponse>('/v1/me', { signal }),
+    enabled: Boolean(session),
+    staleTime: 60_000,
+  });
+}
+
+export const STAFF_VIEW_ROLES = ['super_admin', 'admin', 'support'];
+export const STAFF_EDIT_ROLES = ['super_admin', 'admin'];

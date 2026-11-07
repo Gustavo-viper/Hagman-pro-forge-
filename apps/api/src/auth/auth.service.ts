@@ -164,7 +164,12 @@ export class AuthService {
     }
     if (row.status !== 'active') throw AppError.forbidden('account_suspended', 'Account suspended');
     await this.redis.invalidate(failKey);
-    return this.db.transaction((tx) => this.createSession(tx, row, meta));
+    const session = await this.db.transaction(async (tx) => {
+      if (row.email_verified) await this.maybeBootstrapSuperAdmin(tx, row.id, row.email);
+      return this.createSession(tx, row, meta);
+    });
+    await this.users.invalidate(row.id);
+    return session;
   }
 
   async refresh(refreshToken: string, meta: ClientMeta): Promise<AuthSessionResponse> {

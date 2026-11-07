@@ -23,7 +23,8 @@
     "signOut": "Sair",
     "openMenu": "Abrir menu",
     "closeMenu": "Fechar menu",
-    "premium": "Premium"
+    "premium": "Premium",
+    "admin": "Admin"
   },
   "landing": {
     "hero": {
@@ -322,7 +323,10 @@
     "price_not_found": "Este preço não está disponível.",
     "payment_not_found": "Pagamento não encontrado.",
     "no_active_subscription": "Você não tem uma assinatura ativa.",
-    "cannot_reactivate": "Não há assinatura para reativar. Assine novamente pela página Premium."
+    "cannot_reactivate": "Não há assinatura para reativar. Assine novamente pela página Premium.",
+    "user_not_found": "Usuário não encontrado.",
+    "cannot_suspend_self": "Você não pode suspender a própria conta.",
+    "invalid_cursor": "Paginação inválida. Recarregue a página."
   },
   "premium": {
     "title": "Desbloqueie o seu lado Premium",
@@ -382,6 +386,90 @@
       "failed": "Falhou",
       "expired": "Link expirado",
       "refunded": "Estornado"
+    }
+  },
+  "admin": {
+    "title": "Painel administrativo",
+    "denied": "Acesso restrito à equipe da Forge Studios.",
+    "back": "Voltar ao painel",
+    "users": "Usuários",
+    "search": "Buscar por e-mail, nome ou @usuário",
+    "allPlans": "Todos os planos",
+    "allStatuses": "Todos os status",
+    "noUsers": "Nenhum usuário encontrado.",
+    "user": "Usuário",
+    "account": "Conta",
+    "joined": "Cadastro",
+    "lastSeen": "Último acesso",
+    "loadMore": "Carregar mais",
+    "manual": "manual",
+    "verified": "E-mail verificado",
+    "unverified": "e-mail não verificado",
+    "minor": "Menor de idade",
+    "planUntil": "{{plan}} válido até {{date}}",
+    "access": "Controle de acesso",
+    "reason": "Motivo (obrigatório, fica registrado)",
+    "cancel": "Cancelar",
+    "done": "Feito! Alteração registrada.",
+    "readOnly": "Seu perfil (suporte) pode apenas visualizar.",
+    "activity": "Atividade registrada",
+    "accountStatus": {
+      "active": "Ativa",
+      "suspended": "Suspensa",
+      "banned": "Banida",
+      "deleted": "Excluída"
+    },
+    "stats": {
+      "users": "Usuários",
+      "new7": "{{n}} novos em 7 dias",
+      "verified": "Verificados",
+      "suspended": "{{n}} suspensos",
+      "subscribers": "Assinantes ativos",
+      "revenueMonth": "Receita do mês",
+      "revenue30": "{{v}} nos últimos 30 dias"
+    },
+    "grant": {
+      "title": "Liberar plano",
+      "duration": "Duração",
+      "days_one": "{{count}} dia",
+      "days_other": "{{count}} dias",
+      "custom": "Outro período…",
+      "customDays": "Quantidade de dias (1 a 730)",
+      "reasonPlaceholder": "Ex.: pagou por Pix direto, cortesia, parceria",
+      "extends": "O usuário já tem este plano: os dias serão somados à validade atual.",
+      "replaces": "O plano atual será substituído por este a partir de agora.",
+      "starts": "O plano começa agora.",
+      "submit_one": "Liberar {{plan}} por {{count}} dia",
+      "submit_other": "Liberar {{plan}} por {{count}} dias"
+    },
+    "revoke": {
+      "button": "Bloquear plano",
+      "explain": "Remove o acesso premium agora (ex.: não pagou). A pessoa continua com uma conta Free e pode renovar.",
+      "confirm": "Bloquear plano agora",
+      "note": "Bloquear o plano não estorna pagamentos feitos pela InfinitePay — estornos são feitos no app da InfinitePay."
+    },
+    "suspend": {
+      "button": "Suspender conta",
+      "explain": "Bloqueia o login e encerra todas as sessões. Use para fraudes ou violações graves.",
+      "confirm": "Suspender conta"
+    },
+    "reactivate": {
+      "button": "Reativar conta",
+      "explain": "Libera o login novamente.",
+      "confirm": "Reativar conta"
+    },
+    "actions": {
+      "admin.plan_granted": "Plano liberado pelo admin",
+      "admin.plan_revoked": "Plano bloqueado pelo admin",
+      "admin.account_suspended": "Conta suspensa",
+      "admin.account_reactivated": "Conta reativada",
+      "user.registered": "Cadastro",
+      "user.email_verified": "E-mail verificado",
+      "user.onboarding_completed": "Perfil concluído",
+      "auth.password_reset": "Senha redefinida",
+      "auth.refresh_token_reused": "Alerta: sessão reutilizada (revogada)",
+      "role.bootstrap_super_admin": "Super admin inicial",
+      "role.granted_by_operator": "Papel concedido"
     }
   }
 }

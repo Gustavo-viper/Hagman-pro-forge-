@@ -13,8 +13,8 @@ Legenda: ✅ concluído e validado · 🟡 parcial (fundação pronta) · ⏳ pr
 | 7 | Grupos e comunidades | ⏳ grupos públicos/privados, fóruns, tópicos, moderação |
 | 8 | Mensagens e notificações | ⏳ WebSocket (gateway NestJS + Redis adapter), DMs, grupos, notificações em tempo real |
 | 9 | Jogos e gamificação | 🟡 livro-razão de XP idempotente e curva de níveis prontos. Faltam quizzes, missões, conquistas, rankings semanais/mensais/gerais |
-| 10 | Premium, pagamentos, marketplace | 🟡 planos/preços/estado/entitlements/job de ciclo de vida/`@RequiresPlan`. Faltam provedor, checkout, webhooks, `/premium`, `/account/subscription`, Fandom Coins, inventário |
-| 11 | Painel administrativo | 🟡 RBAC + auditoria + bootstrap de super admin. Falta `/admin` (dashboard, gestão, cadastro de universos) |
+| 10 | Premium, pagamentos, marketplace | 🟡 InfinitePay (checkout, confirmação server-side, webhooks, períodos pré-pagos, lembretes), `/premium`, `/account/subscription`. Faltam áreas exclusivas com conteúdo, Fandom Coins, inventário, loja |
+| 11 | Painel administrativo | 🟡 `/admin`: indicadores, usuários, liberar/bloquear plano, suspender conta, auditoria. Faltam gestão de universos, conteúdo, moderação, cupons e papéis pela interface |
 | 12 | Segurança, testes, otimização, lançamento | 🟡 ver SECURITY.md |
 
 ## Pendências que dependem de credenciais/decisões externas

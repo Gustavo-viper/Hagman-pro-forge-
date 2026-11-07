@@ -183,3 +183,34 @@ export interface ConfirmPaymentResponse {
   status: 'paid' | 'pending';
   subscription: SubscriptionSnapshot;
 }
+
+export interface AdminStats {
+  users: { total: number; newLast7Days: number; verified: number; suspended: number };
+  subscribers: { plus: number; ultra: number };
+  revenue: { currency: string; thisMonthMinor: number; last30DaysMinor: number };
+  pendingCheckouts: number;
+}
+
+export interface AdminUserRow {
+  id: string;
+  email: string;
+  emailVerified: boolean;
+  status: 'active' | 'suspended' | 'banned' | 'deleted';
+  username: string | null;
+  displayName: string | null;
+  country: string | null;
+  isMinor: boolean;
+  onboardingCompleted: boolean;
+  roles: string[];
+  createdAt: string;
+  lastSeenAt: string | null;
+  plan: SubscriptionSnapshot & { provider: string | null };
+}
+
+export interface AdminUserDetails extends AdminUserRow {
+  xpTotal: number;
+  universes: string[];
+  payments: PaymentSummary[];
+  history: { at: string; from: string | null; to: string; reason: string; actor: string }[];
+  audit: { at: string; action: string; actor: string | null; metadata: Record<string, unknown> }[];
+}

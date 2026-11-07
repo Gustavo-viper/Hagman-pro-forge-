@@ -23,7 +23,8 @@
     "signOut": "Sign out",
     "openMenu": "Open menu",
     "closeMenu": "Close menu",
-    "premium": "Premium"
+    "premium": "Premium",
+    "admin": "Admin"
   },
   "landing": {
     "hero": {
@@ -322,7 +323,10 @@
     "price_not_found": "This price is not available.",
     "payment_not_found": "Payment not found.",
     "no_active_subscription": "You don't have an active subscription.",
-    "cannot_reactivate": "There is no subscription to reactivate. Subscribe again from the Premium page."
+    "cannot_reactivate": "There is no subscription to reactivate. Subscribe again from the Premium page.",
+    "user_not_found": "User not found.",
+    "cannot_suspend_self": "You can't suspend your own account.",
+    "invalid_cursor": "Invalid pagination. Reload the page."
   },
   "premium": {
     "title": "Unlock your Premium side",
@@ -382,6 +386,90 @@
       "failed": "Failed",
       "expired": "Link expired",
       "refunded": "Refunded"
+    }
+  },
+  "admin": {
+    "title": "Admin panel",
+    "denied": "Restricted to Forge Studios staff.",
+    "back": "Back to panel",
+    "users": "Users",
+    "search": "Search by email, name or @username",
+    "allPlans": "All plans",
+    "allStatuses": "All statuses",
+    "noUsers": "No users found.",
+    "user": "User",
+    "account": "Account",
+    "joined": "Joined",
+    "lastSeen": "Last seen",
+    "loadMore": "Load more",
+    "manual": "manual",
+    "verified": "Email verified",
+    "unverified": "email not verified",
+    "minor": "Minor",
+    "planUntil": "{{plan}} valid until {{date}}",
+    "access": "Access control",
+    "reason": "Reason (required, logged)",
+    "cancel": "Cancel",
+    "done": "Done! Change recorded.",
+    "readOnly": "Your role (support) is view-only.",
+    "activity": "Recorded activity",
+    "accountStatus": {
+      "active": "Active",
+      "suspended": "Suspended",
+      "banned": "Banned",
+      "deleted": "Deleted"
+    },
+    "stats": {
+      "users": "Users",
+      "new7": "{{n}} new in 7 days",
+      "verified": "Verified",
+      "suspended": "{{n}} suspended",
+      "subscribers": "Active subscribers",
+      "revenueMonth": "Revenue this month",
+      "revenue30": "{{v}} in the last 30 days"
+    },
+    "grant": {
+      "title": "Grant plan",
+      "duration": "Duration",
+      "days_one": "{{count}} day",
+      "days_other": "{{count}} days",
+      "custom": "Other period…",
+      "customDays": "Number of days (1 to 730)",
+      "reasonPlaceholder": "E.g.: paid via Pix directly, courtesy, partnership",
+      "extends": "The user already has this plan: days are added to the current validity.",
+      "replaces": "The current plan will be replaced by this one from now on.",
+      "starts": "The plan starts now.",
+      "submit_one": "Grant {{plan}} for {{count}} day",
+      "submit_other": "Grant {{plan}} for {{count}} days"
+    },
+    "revoke": {
+      "button": "Block plan",
+      "explain": "Removes premium access now (e.g. unpaid). They keep a Free account and can renew.",
+      "confirm": "Block plan now",
+      "note": "Blocking the plan doesn't refund InfinitePay payments — refunds are made in the InfinitePay app."
+    },
+    "suspend": {
+      "button": "Suspend account",
+      "explain": "Blocks sign-in and ends all sessions. Use for fraud or serious violations.",
+      "confirm": "Suspend account"
+    },
+    "reactivate": {
+      "button": "Reactivate account",
+      "explain": "Allows sign-in again.",
+      "confirm": "Reactivate account"
+    },
+    "actions": {
+      "admin.plan_granted": "Plan granted by admin",
+      "admin.plan_revoked": "Plan blocked by admin",
+      "admin.account_suspended": "Account suspended",
+      "admin.account_reactivated": "Account reactivated",
+      "user.registered": "Signed up",
+      "user.email_verified": "Email verified",
+      "user.onboarding_completed": "Profile completed",
+      "auth.password_reset": "Password reset",
+      "auth.refresh_token_reused": "Alert: session reused (revoked)",
+      "role.bootstrap_super_admin": "Initial super admin",
+      "role.granted_by_operator": "Role granted"
     }
   }
 }

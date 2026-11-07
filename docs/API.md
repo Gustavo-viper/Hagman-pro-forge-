@@ -51,6 +51,21 @@ Planos **pré-pagos** (a API da InfinitePay não tem cobrança recorrente): cada
 
 Erros: `billing_unavailable`, `minor_purchase_blocked`, `email_not_verified`, `plan_change_unavailable`, `too_many_checkouts`, `payment_provider_error`, `payment_not_found`, `no_active_subscription`, `cannot_reactivate`, `invalid_webhook_token`.
 
+## Administração (equipe Forge Studios)
+
+Todas as rotas exigem papel verificado no servidor: **visualizar** = `admin` ou `support`; **alterar** = `admin` (`super_admin` sempre pode). Toda alteração exige motivo e gera `audit_logs`.
+
+| Método | Rota | Descrição |
+|---|---|---|
+| GET | `/v1/admin/stats` | usuários (total, novos 7 dias, verificados, suspensos), assinantes por plano, receita do mês e 30 dias |
+| GET | `/v1/admin/users?search=&plan=&status=&cursor=&limit=` | lista paginada por cursor; busca por e-mail, @usuário ou nome |
+| GET | `/v1/admin/users/:id` | detalhes, pagamentos, histórico da assinatura e auditoria |
+| POST | `/v1/admin/users/:id/grant-plan` | `{ planCode, days (1–730), reason }` — libera ou estende (mesmo plano soma dias; outro plano substitui) e avisa o usuário por e-mail |
+| POST | `/v1/admin/users/:id/revoke-plan` | `{ reason }` — corta o premium na hora (conta continua Free) |
+| POST | `/v1/admin/users/:id/suspend` · `/reactivate` | `{ reason }` — suspende login e encerra sessões / reativa |
+
+Primeiro admin: `BOOTSTRAP_SUPER_ADMIN_EMAILS` (concedido no login ou na verificação de e-mail, apenas enquanto não existir super admin) ou `cli.ts grant-role`.
+
 ## Universos
 
 | Método | Rota | Acesso | Descrição |
