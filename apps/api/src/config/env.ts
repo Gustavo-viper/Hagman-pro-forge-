@@ -27,10 +27,14 @@ export const envSchema = z
 
     REDIS_URL: z.string().optional(),
 
-    SUPABASE_URL: z.url().optional(),
-    /** Legacy HS256 JWT secret. Prefer asymmetric keys (JWKS from SUPABASE_URL). */
-    SUPABASE_JWT_SECRET: z.string().min(32).optional(),
-    SUPABASE_JWT_AUDIENCE: z.string().default('authenticated'),
+    /** HMAC secret for access tokens (HS256). >= 32 chars, random. Rotating it signs everyone out. */
+    AUTH_JWT_SECRET: z.string().min(32),
+    AUTH_ACCESS_TOKEN_TTL_SECONDS: z.coerce.number().int().min(60).max(3600).default(900),
+    AUTH_REFRESH_TOKEN_TTL_DAYS: z.coerce.number().int().min(1).max(180).default(30),
+    EMAIL_VERIFICATION_TTL_HOURS: z.coerce.number().int().min(1).max(168).default(48),
+    PASSWORD_RESET_TTL_MINUTES: z.coerce.number().int().min(10).max(1440).default(60),
+    /** Public URL of fandom-web, used to build links in emails. */
+    APP_PUBLIC_URL: z.url().default('http://localhost:5173'),
 
     RATE_LIMIT_TTL_MS: z.coerce.number().int().positive().default(60_000),
     RATE_LIMIT_MAX: z.coerce.number().int().positive().default(120),
@@ -41,13 +45,6 @@ export const envSchema = z
     BOOTSTRAP_SUPER_ADMIN_EMAILS: csv.default([]),
   })
   .superRefine((env, ctx) => {
-    if (!env.SUPABASE_URL && !env.SUPABASE_JWT_SECRET) {
-      ctx.addIssue({
-        code: 'custom',
-        path: ['SUPABASE_URL'],
-        message: 'Set SUPABASE_URL (JWKS) and/or SUPABASE_JWT_SECRET to verify access tokens',
-      });
-    }
     if (env.NODE_ENV === 'production') {
       if (!env.REDIS_URL) {
         ctx.addIssue({ code: 'custom', path: ['REDIS_URL'], message: 'REDIS_URL is required in production' });

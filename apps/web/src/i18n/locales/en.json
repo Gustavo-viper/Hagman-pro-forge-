@@ -105,10 +105,6 @@
     "password": "Password",
     "confirmPassword": "Confirm password",
     "passwordHint": "At least 8 characters, with letters and numbers.",
-    "notConfigured": {
-      "title": "Authentication not configured yet",
-      "body": "This environment does not have Supabase Auth credentials yet (VITE_SUPABASE_URL and VITE_SUPABASE_PUBLISHABLE_KEY). See docs/DEPLOYMENT.md."
-    },
     "login": {
       "title": "Welcome back",
       "subtitle": "Sign in to continue your journey.",
@@ -121,9 +117,7 @@
       "title": "Create your account",
       "subtitle": "One account for every universe.",
       "submit": "Create account",
-      "hasAccount": "Already have an account?",
-      "checkEmailTitle": "Confirm your email",
-      "checkEmailBody": "We sent a confirmation link to {{email}}. Open it to activate your account."
+      "hasAccount": "Already have an account?"
     },
     "forgot": {
       "title": "Recover password",
@@ -139,9 +133,11 @@
       "success": "Password updated successfully.",
       "invalidLink": "This reset link is invalid or has expired. Request a new one."
     },
-    "callback": {
-      "verifying": "Verifying your access…",
-      "failed": "We couldn't verify this link. It may have expired."
+    "verify": {
+      "title": "Email verification",
+      "verifying": "Confirming your email…",
+      "success": "Email confirmed! Your account is secured.",
+      "requestNew": "Request a new link from the dashboard"
     }
   },
   "validation": {
@@ -212,10 +208,12 @@
     "open": "Open",
     "joined": "Member",
     "memberSince": "Since {{date}}",
-    "emailNotVerified": "Your email is not verified yet. Check your inbox.",
+    "emailNotVerified": "Confirm your email through the link we sent to secure your account.",
     "error": "Could not load your dashboard.",
     "profile": "Profile",
-    "staff": "Forge Studios staff"
+    "staff": "Forge Studios staff",
+    "resendVerification": "Resend email",
+    "verificationSent": "Sent! Check your inbox."
   },
   "universe": {
     "back": "All universes",
@@ -289,16 +287,13 @@
     "premium_required": "This feature is part of Fandom Premium.",
     "insufficient_role": "You don't have permission for this.",
     "internal_error": "Internal error. Our team has been notified.",
-    "auth": {
-      "invalid_credentials": "Incorrect email or password.",
-      "email_not_confirmed": "Confirm your email before signing in.",
-      "user_already_exists": "An account with this email already exists.",
-      "email_exists": "An account with this email already exists.",
-      "weak_password": "Password too weak. Choose another one.",
-      "same_password": "The new password must differ from the current one.",
-      "over_email_send_rate_limit": "Too many emails sent. Wait a few minutes.",
-      "over_request_rate_limit": "Too many attempts. Please wait a moment.",
-      "otp_expired": "The link has expired. Request a new one."
-    }
+    "invalid_credentials": "Incorrect email or password.",
+    "email_taken": "An account with this email already exists.",
+    "too_many_attempts": "Too many sign-in attempts. Wait 15 minutes or reset your password.",
+    "invalid_or_expired_token": "This link is invalid or has expired. Request a new one.",
+    "session_revoked": "Your session ended. Please sign in again.",
+    "refresh_token_reused": "For your security, your session was ended. Please sign in again.",
+    "invalid_refresh_token": "Your session expired. Please sign in again.",
+    "email_already_verified": "Your email is already confirmed."
   }
 }

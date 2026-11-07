@@ -1,54 +1,36 @@
 import { signUpSchema } from '@fandom/schemas';
 import { Alert, Button, Input } from '@fandom/ui';
-import { MailCheck } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link, Navigate } from 'react-router';
+import { Link, Navigate, useNavigate } from 'react-router';
 import { useAuth } from '@/auth/AuthProvider';
 import { AuthLayout, FormField } from '@/components/AuthLayout';
 import { useZodForm } from '@/hooks/useZodForm';
-import { authConfigured } from '@/lib/env';
 import { errorMessage } from '@/lib/errors';
-import { supabase } from '@/lib/supabase';
 
 export default function RegisterPage() {
-  const { t, i18n } = useTranslation();
-  const { session } = useAuth();
+  const { t } = useTranslation();
+  const { session, signUp } = useAuth();
+  const navigate = useNavigate();
   const { values, errors, set, handleSubmit } = useZodForm(signUpSchema, { email: '', password: '', confirmPassword: '' });
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<unknown>(null);
-  const [sentTo, setSentTo] = useState<string | null>(null);
 
   if (session) return <Navigate to="/dashboard" replace />;
 
   const onSubmit = handleSubmit(async (data) => {
-    if (!supabase) return;
     setSubmitting(true);
     setError(null);
-    const { data: res, error: err } = await supabase.auth.signUp({
-      email: data.email,
-      password: data.password,
-      options: { emailRedirectTo: `${window.location.origin}/auth/callback`, data: { locale: i18n.language } },
-    });
-    setSubmitting(false);
-    if (err) setError(err);
-    // With "Confirm email" enabled (required in production) no session is returned.
-    else if (!res.session) setSentTo(data.email);
+    try {
+      await signUp(data.email, data.password);
+      void navigate('/dashboard', { replace: true });
+    } catch (err) {
+      setError(err);
+    } finally {
+      setSubmitting(false);
+    }
   });
 
-  if (sentTo) {
-    return (
-      <AuthLayout title={t('auth.register.checkEmailTitle')}>
-        <Alert variant="success">
-          <MailCheck className="mt-0.5 size-5 shrink-0" />
-          <p>{t('auth.register.checkEmailBody', { email: sentTo })}</p>
-        </Alert>
-        <Button asChild variant="glass" className="mt-6 w-full">
-          <Link to="/login">{t('auth.forgot.backToLogin')}</Link>
-        </Button>
-      </AuthLayout>
-    );
-  }
 
   return (
     <AuthLayout
@@ -72,7 +54,7 @@ export default function RegisterPage() {
         <FormField id="confirmPassword" label={t('auth.confirmPassword')} error={errors.confirmPassword}>
           <Input id="confirmPassword" type="password" autoComplete="new-password" value={values.confirmPassword} onChange={(e) => set('confirmPassword', e.target.value)} aria-invalid={Boolean(errors.confirmPassword)} />
         </FormField>
-        <Button type="submit" className="w-full" loading={submitting} disabled={!authConfigured}>
+        <Button type="submit" className="w-full" loading={submitting}>
           {t('auth.register.submit')}
         </Button>
       </form>

@@ -1,10 +1,10 @@
 import type { StaffRole } from '@fandom/shared';
 
 export interface AccessTokenClaims {
+  /** User id. */
   sub: string;
-  email: string;
-  emailVerified: boolean;
-  sessionId: string | null;
+  /** Session id (auth_sessions.id) — lets logout revoke access tokens immediately. */
+  sid: string;
 }
 
 export interface AuthenticatedUser {
@@ -15,4 +15,5 @@ export interface AuthenticatedUser {
   roles: StaffRole[];
   /** Universe ids where the user is universe_moderator. */
   moderatedUniverseIds: string[];
+  sessionId: string;
 }

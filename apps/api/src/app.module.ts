@@ -10,6 +10,7 @@ import { ConfigModule, ENV } from './config/config.module.js';
 import type { Env } from './config/env.js';
 import { DatabaseModule } from './database/database.module.js';
 import { HealthModule } from './health/health.module.js';
+import { MailModule } from './mail/mail.module.js';
 import { MeModule } from './me/me.module.js';
 import { PlansModule } from './plans/plans.module.js';
 import { RedisModule } from './redis/redis.module.js';
@@ -30,6 +31,7 @@ import { XpModule } from './xp/xp.module.js';
         storage: new RedisThrottlerStorage(redis),
       }),
     }),
+    MailModule,
     AuthModule,
     SubscriptionsModule,
     XpModule,

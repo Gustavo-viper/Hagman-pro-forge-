@@ -2,9 +2,9 @@
  * TLS options for node-postgres, shared by api, worker and the migration runner.
  *
  *  - disable      local development (docker / native Postgres)
- *  - require      encrypted, server certificate NOT verified (Supabase pooler without CA)
+ *  - require      encrypted, server certificate NOT verified (e.g. Railway public proxy)
  *  - verify-full  encrypted + certificate verified (recommended in production:
- *                 set DATABASE_CA_CERT to the Supabase CA certificate, PEM)
+ *                 set DATABASE_CA_CERT to the server CA certificate, PEM)
  */
 export const DATABASE_SSL_MODES = ['disable', 'require', 'verify-full'] as const;
 export type DatabaseSslMode = (typeof DATABASE_SSL_MODES)[number];

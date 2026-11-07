@@ -4,6 +4,8 @@ import { motion } from 'framer-motion';
 import { Crown, MailWarning, ShieldCheck, Sparkles } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
+import { useMutation } from '@tanstack/react-query';
+import { api } from '@/lib/api';
 import { EmptyState, ErrorState } from '@/components/states';
 import { UniverseCard } from '@/components/UniverseCard';
 import { useDashboard } from '@/hooks/data';
@@ -207,6 +209,25 @@ function Universes({ data }: { data: DashboardResponse }) {
   );
 }
 
+function VerifyEmailBanner() {
+  const { t } = useTranslation();
+  const resend = useMutation({ mutationFn: () => api<void>('/v1/auth/email-verification', { method: 'POST' }) });
+  return (
+    <Alert variant="warning" className="mb-6 flex-wrap items-center">
+      <MailWarning className="size-5 shrink-0" />
+      <span className="flex-1">{t('dashboard.emailNotVerified')}</span>
+      {resend.isSuccess ? (
+        <span className="text-xs">{t('dashboard.verificationSent')}</span>
+      ) : (
+        <Button size="sm" variant="glass" loading={resend.isPending} onClick={() => resend.mutate()}>
+          {t('dashboard.resendVerification')}
+        </Button>
+      )}
+      {resend.isError && <span role="alert" className="w-full text-xs text-red-200">{errorMessage(resend.error, t)}</span>}
+    </Alert>
+  );
+}
+
 export default function DashboardPage() {
   const { t } = useTranslation();
   const dashboard = useDashboard();
@@ -227,11 +248,7 @@ export default function DashboardPage() {
         <OnboardingForm />
       ) : (
         <>
-          {!dashboard.data.profile.emailVerified && (
-            <Alert variant="warning" className="mb-6">
-              <MailWarning className="size-5 shrink-0" /> {t('dashboard.emailNotVerified')}
-            </Alert>
-          )}
+          {!dashboard.data.profile.emailVerified && <VerifyEmailBanner />}
           <Overview data={dashboard.data} />
           <Universes data={dashboard.data} />
         </>

@@ -4,7 +4,9 @@
 
 | Controle | Onde |
 |---|---|
-| Autenticação por JWT do Supabase verificada localmente (assinatura, `iss`, `aud`, expiração, `role`, rejeita anônimos) | `apps/api/src/auth/token-verifier.service.ts` |
+| Autenticação própria: senhas com scrypt (N=2¹⁷, sal único, comparação em tempo constante), JWT HS256 de 15 min (`iss`/`aud`/`exp` verificados), refresh token opaco rotativo com detecção de reuso (revoga a família), sessões revogáveis (logout invalida o access token na hora) | `apps/api/src/auth/*` |
+| Bloqueio após 10 logins falhos por e-mail (15 min), limite por IP nas rotas de credenciais, resposta idêntica para conta inexistente e senha errada (com hash fictício para igualar o tempo) | `auth.service.ts`, `auth.controller.ts` |
+| Links de verificação/redefinição de uso único, curta duração, armazenados só como SHA-256; redefinir senha encerra todas as sessões; recuperação não revela se o e-mail existe | `auth_tokens` |
 | Guard global seguro por padrão (rota sem `@Public()` exige token) | `auth.guard.ts` |
 | RBAC: Super Admin, Administrador, Moderador global, Moderador de universo, Editor, Suporte (`@Roles`) | `user_roles`, `access.guard.ts` |
 | Áreas premium verificadas no backend (`@RequiresPlan`) com estado confirmado no banco | `entitlements.service.ts` |
@@ -17,7 +19,7 @@
 | Helmet, CORS por lista exata de origens, `trust proxy` de 1 salto | `bootstrap.ts` |
 | CSP restritiva, HSTS, `X-Frame-Options: DENY`, `Permissions-Policy` no web | `apps/web/server.mjs` |
 | XSS: React escapa saída; nomes rejeitam `<`, `>` e caracteres de controle | `schemas/common.ts` |
-| RLS em todas as tabelas; chave pública do Supabase sem acesso a dados privados | `database/policies` |
+| Banco somente na rede privada da Railway; RLS habilitado em todas as tabelas (defesa em profundidade) | `database/policies` |
 | TLS no banco (`verify-full` com CA) e obrigatoriedade de TLS remoto em produção | `config/env.ts` |
 | Auditoria *append-only* | `audit_logs` |
 | Idempotência de XP | `xp_transactions.idempotency_key` |

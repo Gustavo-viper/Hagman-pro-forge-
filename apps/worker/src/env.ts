@@ -15,6 +15,9 @@ export const envSchema = z.object({
   PENDING_SUBSCRIPTION_TTL_HOURS: z.coerce.number().int().min(1).max(720).default(48),
   SUBSCRIPTION_SWEEP_EVERY_MS: z.coerce.number().int().min(60_000).default(15 * 60_000),
   WORKER_CONCURRENCY: z.coerce.number().int().min(1).max(50).default(5),
+  /** SMTP connection, e.g. smtps://user:pass@smtp.provider.com:465. Required to deliver email. */
+  SMTP_URL: z.string().optional(),
+  EMAIL_FROM: z.string().default('Fandom Universe <no-reply@fandomuniverse.app>'),
 });
 export type WorkerEnv = z.infer<typeof envSchema>;
 

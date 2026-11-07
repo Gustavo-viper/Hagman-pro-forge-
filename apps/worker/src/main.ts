@@ -1,12 +1,14 @@
 import { createServer } from 'node:http';
-import { Queue, Worker } from 'bullmq';
+import { Queue, Worker, type Job } from 'bullmq';
 import { Redis } from 'ioredis';
+import nodemailer from 'nodemailer';
 import pg from 'pg';
-import { pgSslConfig, stripSslParams } from '@fandom/shared';
+import { JOBS, pgSslConfig, QUEUES, stripSslParams, type EmailJobData } from '@fandom/shared';
 import { loadEnv } from './env.js';
+import { runAuthCleanup } from './jobs/auth-cleanup.js';
+import { renderEmail } from './jobs/email.js';
 import { runSubscriptionLifecycle } from './jobs/subscription-lifecycle.js';
 import { log } from './logger.js';
-import { JOBS, QUEUES } from './queues.js';
 
 pg.types.setTypeParser(20, (v) => Number.parseInt(v, 10));
 
@@ -25,30 +27,39 @@ async function main(): Promise<void> {
   const connection = new Redis(env.REDIS_URL, { maxRetriesPerRequest: null, family: 0 });
   connection.on('error', (e) => log('warn', 'redis error', { error: e.message }));
 
-  const maintenance = new Queue(QUEUES.maintenance, { connection });
-  // Idempotent: upserting the scheduler on every boot keeps exactly one repeat schedule.
-  await maintenance.upsertJobScheduler(
-    JOBS.subscriptionLifecycle,
-    { every: env.SUBSCRIPTION_SWEEP_EVERY_MS },
-    { name: JOBS.subscriptionLifecycle, opts: { removeOnComplete: 100, removeOnFail: 500, attempts: 3, backoff: { type: 'exponential', delay: 30_000 } } },
-  );
+  const mailer = env.SMTP_URL ? nodemailer.createTransport(env.SMTP_URL) : null;
+  if (!mailer) log('warn', 'SMTP_URL not set: email jobs will fail and be retried until SMTP is configured');
 
-  const worker = new Worker(
+  const maintenance = new Queue(QUEUES.maintenance, { connection });
+  const repeatOpts = { removeOnComplete: 100, removeOnFail: 500, attempts: 3, backoff: { type: 'exponential' as const, delay: 30_000 } };
+  // Idempotent: upserting the schedulers on every boot keeps exactly one schedule each.
+  await maintenance.upsertJobScheduler(JOBS.subscriptionLifecycle, { every: env.SUBSCRIPTION_SWEEP_EVERY_MS }, { name: JOBS.subscriptionLifecycle, opts: repeatOpts });
+  await maintenance.upsertJobScheduler(JOBS.authCleanup, { every: 6 * 3_600_000 }, { name: JOBS.authCleanup, opts: repeatOpts });
+
+  const withClient = async <T>(fn: (c: pg.PoolClient) => Promise<T>): Promise<T> => {
+    const client = await pool.connect();
+    try {
+      return await fn(client);
+    } finally {
+      client.release();
+    }
+  };
+
+  const maintenanceWorker = new Worker(
     QUEUES.maintenance,
     async (job) => {
       switch (job.name) {
         case JOBS.subscriptionLifecycle: {
-          const client = await pool.connect();
-          try {
-            const result = await runSubscriptionLifecycle(client, {
-              graceDays: env.SUBSCRIPTION_GRACE_DAYS,
-              pendingTtlHours: env.PENDING_SUBSCRIPTION_TTL_HOURS,
-            });
-            log('info', 'subscription lifecycle sweep', { jobId: job.id, ...result });
-            return result;
-          } finally {
-            client.release();
-          }
+          const result = await withClient((c) =>
+            runSubscriptionLifecycle(c, { graceDays: env.SUBSCRIPTION_GRACE_DAYS, pendingTtlHours: env.PENDING_SUBSCRIPTION_TTL_HOURS }),
+          );
+          log('info', 'subscription lifecycle sweep', { jobId: job.id, ...result });
+          return result;
+        }
+        case JOBS.authCleanup: {
+          const result = await withClient((c) => runAuthCleanup(c));
+          log('info', 'auth cleanup', { jobId: job.id, ...result });
+          return result;
         }
         default:
           throw new Error(`Unknown job ${job.name}`);
@@ -56,9 +67,24 @@ async function main(): Promise<void> {
     },
     { connection, concurrency: env.WORKER_CONCURRENCY },
   );
-  worker.on('failed', (job, error) => log('error', 'job failed', { job: job?.name, jobId: job?.id, error: error.message }));
 
-  // Health endpoint for Railway: healthy when Redis and PostgreSQL answer.
+  const emailWorker = new Worker<EmailJobData>(
+    QUEUES.email,
+    async (job: Job<EmailJobData>) => {
+      if (!mailer) throw new Error('SMTP_URL is not configured');
+      const { subject, text, html } = renderEmail(job.data);
+      const info = await mailer.sendMail({ from: env.EMAIL_FROM, to: job.data.to, subject, text, html });
+      // Never log the link: it carries a single-use credential.
+      log('info', 'email sent', { jobId: job.id, template: job.data.template, messageId: info.messageId });
+    },
+    { connection, concurrency: env.WORKER_CONCURRENCY },
+  );
+
+  for (const w of [maintenanceWorker, emailWorker]) {
+    w.on('failed', (job, error) => log('error', 'job failed', { queue: w.name, job: job?.name, jobId: job?.id, attempt: job?.attemptsMade, error: error.message }));
+  }
+
+  // Health endpoint for Railway: healthy when Redis and PostgreSQL answer and workers run.
   const server = createServer(async (req, res) => {
     if (req.url !== '/health') {
       res.writeHead(404).end();
@@ -69,7 +95,8 @@ async function main(): Promise<void> {
       pool.query('SELECT 1').then(() => (checks.database = 'ok'), (e: Error) => (checks.database = e.message)),
       connection.ping().then(() => (checks.redis = 'ok'), (e: Error) => (checks.redis = e.message)),
     ]);
-    const ok = Object.values(checks).every((c) => c === 'ok') && worker.isRunning();
+    checks.smtp = mailer ? 'configured' : 'not_configured';
+    const ok = checks.database === 'ok' && checks.redis === 'ok' && maintenanceWorker.isRunning() && emailWorker.isRunning();
     res.writeHead(ok ? 200 : 503, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ status: ok ? 'ok' : 'error', service: 'fandom-worker', checks }));
   });
@@ -78,12 +105,12 @@ async function main(): Promise<void> {
     else throw error;
   });
   server.listen(env.PORT, '::');
-  log('info', 'fandom-worker started', { port: env.PORT, env: env.APP_ENV });
+  log('info', 'fandom-worker started', { port: env.PORT, env: env.APP_ENV, smtp: Boolean(mailer) });
 
   const shutdown = async (signal: string) => {
     log('info', 'shutting down', { signal });
     server.close();
-    await worker.close();
+    await Promise.all([maintenanceWorker.close(), emailWorker.close()]);
     await maintenance.close();
     await connection.quit().catch(() => undefined);
     await pool.end();

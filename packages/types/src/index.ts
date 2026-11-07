@@ -23,6 +23,23 @@ export interface ApiErrorBody {
   requestId?: string;
 }
 
+export interface AuthUser {
+  id: string;
+  email: string;
+  emailVerified: boolean;
+}
+
+/** Returned by register, login and refresh. The refresh token rotates on every use. */
+export interface AuthSessionResponse {
+  accessToken: string;
+  /** Seconds until the access token expires. */
+  expiresIn: number;
+  refreshToken: string;
+  /** ISO date when the refresh token expires. */
+  refreshExpiresAt: string;
+  user: AuthUser;
+}
+
 export interface CursorPage<T> {
   items: T[];
   nextCursor: string | null;

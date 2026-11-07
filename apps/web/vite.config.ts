@@ -22,7 +22,6 @@ export default defineConfig({
           groups: [
             { name: 'react', test: /node_modules[\\/](react|react-dom|react-router|scheduler)[\\/]/ },
             { name: 'motion', test: /node_modules[\\/](framer-motion|motion-dom|motion-utils)[\\/]/ },
-            { name: 'supabase', test: /node_modules[\\/]@supabase[\\/]/ },
             { name: 'i18n', test: /node_modules[\\/](i18next|react-i18next)[\\/]/ },
           ],
         },

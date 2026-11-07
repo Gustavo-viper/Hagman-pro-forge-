@@ -1,5 +1,7 @@
 # Relatório técnico — Etapa 1: Foundation Build
 
+> **Atualização (2026-11-07):** por decisão do projeto, **tudo passou a rodar na Railway** e o Supabase foi removido por completo. O banco é o serviço `fandom-postgres` e a autenticação é própria (scrypt + JWT + refresh rotativo, em `apps/api/src/auth`). Os e-mails são enviados pelo worker via SMTP. As menções ao Supabase abaixo descrevem a versão inicial desta etapa.
+
 **Projeto:** Fandom Universe · **Empresa:** Forge Studios Tecnologias em Softwares LTDA. · **Data:** 2026-11-07
 
 ## 1. Análise do ambiente

@@ -10,6 +10,7 @@ import { issueKey } from '@/hooks/useZodForm';
 import { ApiError } from '@/lib/api';
 import { errorMessage } from '@/lib/errors';
 import { localized } from '@/lib/format';
+import { AuthRequestError } from '@/lib/session';
 import i18n from '@/lib/i18n';
 import en from '@/i18n/locales/en.json';
 import ptBR from '@/i18n/locales/pt-BR.json';
@@ -49,7 +50,7 @@ describe('error messages', () => {
   it('translates API codes and falls back to generic', () => {
     expect(errorMessage(new ApiError(409, 'username_taken', 'x'), i18n.t)).toBe('Este nome de usuário já está em uso.');
     expect(errorMessage(new ApiError(500, 'unknown_code', 'x'), i18n.t)).toBe('Algo deu errado. Tente novamente.');
-    expect(errorMessage({ code: 'invalid_credentials' }, i18n.t)).toBe('E-mail ou senha incorretos.');
+    expect(errorMessage(new AuthRequestError(401, 'invalid_credentials'), i18n.t)).toBe('E-mail ou senha incorretos.');
   });
 });
 

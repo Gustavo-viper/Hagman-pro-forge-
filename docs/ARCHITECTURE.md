@@ -6,7 +6,7 @@
                  ┌────────────────────────┐
   Navegador ───► │ fandom-web (Railway)   │  SPA React + PWA, servidor estático endurecido
   (PWA)          └──────────┬─────────────┘
-       │  Supabase Auth     │ HTTPS  Authorization: Bearer <access token Supabase>
+       │                    │ HTTPS  Authorization: Bearer <access token>
        │  (login, e-mail)   ▼
        │         ┌────────────────────────┐      ┌───────────────────────┐
        └───────► │ fandom-api (Railway)   │ ───► │ PostgreSQL (Railway)  │
@@ -41,11 +41,11 @@ infrastructure/ Dockerfiles, docker-compose local, scripts
 
 | # | Decisão | Motivo |
 |---|---|---|
-| 0 | **Banco na Railway (`fandom-postgres`, rede privada); Supabase apenas para Auth.** | Tudo no mesmo projeto Railway, latência mínima API↔banco, banco sem exposição pública. |
+| 0 | **Tudo na Railway**: `fandom-postgres` na rede privada, autenticação própria na API, e-mails pelo worker. | Um único provedor, latência mínima API↔banco, banco sem exposição pública, sem dependência de identidade externa. |
 | 1 | **Backend é a única porta de dados.** O navegador nunca consulta tabelas via PostgREST. | Autorização centralizada e testável; regras de XP/assinatura nunca no cliente. RLS habilitado em todas as tabelas como defesa em profundidade contra uso indevido da chave pública. |
-| 2 | **SQL puro versionado + executor próprio** (`database/src/runner.ts`) em vez de ORM. | Portável entre Railway PostgreSQL e Supabase: RLS, triggers e índices parciais são SQL nativo. O executor usa *advisory lock* (deploys concorrentes), uma transação por migration e **checksum** (bloqueia edição de migration já aplicada). |
-| 3 | **Supabase Auth + verificação local de JWT** (`jose`). JWKS (`/auth/v1/.well-known/jwks.json`) para chaves assimétricas e HS256 legado. | Sem chamada de rede por requisição; *issuer*, *audience*, `role=authenticated` e tokens anônimos validados. |
-| 4 | **Espelho de usuários** em `public.users` criado no primeiro request autenticado. | Funciona com qualquer emissor compatível, não depende de trigger em `auth.users` (schema gerenciado pelo Supabase). |
+| 2 | **SQL puro versionado + executor próprio** (`database/src/runner.ts`) em vez de ORM. | Portável entre provedores PostgreSQL: RLS, triggers e índices parciais são SQL nativo. O executor usa *advisory lock* (deploys concorrentes), uma transação por migration e **checksum** (bloqueia edição de migration já aplicada). |
+| 3 | **Autenticação própria**: scrypt, JWT HS256 curto (`jose`) + refresh token opaco rotativo com detecção de reuso, sessões revogáveis. | Nenhuma dependência externa; logout e redefinição de senha revogam sessões imediatamente. Tokens no `localStorage`, mitigado por CSP estrita (`script-src 'self'`). |
+| 4 | **E-mails transacionais via fila** (API → Redis/BullMQ → worker → SMTP). | A requisição nunca espera o SMTP; novas tentativas com backoff; links nunca registrados em log. |
 | 5 | **Guards globais seguros por padrão**: Throttler → Auth → Access (`@Roles`, `@RequiresPlan`). Rotas públicas exigem `@Public()` explícito. | Esquecer um decorator falha fechado, não aberto. |
 | 6 | **Assinatura decidida só no backend** (`EntitlementsService.entitledPlan`), a partir do estado confirmado no banco. | Atende "nunca ativar pelo redirect de sucesso"; o estado só mudará via webhook validado (Etapa 10). Worker trata as transições temporais. |
 | 7 | **XP como livro-razão com chave de idempotência única** (`xp_transactions.idempotency_key`). | Replays/duplicações não geram XP em dobro; totais atualizados na mesma transação. |
@@ -57,7 +57,7 @@ infrastructure/ Dockerfiles, docker-compose local, scripts
 
 ## Frontend
 
-- **Roteamento** com `react-router` 8 e *code splitting* por rota (`lazy`). Chunks de vendor separados (react, motion, supabase, i18n) para cache longo.
+- **Roteamento** com `react-router` 8 e *code splitting* por rota (`lazy`). Chunks de vendor separados (react, motion, i18n) para cache longo.
 - **Dados** com TanStack Query (sem retry em 4xx, cancelamento por `AbortSignal`).
 - **Estados**: toda página tem carregamento (skeletons), erro (com "tentar novamente"), vazio e sucesso.
 - **i18n**: i18next com `pt-BR` e `en` (paridade de chaves testada); `Intl` para datas, números e moedas; idioma persistido no perfil.

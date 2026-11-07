@@ -7,7 +7,7 @@ import type { AuthenticatedUser } from './auth.types.js';
 import { TokenVerifierService } from './token-verifier.service.js';
 import { UsersService } from './users.service.js';
 
-/** Global guard: every route requires a valid Supabase access token unless marked @Public(). */
+/** Global guard: every route requires a valid access token unless marked @Public(). */
 @Injectable()
 export class AuthGuard implements CanActivate {
   constructor(
@@ -29,6 +29,7 @@ export class AuthGuard implements CanActivate {
 
     const claims = await this.verifier.verify(token);
     const user = await this.users.resolve(claims);
+    if (!user) throw AppError.unauthorized('session_revoked', 'Session is no longer valid');
     if (user.status === 'deleted') throw AppError.unauthorized('account_deleted', 'Account deleted');
     if (user.status !== 'active') throw AppError.forbidden('account_suspended', 'Account suspended');
     req.user = user;

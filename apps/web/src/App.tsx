@@ -10,7 +10,7 @@ const LoginPage = lazy(() => import('@/pages/auth/LoginPage'));
 const RegisterPage = lazy(() => import('@/pages/auth/RegisterPage'));
 const ForgotPasswordPage = lazy(() => import('@/pages/auth/ForgotPasswordPage'));
 const ResetPasswordPage = lazy(() => import('@/pages/auth/ResetPasswordPage'));
-const AuthCallbackPage = lazy(() => import('@/pages/auth/AuthCallbackPage'));
+const VerifyEmailPage = lazy(() => import('@/pages/auth/VerifyEmailPage'));
 const DashboardPage = lazy(() => import('@/pages/dashboard/DashboardPage'));
 const UniversesPage = lazy(() => import('@/pages/UniversesPage'));
 const UniverseDetailPage = lazy(() => import('@/pages/UniverseDetailPage'));
@@ -28,7 +28,7 @@ export const routes = [
       { path: '/register', element: s(<RegisterPage />) },
       { path: '/forgot-password', element: s(<ForgotPasswordPage />) },
       { path: '/reset-password', element: s(<ResetPasswordPage />) },
-      { path: '/auth/callback', element: s(<AuthCallbackPage />) },
+      { path: '/verify-email', element: s(<VerifyEmailPage />) },
       { path: '/universes', element: s(<UniversesPage />) },
       { path: '/universes/:slug', element: s(<UniverseDetailPage />) },
       { path: '/dashboard', element: <RequireAuth>{s(<DashboardPage />)}</RequireAuth> },

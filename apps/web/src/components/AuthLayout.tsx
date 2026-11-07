@@ -1,14 +1,11 @@
-import { Alert, Card } from '@fandom/ui';
+import { Card } from '@fandom/ui';
 import { motion } from 'framer-motion';
-import { KeyRound } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { authConfigured } from '@/lib/env';
 import { LogoMark } from './Logo';
 import { ParticleField } from './ParticleField';
 
 export function AuthLayout({ title, subtitle, children, footer }: { title: string; subtitle?: string; children: ReactNode; footer?: ReactNode }) {
-  const { t } = useTranslation();
   return (
     <div className="relative grid min-h-[calc(100dvh-4rem)] place-items-center overflow-hidden px-4 py-16">
       <ParticleField className="absolute inset-0 size-full" density={0.6} />
@@ -20,15 +17,6 @@ export function AuthLayout({ title, subtitle, children, footer }: { title: strin
             <h1 className="mt-4 font-display text-2xl font-bold tracking-wide">{title}</h1>
             {subtitle && <p className="mt-2 text-sm text-mist/60">{subtitle}</p>}
           </div>
-          {!authConfigured && (
-            <Alert variant="warning" className="mb-6">
-              <KeyRound className="mt-0.5 size-5 shrink-0" />
-              <div>
-                <p className="font-semibold">{t('auth.notConfigured.title')}</p>
-                <p className="mt-1 text-xs opacity-80">{t('auth.notConfigured.body')}</p>
-              </div>
-            </Alert>
-          )}
           {children}
         </Card>
         {footer && <div className="relative mt-6 text-center text-sm text-mist/60">{footer}</div>}

@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 export const emailSchema = z.email().trim().toLowerCase().max(254);
 
-/** Password policy used by the web forms (Supabase also enforces its own server-side policy). */
+/** Password policy, enforced identically by the web forms and the API. */
 export const passwordSchema = z
   .string()
   .min(8, 'password_too_short')
@@ -37,3 +37,22 @@ export const resetPasswordSchema = z
     message: 'password_mismatch',
   });
 export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>;
+
+// ---- API request bodies (first-party authentication) -----------------------------------
+
+const opaqueToken = z.string().min(20).max(200).regex(/^[A-Za-z0-9_-]+$/, 'invalid_token');
+
+export const registerSchema = z.object({ email: emailSchema, password: passwordSchema });
+export type RegisterInput = z.infer<typeof registerSchema>;
+
+export const loginSchema = signInSchema;
+export type LoginInput = SignInInput;
+
+export const refreshSchema = z.object({ refreshToken: opaqueToken });
+export type RefreshInput = z.infer<typeof refreshSchema>;
+
+export const verifyEmailSchema = z.object({ token: opaqueToken });
+export type VerifyEmailInput = z.infer<typeof verifyEmailSchema>;
+
+export const confirmPasswordResetSchema = z.object({ token: opaqueToken, password: passwordSchema });
+export type ConfirmPasswordResetInput = z.infer<typeof confirmPasswordResetSchema>;

@@ -7,11 +7,8 @@ WORKDIR /repo
 FROM base AS build
 # Vite inlines these PUBLIC values at build time. Railway passes service variables as build args.
 ARG VITE_API_URL
-ARG VITE_SUPABASE_URL
-ARG VITE_SUPABASE_PUBLISHABLE_KEY
 ARG VITE_APP_ENV=production
-ENV VITE_API_URL=$VITE_API_URL VITE_SUPABASE_URL=$VITE_SUPABASE_URL \
-    VITE_SUPABASE_PUBLISHABLE_KEY=$VITE_SUPABASE_PUBLISHABLE_KEY VITE_APP_ENV=$VITE_APP_ENV
+ENV VITE_API_URL=$VITE_API_URL VITE_APP_ENV=$VITE_APP_ENV
 COPY . .
 RUN pnpm install --frozen-lockfile
 RUN test -n "$VITE_API_URL" || (echo "VITE_API_URL build arg is required" && exit 1)

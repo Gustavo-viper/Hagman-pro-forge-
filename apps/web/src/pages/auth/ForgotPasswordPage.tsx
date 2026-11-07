@@ -5,9 +5,8 @@ import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 import { AuthLayout, FormField } from '@/components/AuthLayout';
 import { useZodForm } from '@/hooks/useZodForm';
-import { authConfigured } from '@/lib/env';
 import { errorMessage } from '@/lib/errors';
-import { supabase } from '@/lib/supabase';
+import { authRequest } from '@/lib/session';
 
 export default function ForgotPasswordPage() {
   const { t } = useTranslation();
@@ -17,16 +16,17 @@ export default function ForgotPasswordPage() {
   const [sent, setSent] = useState(false);
 
   const onSubmit = handleSubmit(async (data) => {
-    if (!supabase) return;
     setSubmitting(true);
     setError(null);
-    const { error: err } = await supabase.auth.resetPasswordForEmail(data.email, {
-      redirectTo: `${window.location.origin}/reset-password`,
-    });
-    setSubmitting(false);
-    // Same message whether or not the account exists (prevents account enumeration).
-    if (err && err.code !== 'user_not_found') setError(err);
-    else setSent(true);
+    try {
+      // Same response whether or not the account exists (prevents account enumeration).
+      await authRequest('password-reset', { email: data.email });
+      setSent(true);
+    } catch (err) {
+      setError(err);
+    } finally {
+      setSubmitting(false);
+    }
   });
 
   return (
@@ -43,7 +43,7 @@ export default function ForgotPasswordPage() {
           <FormField id="email" label={t('auth.email')} error={errors.email}>
             <Input id="email" type="email" autoComplete="email" value={values.email} onChange={(e) => set('email', e.target.value)} aria-invalid={Boolean(errors.email)} />
           </FormField>
-          <Button type="submit" className="w-full" loading={submitting} disabled={!authConfigured}>
+          <Button type="submit" className="w-full" loading={submitting}>
             {t('auth.forgot.submit')}
           </Button>
         </form>

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { loadEnv } from './env.js';
 
-const base = { DATABASE_URL: 'postgres://x@localhost/db', SUPABASE_JWT_SECRET: 'x'.repeat(32) };
+const base = { DATABASE_URL: 'postgres://x@localhost/db', AUTH_JWT_SECRET: 'x'.repeat(32) };
 
 describe('loadEnv', () => {
   it('applies safe defaults', () => {
@@ -10,15 +10,16 @@ describe('loadEnv', () => {
     expect(env.WEB_ORIGINS).toEqual(['http://localhost:5173']);
     expect(env.SUBSCRIPTION_GRACE_DAYS).toBe(3);
   });
-  it('requires a token verification method', () => {
-    expect(() => loadEnv({ DATABASE_URL: base.DATABASE_URL })).toThrow(/SUPABASE_URL/);
+  it('requires a strong JWT secret', () => {
+    expect(() => loadEnv({ DATABASE_URL: base.DATABASE_URL })).toThrow(/AUTH_JWT_SECRET/);
+    expect(() => loadEnv({ ...base, AUTH_JWT_SECRET: 'short' })).toThrow(/AUTH_JWT_SECRET/);
   });
   it('requires redis and TLS for remote databases in production', () => {
-    expect(() => loadEnv({ ...base, NODE_ENV: 'production', DATABASE_URL: 'postgres://x@db.supabase.co/db' })).toThrow(
+    expect(() => loadEnv({ ...base, NODE_ENV: 'production', DATABASE_URL: 'postgres://x@db.example.com/db' })).toThrow(
       /REDIS_URL[\s\S]*DATABASE_SSL/,
     );
     expect(() =>
-      loadEnv({ ...base, NODE_ENV: 'production', DATABASE_URL: 'postgres://x@db.supabase.co/db', DATABASE_SSL: 'require', REDIS_URL: 'redis://r' }),
+      loadEnv({ ...base, NODE_ENV: 'production', DATABASE_URL: 'postgres://x@db.example.com/db', DATABASE_SSL: 'require', REDIS_URL: 'redis://r' }),
     ).not.toThrow();
   });
   it('accepts Railway private-network Postgres without TLS in production', () => {

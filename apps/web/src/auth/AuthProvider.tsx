@@ -1,14 +1,16 @@
-import type { Session } from '@supabase/supabase-js';
+import type { AuthSessionResponse, AuthUser } from '@fandom/types';
 import { useQueryClient } from '@tanstack/react-query';
-import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
-import { supabase } from '@/lib/supabase';
+import { createContext, useCallback, useContext, useEffect, useMemo, useSyncExternalStore, type ReactNode } from 'react';
+import i18n from '@/lib/i18n';
+import { authRequest, getAccessToken, sessionStore, type StoredSession } from '@/lib/session';
 
 interface AuthState {
-  session: Session | null;
-  /** true until the persisted session has been restored. */
+  session: StoredSession | null;
+  user: AuthUser | null;
+  /** Kept for API compatibility: the session is read synchronously from storage. */
   loading: boolean;
-  /** true while the user arrived via a password-recovery link. */
-  recovery: boolean;
+  signIn: (email: string, password: string) => Promise<void>;
+  signUp: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
 }
 
@@ -16,43 +18,41 @@ const AuthContext = createContext<AuthState | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const queryClient = useQueryClient();
-  const [session, setSession] = useState<Session | null>(null);
-  const [loading, setLoading] = useState(Boolean(supabase));
-  const [recovery, setRecovery] = useState(false);
+  const session = useSyncExternalStore(sessionStore.subscribe, sessionStore.get, () => null);
 
+  // Drop cached private data whenever the signed-in user changes or signs out.
+  const userId = session?.user.id ?? null;
   useEffect(() => {
-    if (!supabase) return;
-    let active = true;
-    void supabase.auth.getSession().then(({ data }) => {
-      if (!active) return;
-      setSession(data.session);
-      setLoading(false);
-    });
-    const { data } = supabase.auth.onAuthStateChange((event, next) => {
-      setSession(next);
-      setLoading(false);
-      if (event === 'PASSWORD_RECOVERY') setRecovery(true);
-      if (event === 'SIGNED_OUT') {
-        setRecovery(false);
-        queryClient.removeQueries({ queryKey: ['me'] });
-      }
-    });
-    return () => {
-      active = false;
-      data.subscription.unsubscribe();
-    };
-  }, [queryClient]);
+    queryClient.removeQueries({ queryKey: ['me'] });
+  }, [userId, queryClient]);
+
+  // Keep the session warm while the tab is open (refresh happens just before expiry).
+  useEffect(() => {
+    if (!session) return;
+    const ms = Math.max(session.accessExpiresAt - Date.now() - 25_000, 5_000);
+    const timer = setTimeout(() => void getAccessToken(), ms);
+    return () => clearTimeout(timer);
+  }, [session]);
+
+  const signIn = useCallback(async (email: string, password: string) => {
+    sessionStore.setFromResponse(await authRequest<AuthSessionResponse>('login', { email, password }));
+  }, []);
+
+  const signUp = useCallback(async (email: string, password: string) => {
+    // The UI language localizes the verification email.
+    const res = await authRequest<AuthSessionResponse>('register', { email, password }, undefined, { 'Accept-Language': i18n.language });
+    sessionStore.setFromResponse(res);
+  }, []);
+
+  const signOut = useCallback(async () => {
+    const token = sessionStore.get()?.accessToken;
+    sessionStore.clear();
+    if (token) await authRequest('logout', undefined, token).catch(() => undefined);
+  }, []);
 
   const value = useMemo<AuthState>(
-    () => ({
-      session,
-      loading,
-      recovery,
-      signOut: async () => {
-        await supabase?.auth.signOut();
-      },
-    }),
-    [session, loading, recovery],
+    () => ({ session, user: session?.user ?? null, loading: false, signIn, signUp, signOut }),
+    [session, signIn, signUp, signOut],
   );
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
@@ -62,3 +62,4 @@ export function useAuth(): AuthState {
   if (!ctx) throw new Error('useAuth must be used inside <AuthProvider>');
   return ctx;
 }
+

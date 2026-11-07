@@ -6,13 +6,11 @@ import { Link, Navigate, useLocation, useNavigate } from 'react-router';
 import { useAuth } from '@/auth/AuthProvider';
 import { AuthLayout, FormField } from '@/components/AuthLayout';
 import { useZodForm } from '@/hooks/useZodForm';
-import { authConfigured } from '@/lib/env';
 import { errorMessage } from '@/lib/errors';
-import { supabase } from '@/lib/supabase';
 
 export default function LoginPage() {
   const { t } = useTranslation();
-  const { session } = useAuth();
+  const { session, signIn } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const from = (location.state as { from?: string } | null)?.from ?? '/dashboard';
@@ -23,13 +21,16 @@ export default function LoginPage() {
   if (session) return <Navigate to={from} replace />;
 
   const onSubmit = handleSubmit(async (data) => {
-    if (!supabase) return;
     setSubmitting(true);
     setError(null);
-    const { error: err } = await supabase.auth.signInWithPassword(data);
-    setSubmitting(false);
-    if (err) setError(err);
-    else void navigate(from, { replace: true });
+    try {
+      await signIn(data.email, data.password);
+      void navigate(from, { replace: true });
+    } catch (err) {
+      setError(err);
+    } finally {
+      setSubmitting(false);
+    }
   });
 
   return (
@@ -54,7 +55,7 @@ export default function LoginPage() {
         <div className="flex justify-end">
           <Link to="/forgot-password" className="text-xs text-mystic-300 hover:underline">{t('auth.login.forgot')}</Link>
         </div>
-        <Button type="submit" className="w-full" loading={submitting} disabled={!authConfigured}>
+        <Button type="submit" className="w-full" loading={submitting}>
           {t('auth.login.submit')}
         </Button>
       </form>

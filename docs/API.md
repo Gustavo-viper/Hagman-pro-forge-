@@ -2,7 +2,7 @@
 
 Base: `https://<fandom-api>/` · Versionamento por URI (`/v1/...`). Health checks não são versionados.
 
-**Autenticação:** `Authorization: Bearer <access_token do Supabase>`. Toda rota exige token, exceto as marcadas como **pública**.
+**Autenticação:** `Authorization: Bearer <accessToken>` obtido em `/v1/auth/login`, `/register` ou `/refresh`. Toda rota exige token, exceto as marcadas como **pública**.
 
 **Erros** seguem um envelope único; `code` é estável e traduzido pelo frontend:
 
@@ -20,6 +20,21 @@ Rate limit: `RATE_LIMIT_MAX` requisições por `RATE_LIMIT_TTL_MS` por IP (`429 
 |---|---|---|---|
 | GET | `/health` | pública | Liveness (não toca dependências) |
 | GET | `/health/ready` | pública | PostgreSQL + Redis; `503` se o banco estiver fora |
+
+## Autenticação
+
+| Método | Rota | Acesso | Descrição |
+|---|---|---|---|
+| POST | `/v1/auth/register` | pública · limite estrito | `{ email, password }` → `201 AuthSession`; envia e-mail de verificação (`409 email_taken`) |
+| POST | `/v1/auth/login` | pública · limite estrito | `{ email, password }` → `200 AuthSession` (`401 invalid_credentials`, `429 too_many_attempts`, `403 account_suspended`) |
+| POST | `/v1/auth/refresh` | pública | `{ refreshToken }` → nova `AuthSession` (o refresh token **rotaciona**; reuso → `401 refresh_token_reused` e toda a família é revogada) |
+| POST | `/v1/auth/logout` | autenticado | Revoga a sessão atual → `204` (o access token deixa de valer na hora) |
+| POST | `/v1/auth/email-verification` | autenticado | Reenvia o link → `202` (`409 email_already_verified`) |
+| POST | `/v1/auth/email-verification/confirm` | pública | `{ token }` → `204` (`400 invalid_or_expired_token`) |
+| POST | `/v1/auth/password-reset` | pública · limite estrito | `{ email }` → sempre `202` (não revela se a conta existe) |
+| POST | `/v1/auth/password-reset/confirm` | pública | `{ token, password }` → `204`; encerra todas as sessões |
+
+`AuthSession`: `{ accessToken, expiresIn, refreshToken, refreshExpiresAt, user: { id, email, emailVerified } }`. O access token (JWT HS256, 15 min) vai no cabeçalho `Authorization: Bearer`.
 
 ## Universos
 
@@ -60,6 +75,6 @@ Erros: `409 username_taken`, `409 onboarding_already_completed`, `403 age_restri
 
 ## Códigos de erro
 
-`unauthorized`, `invalid_token`, `token_expired`, `account_suspended`, `account_deleted`, `insufficient_role`, `premium_required`, `onboarding_required`, `onboarding_already_completed`, `username_taken`, `age_restricted`, `invalid_birthdate`, `validation_failed`, `universe_not_found`, `membership_not_found`, `rate_limited`, `not_found`, `bad_request`, `internal_error`.
+`unauthorized`, `invalid_token`, `token_expired`, `session_revoked`, `invalid_credentials`, `email_taken`, `too_many_attempts`, `invalid_refresh_token`, `refresh_token_reused`, `invalid_or_expired_token`, `email_already_verified`, `account_suspended`, `account_deleted`, `insufficient_role`, `premium_required`, `onboarding_required`, `onboarding_already_completed`, `username_taken`, `age_restricted`, `invalid_birthdate`, `validation_failed`, `universe_not_found`, `membership_not_found`, `rate_limited`, `not_found`, `bad_request`, `internal_error`.
 
 Os contratos TypeScript estão em `packages/types/src/index.ts`; os corpos de requisição em `packages/schemas`.

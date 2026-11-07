@@ -16,7 +16,7 @@ Regras: **nunca edite uma migration aplicada** (o executor compara checksums e a
 
 | Tabela | Finalidade | Destaques |
 |---|---|---|
-| `users` | Espelho do usuário do Supabase Auth (`id` = `auth.users.id`) | `status` (active/suspended/banned/deleted), e-mail único entre contas não excluídas |
+| `users` | Conta da plataforma | `status` (active/suspended/banned/deleted), e-mail único entre contas não excluídas |
 | `profiles` | Perfil global | `username` único (regex = Zod), `is_minor`, `privacy` jsonb, `xp_total ≥ 0`, `onboarding_completed_at` |
 | `user_consents` | Prova de consentimento (LGPD) — *append-only* | tipo, versão do documento, IP, user-agent |
 | `universes` | Universos (dados, não código) | textos localizados jsonb, `status`, `member_count` mantido por trigger |
@@ -29,20 +29,22 @@ Regras: **nunca edite uma migration aplicada** (o executor compara checksums e a
 | `subscription_plans` | Free · Plus · Ultra | benefícios localizados |
 | `plan_prices` | Preço por plano × intervalo × moeda | centavos, `UNIQUE(plan, interval, currency)`, id do preço no provedor (Etapa 10) |
 | `subscriptions` | Estado da assinatura | status pending/active/past_due/cancelled/expired; **no máximo uma aberta por usuário** (índice parcial único) |
+| `auth_credentials` | Hash scrypt da senha | 1:1 com `users` |
+| `auth_sessions` | Sessões/refresh tokens (hash SHA-256) | família para detecção de reuso, revogação, expiração |
+| `auth_tokens` | Links de verificação e redefinição (hash SHA-256) | uso único, expiração curta |
 | `subscription_status_history` | Histórico de mudanças de status | motivo + ator |
 
 Planejadas para as próximas etapas (ver `ROADMAP.md`): posts, comments, reactions, friendships, follows, groups, group_members, conversations, message_participants, messages, notifications, quizzes, questions, quiz_attempts, missions, achievements, user_achievements, wallets, wallet_transactions, inventory, products, payment_transactions, payment_webhook_events, events, event_participants, reports, moderation_actions.
 
 ## RLS
 
-`policies/0001_rls.sql` habilita RLS em **todas** as tabelas. No Supabase (onde existem as roles `anon`/`authenticated` e o schema `auth`), revoga todos os privilégios dessas roles e libera somente leitura do catálogo público (universos ativos, planos e preços ativos) e do próprio perfil. A API conecta como dono das tabelas e aplica a autorização em código. Testado: `anon` lê universos e recebe *permission denied* em `users`.
+`policies/0001_rls.sql` habilita RLS em **todas** as tabelas, sem políticas: o banco fica só na rede privada da Railway e apenas a API/worker (donos das tabelas) acessam; qualquer outra role criada no futuro não enxerga linhas sem uma política explícita.
 
 ## Conexão
 
 - Produção (Railway): `DATABASE_URL=${{fandom-postgres.DATABASE_URL}}` — host `fandom-postgres.railway.internal`, só acessível pela rede privada do projeto; `DATABASE_SSL=disable`.
 - Acesso externo pontual: `DATABASE_PUBLIC_URL` com `DATABASE_SSL=require`.
 - O executor de migrations usa `DATABASE_MIGRATION_URL` se definido, senão `DATABASE_URL`.
-- Compatível também com Supabase PostgreSQL (pooler + `verify-full`), caso a hospedagem mude.
 
 ## Backups e recuperação
 

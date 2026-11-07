@@ -21,10 +21,9 @@ const origin = (url) => {
     return '';
   }
 };
-// CSP connect-src must allow the API and Supabase (REST + realtime websockets).
+// CSP connect-src must allow the API (REST now, WebSocket in stage 8).
 const api = origin(process.env.VITE_API_URL || 'http://localhost:3000');
-const supa = origin(process.env.VITE_SUPABASE_URL);
-const connect = ["'self'", api, supa, supa && supa.replace(/^https/, 'wss')].filter(Boolean).join(' ');
+const connect = ["'self'", api, api.replace(/^http/, 'ws')].filter(Boolean).join(' ');
 const CSP = [
   "default-src 'self'",
   "script-src 'self'",

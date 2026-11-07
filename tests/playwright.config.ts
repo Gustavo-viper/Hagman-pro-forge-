@@ -4,16 +4,13 @@ import { defineConfig, devices } from '@playwright/test';
  * Boots the REAL stack: the compiled API (against TEST_DATABASE_URL / TEST_REDIS_URL, already
  * migrated + seeded) and a production build of the web app served by apps/web/server.mjs.
  *
- * Supabase Auth is the only external dependency. The web build points VITE_SUPABASE_URL at a
- * fake host and the tests inject a session whose access token is signed with the API's test
- * HS256 secret — the API verifies it exactly like a Supabase token. No API behaviour is mocked.
+ * Nothing is mocked: users sign up and sign in through the real UI and API.
  */
 export const E2E_JWT_SECRET = 'e2e-secret-that-is-at-least-32-characters-long!!';
 const API_PORT = 3901;
 const WEB_PORT = 4901;
 const api = `http://localhost:${API_PORT}`;
 const web = `http://localhost:${WEB_PORT}`;
-const supabaseUrl = 'http://supabase.e2e.invalid';
 const db = process.env.TEST_DATABASE_URL ?? 'postgres://fandom:fandom@localhost:5432/fandom_test';
 
 export default defineConfig({
@@ -41,7 +38,9 @@ export default defineConfig({
         PORT: String(API_PORT),
         DATABASE_URL: db,
         ...(process.env.TEST_REDIS_URL ? { REDIS_URL: process.env.TEST_REDIS_URL } : {}),
-        SUPABASE_JWT_SECRET: E2E_JWT_SECRET,
+        AUTH_JWT_SECRET: E2E_JWT_SECRET,
+        AUTH_RATE_LIMIT_MAX: '10000',
+        APP_PUBLIC_URL: web,
         WEB_ORIGINS: web,
         RATE_LIMIT_MAX: '10000',
       },
@@ -55,8 +54,6 @@ export default defineConfig({
         PORT: String(WEB_PORT),
         WEB_ROOT: '../apps/web/dist-e2e',
         VITE_API_URL: api,
-        VITE_SUPABASE_URL: supabaseUrl,
-        VITE_SUPABASE_PUBLISHABLE_KEY: 'e2e-publishable-key',
       },
     },
   ],

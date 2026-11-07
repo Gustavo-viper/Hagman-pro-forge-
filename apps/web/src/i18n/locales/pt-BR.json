@@ -105,10 +105,6 @@
     "password": "Senha",
     "confirmPassword": "Confirmar senha",
     "passwordHint": "Mínimo de 8 caracteres, com letras e números.",
-    "notConfigured": {
-      "title": "Autenticação ainda não configurada",
-      "body": "Este ambiente ainda não possui as credenciais do Supabase Auth (VITE_SUPABASE_URL e VITE_SUPABASE_PUBLISHABLE_KEY). Consulte docs/DEPLOYMENT.md."
-    },
     "login": {
       "title": "Bem-vindo de volta",
       "subtitle": "Entre para continuar sua jornada.",
@@ -121,9 +117,7 @@
       "title": "Crie sua conta",
       "subtitle": "Uma conta para todos os universos.",
       "submit": "Criar conta",
-      "hasAccount": "Já tem conta?",
-      "checkEmailTitle": "Confirme seu e-mail",
-      "checkEmailBody": "Enviamos um link de confirmação para {{email}}. Abra-o para ativar sua conta."
+      "hasAccount": "Já tem conta?"
     },
     "forgot": {
       "title": "Recuperar senha",
@@ -139,9 +133,11 @@
       "success": "Senha atualizada com sucesso.",
       "invalidLink": "Este link de redefinição é inválido ou expirou. Solicite um novo."
     },
-    "callback": {
-      "verifying": "Validando seu acesso…",
-      "failed": "Não foi possível validar este link. Ele pode ter expirado."
+    "verify": {
+      "title": "Verificação de e-mail",
+      "verifying": "Confirmando seu e-mail…",
+      "success": "E-mail confirmado! Sua conta está protegida.",
+      "requestNew": "Solicitar novo link no painel"
     }
   },
   "validation": {
@@ -212,10 +208,12 @@
     "open": "Abrir",
     "joined": "Membro",
     "memberSince": "Desde {{date}}",
-    "emailNotVerified": "Seu e-mail ainda não foi verificado. Verifique sua caixa de entrada.",
+    "emailNotVerified": "Confirme seu e-mail pelo link que enviamos para proteger sua conta.",
     "error": "Não foi possível carregar seu painel.",
     "profile": "Perfil",
-    "staff": "Equipe Forge Studios"
+    "staff": "Equipe Forge Studios",
+    "resendVerification": "Reenviar e-mail",
+    "verificationSent": "Enviado! Confira sua caixa de entrada."
   },
   "universe": {
     "back": "Todos os universos",
@@ -289,16 +287,13 @@
     "premium_required": "Este recurso faz parte do Fandom Premium.",
     "insufficient_role": "Você não tem permissão para isso.",
     "internal_error": "Erro interno. Nossa equipe foi notificada.",
-    "auth": {
-      "invalid_credentials": "E-mail ou senha incorretos.",
-      "email_not_confirmed": "Confirme seu e-mail antes de entrar.",
-      "user_already_exists": "Já existe uma conta com este e-mail.",
-      "email_exists": "Já existe uma conta com este e-mail.",
-      "weak_password": "Senha muito fraca. Escolha outra.",
-      "same_password": "A nova senha deve ser diferente da atual.",
-      "over_email_send_rate_limit": "Muitos e-mails enviados. Aguarde alguns minutos.",
-      "over_request_rate_limit": "Muitas tentativas. Aguarde um momento.",
-      "otp_expired": "O link expirou. Solicite um novo."
-    }
+    "invalid_credentials": "E-mail ou senha incorretos.",
+    "email_taken": "Já existe uma conta com este e-mail.",
+    "too_many_attempts": "Muitas tentativas de login. Aguarde 15 minutos ou redefina sua senha.",
+    "invalid_or_expired_token": "Este link é inválido ou expirou. Solicite um novo.",
+    "session_revoked": "Sua sessão foi encerrada. Entre novamente.",
+    "refresh_token_reused": "Por segurança, sua sessão foi encerrada. Entre novamente.",
+    "invalid_refresh_token": "Sua sessão expirou. Entre novamente.",
+    "email_already_verified": "Seu e-mail já está confirmado."
   }
 }

@@ -19,12 +19,12 @@ Fandom Universe é uma plataforma **multiuniverso**: cada universo (Harry Potter
 | Serviço | Pasta | Tecnologia | Railway |
 |---|---|---|---|
 | **fandom-web** | `apps/web` | React 19 · TypeScript · Vite · Tailwind CSS v4 · shadcn/ui · Framer Motion · PWA | `apps/web/railway.json` |
-| **fandom-api** | `apps/api` | NestJS 12 · REST versionada (`/v1`) · Zod · Supabase Auth (JWT) | `apps/api/railway.json` |
+| **fandom-api** | `apps/api` | NestJS 12 · REST versionada (`/v1`) · Zod · autenticação própria (scrypt + JWT + refresh rotativo) | `apps/api/railway.json` |
 | **fandom-worker** | `apps/worker` | BullMQ · jobs agendados | `apps/worker/railway.json` |
 | **fandom-redis** | — | Redis 7 (cache, rate limit distribuído, filas) | template Redis |
 | **fandom-postgres** | `database/` | PostgreSQL · migrations SQL versionadas · RLS | template PostgreSQL |
 
-Autenticação: **Supabase Auth** (somente auth; o banco roda na Railway).
+**Tudo roda na Railway** — aplicação, banco, filas e autenticação. Nenhum serviço externo de banco ou identidade.
 
 Pacotes compartilhados: `packages/shared` (regras de domínio), `packages/schemas` (Zod — mesma validação no browser e na API), `packages/types` (contratos da API), `packages/ui` (design system).
 
@@ -41,7 +41,7 @@ Pré-requisitos: **Node.js ≥ 22.22**, **pnpm 10** (`corepack enable`), Postgre
 pnpm install
 
 # 2. Variáveis de ambiente
-cp .env.example .env            # preencha SUPABASE_* e VITE_SUPABASE_* (ver docs/DEPLOYMENT.md §2)
+cp .env.example .env            # defina AUTH_JWT_SECRET (e SMTP_URL para enviar e-mails)
 
 # 3. PostgreSQL + Redis locais (opcional se já tiver instalados)
 pnpm infra:up
@@ -55,7 +55,7 @@ pnpm dev
 
 > Um único `.env` na raiz serve todos os serviços. Apenas variáveis `VITE_*` chegam ao navegador.
 
-Sem credenciais do Supabase a aplicação funciona nas áreas públicas e mostra um aviso claro nas telas de autenticação.
+Sem `SMTP_URL`, os links de verificação/redefinição aparecem no log da API em desenvolvimento (sem Redis) ou ficam na fila até o SMTP ser configurado.
 
 ## Comandos
 
@@ -82,7 +82,7 @@ pnpm build && pnpm test && pnpm test:e2e
 - [Arquitetura e decisões técnicas](docs/ARCHITECTURE.md)
 - [API REST v1](docs/API.md)
 - [Banco de dados](docs/DATABASE.md)
-- [Implantação na Railway (app + banco) e Supabase Auth](docs/DEPLOYMENT.md)
+- [Implantação 100% na Railway](docs/DEPLOYMENT.md)
 - [Segurança, LGPD e proteção de menores](docs/SECURITY.md)
 - [Roadmap e pendências](docs/ROADMAP.md)
 
