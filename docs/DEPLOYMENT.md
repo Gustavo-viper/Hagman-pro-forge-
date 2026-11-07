@@ -34,13 +34,15 @@ Todos os Dockerfiles usam a **raiz do repositório** como contexto (monorepo com
 
 ## 3. Railway — serviços da aplicação (projeto `trila demo`)
 
-1. *Create → GitHub Repo* → este repositório → renomeie para `fandom-api`. Em *Settings*: **Root Directory** vazio; **Railway Config File** `/apps/api/railway.json`.
-2. Repita para `fandom-web` (`/apps/web/railway.json`) e `fandom-worker` (`/apps/worker/railway.json`).
+1. *Create → GitHub Repo* → este repositório → renomeie para `fandom-api`. Em *Settings*: **Root Directory** vazio e as configurações de build/deploy de `apps/api/railway.json` (ver aviso abaixo).
+2. Repita para `fandom-web` (`apps/web/railway.json`) e `fandom-worker` (`apps/worker/railway.json`).
 3. *Create → Database → Add Redis* → renomeie para `fandom-redis`.
 4. `fandom-web` e `fandom-api` → *Settings → Networking → Generate Domain*.
 5. Configure as variáveis abaixo (*Variables → Raw Editor*) e faça *Deploy*.
 
-O `railway.json` de cada serviço define builder Dockerfile, `watchPatterns` (deploy independente), health check, restart e, na API, o **pre-deploy** `migrate && seed`.
+O `railway.json` de cada serviço documenta builder Dockerfile, `watchPatterns` (deploy independente), health check, restart e, na API, o **pre-deploy** `migrate && seed`.
+
+> **Atenção (nov/2026):** a Railway deprecou o campo *Railway Config File* (config-as-code `railway.json`) em favor de *Infrastructure as Code* (`.railway/railway.ts`). No projeto `Trilha Demo` essas configurações foram aplicadas **diretamente em cada serviço** (Settings → Build/Deploy), com os mesmos valores dos `railway.json`, que permanecem no repositório como fonte de referência. Se um serviço for recriado, replique: *Dockerfile Path*, *Start Command*, *Pre-deploy Command* (API), *Healthcheck Path/Timeout*, *Restart Policy* e *Watch Paths*, ou defina a variável `RAILWAY_DOCKERFILE_PATH`.
 
 ### Alternativa pela CLI (a partir da raiz do repositório)
 

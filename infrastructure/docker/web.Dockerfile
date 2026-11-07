@@ -13,7 +13,7 @@ ARG VITE_APP_ENV=production
 ENV VITE_API_URL=$VITE_API_URL VITE_SUPABASE_URL=$VITE_SUPABASE_URL \
     VITE_SUPABASE_PUBLISHABLE_KEY=$VITE_SUPABASE_PUBLISHABLE_KEY VITE_APP_ENV=$VITE_APP_ENV
 COPY . .
-RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
+RUN pnpm install --frozen-lockfile
 RUN test -n "$VITE_API_URL" || (echo "VITE_API_URL build arg is required" && exit 1)
 RUN pnpm turbo run build --filter=@fandom/web...
 RUN pnpm --filter @fandom/web --prod deploy --legacy /out/web && cp -r apps/web/dist /out/web/dist

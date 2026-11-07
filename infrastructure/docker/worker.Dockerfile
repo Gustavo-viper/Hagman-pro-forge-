@@ -6,7 +6,7 @@ WORKDIR /repo
 
 FROM base AS build
 COPY . .
-RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
+RUN pnpm install --frozen-lockfile
 RUN pnpm turbo run build --filter=@fandom/worker...
 RUN pnpm --filter @fandom/worker --prod deploy --legacy /out/worker
 
