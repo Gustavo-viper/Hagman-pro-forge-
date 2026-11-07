@@ -11,6 +11,7 @@ test('landing renders universes and plans from the API', async ({ page }) => {
   await expect(page.getByRole('heading', { level: 1 })).toContainText('Todos os seus universos');
   await expect(page.getByRole('heading', { name: 'Harry Potter' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Supernatural' })).toBeVisible();
+  for (const name of ['Marvel', 'DC', 'Star Wars']) await expect(page.getByRole('heading', { name, exact: true })).toBeVisible();
   await page.locator('#plans').scrollIntoViewIfNeeded();
   await expect(page.getByText('R$ 14,90')).toBeVisible();
   await page.getByRole('radio', { name: 'Anual' }).click();
@@ -32,6 +33,13 @@ test('universe page shows the identity system', async ({ page }) => {
   await expect(page.getByRole('heading', { name: 'Grifinória' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Lufa-Lufa' })).toBeVisible();
   await expect(page.getByRole('link', { name: 'Entre para participar' })).toBeVisible();
+});
+
+test('Star Wars page shows factions and translated features', async ({ page }) => {
+  await page.goto('/universes/star-wars');
+  await expect(page.getByRole('heading', { name: 'Star Wars', level: 1 })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Caçador de recompensas' })).toBeVisible();
+  await expect(page.getByText('Atlas da galáxia', { exact: true })).toBeVisible();
 });
 
 test('unknown routes and universes render 404', async ({ page }) => {

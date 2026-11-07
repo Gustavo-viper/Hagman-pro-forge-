@@ -53,13 +53,21 @@ describe.runIf(enabled)('Fandom API (PostgreSQL + Redis)', () => {
   describe('public catalog', () => {
     it('lists active universes with theme tokens', async () => {
       const res = await http.get('/v1/universes').expect(200);
-      expect(res.body.items.map((u: { slug: string }) => u.slug)).toEqual(['harry-potter', 'supernatural']);
+      expect(res.body.items.map((u: { slug: string }) => u.slug)).toEqual(['harry-potter', 'supernatural', 'marvel', 'dc', 'star-wars']);
       expect(res.body.items[0].theme.primary).toMatch(/^#/);
     });
 
     it('returns a universe with identity config (houses)', async () => {
       const res = await http.get('/v1/universes/harry-potter').expect(200);
       expect(res.body.identityConfig.options).toHaveLength(4);
+    });
+
+    it('serves the Marvel, DC and Star Wars universes with their own themes and identities', async () => {
+      const sw = await http.get('/v1/universes/star-wars').expect(200);
+      expect(sw.body.identityConfig.options.map((o: { key: string }) => o.key)).toContain('jedi');
+      expect(sw.body.theme.accent).toBe('#ffe81f');
+      expect((await http.get('/v1/universes/marvel').expect(200)).body.identityConfig.options).toHaveLength(5);
+      expect((await http.get('/v1/universes/dc').expect(200)).body.features).toContain('multiverse_guide');
     });
 
     it('404s unknown universes and rejects invalid slugs', async () => {

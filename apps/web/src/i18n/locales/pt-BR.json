@@ -245,7 +245,14 @@
       "missions": "Missões",
       "hunter_ranking": "Ranking de caçadores",
       "discussion_groups": "Grupos de discussão",
-      "challenges": "Desafios"
+      "challenges": "Desafios",
+      "faction_identity": "Identidade de facção",
+      "character_archive": "Arquivo de personagens",
+      "timelines": "Linhas do tempo",
+      "multiverse_guide": "Guia do multiverso",
+      "galaxy_atlas": "Atlas da galáxia",
+      "starship_archive": "Arquivo de naves",
+      "species_archive": "Arquivo de espécies"
     }
   },
   "universes": {

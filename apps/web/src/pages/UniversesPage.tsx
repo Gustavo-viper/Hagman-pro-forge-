@@ -13,13 +13,13 @@ export default function UniversesPage() {
       <SectionHeading title={t('universes.title')} subtitle={t('universes.subtitle')} />
       <div className="mt-12">
         {universes.isPending ? (
-          <CardGridSkeleton className="h-80" />
+          <CardGridSkeleton count={3} className="h-80" />
         ) : universes.isError ? (
           <ErrorState error={universes.error} title={t('landing.universes.error')} onRetry={() => void universes.refetch()} />
         ) : universes.data.length === 0 ? (
           <EmptyState>{t('landing.universes.empty')}</EmptyState>
         ) : (
-          <div className="grid gap-6 md:grid-cols-2">
+          <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
             {universes.data.map((u, i) => (
               <motion.div key={u.id} initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.08 }}>
                 <UniverseCard universe={u} className="h-full" />

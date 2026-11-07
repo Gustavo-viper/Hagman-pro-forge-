@@ -245,7 +245,14 @@
       "missions": "Missions",
       "hunter_ranking": "Hunter ranking",
       "discussion_groups": "Discussion groups",
-      "challenges": "Challenges"
+      "challenges": "Challenges",
+      "faction_identity": "Faction identity",
+      "character_archive": "Character archive",
+      "timelines": "Timelines",
+      "multiverse_guide": "Multiverse guide",
+      "galaxy_atlas": "Galaxy atlas",
+      "starship_archive": "Starship archive",
+      "species_archive": "Species archive"
     }
   },
   "universes": {
