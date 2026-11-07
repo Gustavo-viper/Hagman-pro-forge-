@@ -6,7 +6,7 @@
     "watchPatterns": ["apps/api/**", "packages/shared/**", "packages/schemas/**", "packages/types/**", "database/**", "pnpm-lock.yaml", "infrastructure/docker/api.Dockerfile"]
   },
   "deploy": {
-    "preDeployCommand": ["node /app/database/src/cli.ts migrate && node /app/database/src/cli.ts seed"],
+    "preDeployCommand": ["node /app/database/src/cli.ts deploy"],
     "startCommand": "node /app/api/dist/main.js",
     "healthcheckPath": "/health/ready",
     "healthcheckTimeout": 60,

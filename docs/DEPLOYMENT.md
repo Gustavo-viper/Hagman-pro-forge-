@@ -40,7 +40,7 @@ Todos os Dockerfiles usam a **raiz do repositório** como contexto (monorepo com
 4. `fandom-web` e `fandom-api` → *Settings → Networking → Generate Domain*.
 5. Configure as variáveis abaixo (*Variables → Raw Editor*) e faça *Deploy*.
 
-O `railway.json` de cada serviço documenta builder Dockerfile, `watchPatterns` (deploy independente), health check, restart e, na API, o **pre-deploy** `migrate && seed`.
+O `railway.json` de cada serviço documenta builder Dockerfile, `watchPatterns` (deploy independente), health check, restart e, na API, o **pre-deploy** `cli.ts deploy` (migrate + seed).
 
 > **Atenção (nov/2026):** a Railway deprecou o campo *Railway Config File* (config-as-code `railway.json`) em favor de *Infrastructure as Code* (`.railway/railway.ts`). No projeto `Trilha Demo` essas configurações foram aplicadas **diretamente em cada serviço** (Settings → Build/Deploy), com os mesmos valores dos `railway.json`, que permanecem no repositório como fonte de referência. Se um serviço for recriado, replique: *Dockerfile Path*, *Start Command*, *Pre-deploy Command* (API), *Healthcheck Path/Timeout*, *Restart Policy* e *Watch Paths*, ou defina a variável `RAILWAY_DOCKERFILE_PATH`.
 

@@ -36,6 +36,15 @@ async function main(): Promise<void> {
         log.info(`done: ${r.applied.length} applied, ${r.skipped.length} already applied, ${r.policies.length} policy files`);
         break;
       }
+      // Single entry point for platform pre-deploy hooks, which run without a shell
+      // (so `migrate && seed` cannot be chained there).
+      case 'deploy': {
+        const r = await migrate(client, dirs, log);
+        log.info(`migrate: ${r.applied.length} applied, ${r.skipped.length} already applied, ${r.policies.length} policy files`);
+        const seeded = await seed(client, dirs.seeds, log);
+        log.info(`seed: ${seeded.length} seed files`);
+        break;
+      }
       case 'seed': {
         const r = await seed(client, dirs.seeds, log);
         log.info(`done: ${r.length} seed files`);
@@ -48,7 +57,7 @@ async function main(): Promise<void> {
         break;
       }
       default:
-        throw new Error('usage: cli.ts <migrate|seed|status>');
+        throw new Error('usage: cli.ts <migrate|seed|deploy|status>');
     }
   } finally {
     await client.end();
