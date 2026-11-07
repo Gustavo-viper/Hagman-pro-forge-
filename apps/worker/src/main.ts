@@ -1,7 +1,6 @@
 import { createServer } from 'node:http';
 import { Queue, Worker, type Job } from 'bullmq';
 import { Redis } from 'ioredis';
-import nodemailer from 'nodemailer';
 import pg from 'pg';
 import { JOBS, pgSslConfig, QUEUES, stripSslParams, type EmailJobData } from '@fandom/shared';
 import { loadEnv } from './env.js';
@@ -9,6 +8,7 @@ import { runAuthCleanup } from './jobs/auth-cleanup.js';
 import { renderEmail } from './jobs/email.js';
 import { runSubscriptionLifecycle } from './jobs/subscription-lifecycle.js';
 import { log } from './logger.js';
+import { createMailer, mailerHost } from './mailer.js';
 
 pg.types.setTypeParser(20, (v) => Number.parseInt(v, 10));
 
@@ -27,8 +27,23 @@ async function main(): Promise<void> {
   const connection = new Redis(env.REDIS_URL, { maxRetriesPerRequest: null, family: 0 });
   connection.on('error', (e) => log('warn', 'redis error', { error: e.message }));
 
-  const mailer = env.SMTP_URL ? nodemailer.createTransport(env.SMTP_URL) : null;
-  if (!mailer) log('warn', 'SMTP_URL not set: email jobs will fail and be retried until SMTP is configured');
+  const mailer = createMailer(env);
+  let smtpStatus = mailer ? 'unverified' : 'not_configured';
+  if (!mailer) {
+    log('warn', 'SMTP not configured (SMTP_HOST or SMTP_URL): email jobs will be retried until it is');
+  } else {
+    // Verify credentials at boot so misconfiguration shows up immediately in the logs.
+    mailer.verify().then(
+      () => {
+        smtpStatus = 'ok';
+        log('info', 'smtp connection verified', { host: mailerHost(env) });
+      },
+      (e: Error) => {
+        smtpStatus = 'error';
+        log('error', 'smtp verification failed', { host: mailerHost(env), error: e.message.slice(0, 300) });
+      },
+    );
+  }
 
   const maintenance = new Queue(QUEUES.maintenance, { connection });
   const repeatOpts = { removeOnComplete: 100, removeOnFail: 500, attempts: 3, backoff: { type: 'exponential' as const, delay: 30_000 } };
@@ -71,7 +86,7 @@ async function main(): Promise<void> {
   const emailWorker = new Worker<EmailJobData>(
     QUEUES.email,
     async (job: Job<EmailJobData>) => {
-      if (!mailer) throw new Error('SMTP_URL is not configured');
+      if (!mailer) throw new Error('SMTP is not configured');
       const { subject, text, html } = renderEmail(job.data);
       const info = await mailer.sendMail({ from: env.EMAIL_FROM, to: job.data.to, subject, text, html });
       // Never log the link: it carries a single-use credential.
@@ -95,7 +110,7 @@ async function main(): Promise<void> {
       pool.query('SELECT 1').then(() => (checks.database = 'ok'), (e: Error) => (checks.database = e.message)),
       connection.ping().then(() => (checks.redis = 'ok'), (e: Error) => (checks.redis = e.message)),
     ]);
-    checks.smtp = mailer ? 'configured' : 'not_configured';
+    checks.smtp = smtpStatus;
     const ok = checks.database === 'ok' && checks.redis === 'ok' && maintenanceWorker.isRunning() && emailWorker.isRunning();
     res.writeHead(ok ? 200 : 503, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ status: ok ? 'ok' : 'error', service: 'fandom-worker', checks }));

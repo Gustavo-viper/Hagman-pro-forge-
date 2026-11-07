@@ -10,7 +10,7 @@ Tudo roda em **um único projeto Railway** (`Trilha Demo`): aplicação, banco d
 | `fandom-postgres` | template **PostgreSQL** | — | gerenciado (volume persistente) |
 | `fandom-redis` | template **Redis** | — | gerenciado (volume persistente) |
 
-Dependência externa opcional: um **provedor SMTP** para entregar os e-mails de verificação e de redefinição de senha (ex.: Resend, Amazon SES, Brevo, Mailgun, Postmark — todos expõem SMTP).
+Dependência externa: um **provedor SMTP** (atualmente Gmail com senha de app) para entregar os e-mails de verificação e de redefinição de senha (ex.: Resend, Amazon SES, Brevo, Mailgun, Postmark — todos expõem SMTP).
 
 ---
 
@@ -67,9 +67,18 @@ DATABASE_URL=${{fandom-postgres.DATABASE_URL}}
 DATABASE_SSL=disable
 REDIS_URL=${{fandom-redis.REDIS_URL}}
 SUBSCRIPTION_GRACE_DAYS=3
-SMTP_URL=<smtps://usuario:senha@smtp.provedor.com:465>
-EMAIL_FROM=Fandom Universe <no-reply@seu-dominio.com>
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=465
+SMTP_USER=forgestudios.contato@gmail.com
+SMTP_PASSWORD=<senha de app de 16 letras, sem espaços>
+EMAIL_FROM=Fandom Universe <forgestudios.contato@gmail.com>
 ```
+
+#### Gmail (configuração atual, sem domínio próprio)
+1. Na conta Google: *Segurança → Verificação em duas etapas* (obrigatória) → *Senhas de app* → crie "Fandom Universe" e copie a senha de 16 letras.
+2. Preencha as variáveis acima em `fandom-worker` (o plano Pro da Railway libera SMTP de saída).
+3. Nos *Deploy Logs* do worker deve aparecer `smtp connection verified`; `GET /health` do worker mostra `"smtp":"ok"`.
+4. Limites: ~500 destinatários/dia; o remetente precisa ser o próprio Gmail. Ao ter domínio, troque para um provedor transacional (Resend, Brevo, SES) mudando apenas essas variáveis e configure SPF/DKIM.
 
 ### fandom-web
 ```
