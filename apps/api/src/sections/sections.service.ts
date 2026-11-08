@@ -44,6 +44,8 @@ export async function objectiveProgress(
       return q(`SELECT count(*)::int AS n FROM game_sessions WHERE user_id = $1 AND universe_id = $2 AND game = 'daily' AND status <> 'active' AND finished_at BETWEEN $3 AND $4`);
     case 'daily_perfect':
       return q(`SELECT count(*)::int AS n FROM game_sessions WHERE user_id = $1 AND universe_id = $2 AND game = 'daily' AND status <> 'active' AND total > 0 AND score = total AND finished_at BETWEEN $3 AND $4`);
+    case 'survival_score':
+      return q(`SELECT COALESCE(max(score), 0)::int AS n FROM game_sessions WHERE user_id = $1 AND universe_id = $2 AND game = 'survival' AND status <> 'active' AND finished_at BETWEEN $3 AND $4`);
     case 'speed_score':
       // Best number of correct answers in a single speed round.
       return q(`SELECT COALESCE(max(score), 0)::int AS n FROM game_sessions WHERE user_id = $1 AND universe_id = $2 AND game = 'speed' AND status <> 'active' AND finished_at BETWEEN $3 AND $4`);
@@ -101,17 +103,18 @@ export class SectionsService {
     const universe = await this.universeWith(slug, null, 'missions');
     const { rows } = await this.db.query<{
       id: string; slug: string; section: string; title: MissionSummary['title']; description: MissionSummary['description'];
-      objective_type: string; objective_count: number; xp_reward: number; ends_at: Date | null;
+      objective_type: string; objective_count: number; xp_reward: number; ends_at: Date | null; premium_plan: 'plus' | 'ultra' | null;
     }>(
-      `SELECT id, slug, section, title, description, objective_type, objective_count, xp_reward, ends_at FROM missions
+      `SELECT id, slug, section, title, description, objective_type, objective_count, xp_reward, ends_at, premium_plan FROM missions
         WHERE universe_id = $1 AND status = 'published' AND (starts_at IS NULL OR starts_at <= now()) AND (ends_at IS NULL OR ends_at > now())
           AND section = ANY($2::text[])
-        ORDER BY section, sort_order, slug`,
+        ORDER BY section, premium_plan NULLS FIRST, sort_order, slug`,
       [universe.id, universe.features],
     );
     return rows.map((r) => ({
       id: r.id, slug: r.slug, section: r.section, title: r.title, description: r.description,
       objectiveType: r.objective_type, objectiveCount: r.objective_count, xpReward: r.xp_reward, endsAt: r.ends_at?.toISOString() ?? null,
+      premiumPlan: r.premium_plan,
     }));
   }
 
@@ -134,14 +137,20 @@ export class SectionsService {
   }
 
   /** Verifies the objective against real activity, then records completion and XP exactly once. */
-  async claimMission(user: AuthenticatedUser, missionId: string): Promise<MissionProgress & { xpAwarded: number }> {
-    const m = await this.db.one<{ id: string; universe_id: string; objective_type: MissionObjective; objective_count: number; xp_reward: number; starts_at: Date | null; ends_at: Date | null }>(
-      "SELECT id, universe_id, objective_type, objective_count, xp_reward, starts_at, ends_at FROM missions WHERE id = $1 AND status = 'published'",
+  async claimMission(user: AuthenticatedUser, missionId: string): Promise<MissionProgress & { xpAwarded: number; xpBonus: number }> {
+    const m = await this.db.one<{ id: string; universe_id: string; objective_type: MissionObjective; objective_count: number; xp_reward: number; starts_at: Date | null; ends_at: Date | null; premium_plan: 'plus' | 'ultra' | null }>(
+      "SELECT id, universe_id, objective_type, objective_count, xp_reward, starts_at, ends_at, premium_plan FROM missions WHERE id = $1 AND status = 'published'",
       [missionId],
     );
     if (!m) throw AppError.notFound('mission_not_found', 'Mission not found');
     if (m.ends_at && m.ends_at <= new Date()) throw AppError.conflict('mission_ended', 'This mission has ended');
     await this.assertMember(user.id, m.universe_id);
+    if (m.premium_plan) {
+      const { planCode } = await this.entitlements.snapshot(user.id);
+      if (PLAN_RANK[planCode] < PLAN_RANK[m.premium_plan]) {
+        throw new AppError('premium_required', `Requires ${m.premium_plan}`, HttpStatus.FORBIDDEN, { requiredPlan: m.premium_plan });
+      }
+    }
     return this.db.transaction(async (tx) => {
       const progress = await objectiveProgress(tx, m.objective_type, user.id, m.universe_id, { from: m.starts_at, to: m.ends_at });
       if (progress < m.objective_count) {
@@ -152,15 +161,17 @@ export class SectionsService {
         [m.id, user.id],
       );
       let xpAwarded = 0;
+      let xpBonus = 0;
       if (ins.rowCount) {
-        const awarded = await this.xp.award(tx, {
+        const r = await this.xp.awardWithBonus(tx, {
           userId: user.id, universeId: m.universe_id, amount: m.xp_reward, source: 'mission', sourceRef: m.id,
           idempotencyKey: `mission:${m.id}:${user.id}`,
         });
-        xpAwarded = awarded ? m.xp_reward : 0;
+        xpAwarded = r.granted ? m.xp_reward : 0;
+        xpBonus = r.bonus;
       }
       const done = await tx.query<{ completed_at: Date }>('SELECT completed_at FROM mission_completions WHERE mission_id = $1 AND user_id = $2', [m.id, user.id]);
-      return { missionId: m.id, progress: m.objective_count, completed: true, completedAt: done.rows[0]!.completed_at.toISOString(), xpAwarded };
+      return { missionId: m.id, progress: m.objective_count, completed: true, completedAt: done.rows[0]!.completed_at.toISOString(), xpAwarded, xpBonus };
     });
   }
 

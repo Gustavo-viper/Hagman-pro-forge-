@@ -11,7 +11,7 @@ import {
   type HangmanGuessInput,
   type SpeedAnswerInput,
 } from '@fandom/schemas';
-import type { DailyChallenge, GameLeaderboardEntry, GamesOverview, HangmanGame, SpeedRound } from '@fandom/types';
+import type { DailyChallenge, GameLeaderboardEntry, GamesOverview, HangmanGame, SpeedRound, SurvivalRound } from '@fandom/types';
 import type { AuthenticatedUser } from '../auth/auth.types.js';
 import { CurrentUser, Public } from '../common/decorators.js';
 import { ZodPipe } from '../common/zod.pipe.js';
@@ -71,6 +71,26 @@ export class GamesController {
   @HttpCode(200)
   finish(@CurrentUser() user: AuthenticatedUser, @Param('id', ParseUUIDPipe) id: string): Promise<SpeedRound> {
     return this.games.finishSpeedRound(user, id);
+  }
+
+  // survival (subscribers)
+  @Throttle(startLimit)
+  @Post('universes/:slug/games/survival')
+  startSurvival(@CurrentUser() user: AuthenticatedUser, @Param('slug', slugPipe) slug: string): Promise<SurvivalRound> {
+    return this.games.startSurvival(user, slug);
+  }
+
+  @Throttle(playLimit)
+  @Post('games/survival/:id/answers')
+  @HttpCode(200)
+  answerSurvival(@CurrentUser() user: AuthenticatedUser, @Param('id', ParseUUIDPipe) id: string, @Body(new ZodPipe(speedAnswerSchema)) body: SpeedAnswerInput): Promise<SurvivalRound> {
+    return this.games.answerSurvival(user, id, body);
+  }
+
+  @Post('games/survival/:id/finish')
+  @HttpCode(200)
+  finishSurvival(@CurrentUser() user: AuthenticatedUser, @Param('id', ParseUUIDPipe) id: string): Promise<SurvivalRound> {
+    return this.games.finishSurvivalRound(user, id);
   }
 
   // hangman

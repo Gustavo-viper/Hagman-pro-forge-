@@ -1,7 +1,7 @@
 import type { HangmanGame } from '@fandom/types';
 import { Badge, Button, Card, cn, Skeleton } from '@fandom/ui';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { Heart, PartyPopper, RotateCcw, Skull, Sparkles } from 'lucide-react';
+import { Heart, PartyPopper, RotateCcw, Skull } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useParams } from 'react-router';
@@ -11,6 +11,7 @@ import { errorMessage } from '@/lib/errors';
 import { localized } from '@/lib/format';
 import { currentLocale } from '@/lib/i18n';
 import { GameShell } from './GameShell';
+import { XpReward } from '@/components/premium';
 
 const LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
 const base = (c: string) => c.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toUpperCase();
@@ -191,7 +192,7 @@ export default function HangmanPage() {
                   ) : (
                     <p className="flex items-center justify-center gap-2 font-display text-2xl font-bold text-red-200"><Skull className="size-6" /> {t('games.hangman.lost', { word: game.word })}</p>
                   )}
-                  {game.xpAwarded > 0 && <Badge variant="gold" className="mt-3 px-3 py-1.5 text-sm"><Sparkles className="size-4" /> +{game.xpAwarded} XP</Badge>}
+                  <XpReward className="mt-3" xp={game.xpAwarded} bonus={game.xpBonus} />
                   {game.status === 'won' && game.xpAwarded === 0 && <p className="mt-3 text-xs text-mist/50">{t('games.hangman.noXp')}</p>}
                   <div className="mt-6 flex flex-wrap justify-center gap-3">
                     <Button loading={start.isPending} onClick={() => start.mutate()}><RotateCcw /> {t('games.hangman.new')}</Button>

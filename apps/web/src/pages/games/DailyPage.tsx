@@ -10,6 +10,7 @@ import { errorMessage } from '@/lib/errors';
 import { localized } from '@/lib/format';
 import { currentLocale } from '@/lib/i18n';
 import { GameShell, optionClass } from './GameShell';
+import { XpReward } from '@/components/premium';
 
 export default function DailyPage() {
   const { slug = '' } = useParams();
@@ -44,7 +45,7 @@ export default function DailyPage() {
               <Card className="mt-6 rounded-3xl p-6 text-center">
                 <p className="text-sm uppercase tracking-[0.3em] text-mist/55">{t('games.daily.yourResult')}</p>
                 <p className="mt-2 font-display text-5xl font-bold">{d.result.score}/{d.result.total}</p>
-                {d.result.xpAwarded > 0 && <Badge variant="gold" className="mt-3 px-3 py-1.5 text-sm"><Sparkles className="size-4" /> +{d.result.xpAwarded} XP</Badge>}
+                <XpReward className="mt-3" xp={d.result.xpAwarded} bonus={d.result.xpBonus} />
                 <p className="mt-3 text-sm text-mist/60">{t('games.daily.comeBack')}</p>
               </Card>
             )}

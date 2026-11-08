@@ -19,6 +19,7 @@ import { CommunityTab } from '@/components/universe/CommunityTab';
 import { ArchiveTab, EventsTab, MissionsTab, StandingsCard } from '@/components/universe/SectionTabs';
 import { GamesPanel } from '@/components/universe/GamesPanel';
 import NotFoundPage from './NotFoundPage';
+import { PlanName } from '@/components/premium';
 
 type Tab = 'overview' | 'quizzes' | 'archive' | 'community' | 'missions' | 'events' | 'ranking';
 
@@ -252,7 +253,7 @@ function RankingTab({ universe }: { universe: UniverseDetail }) {
                   {e.rank <= 3 ? <Medal className="size-4" /> : e.rank}
                 </span>
                 <div className="min-w-0 flex-1">
-                  <p className="truncate font-semibold">{e.displayName ?? e.username ?? '—'}{mine && <span className="text-xs text-mist/50"> · {t('ranking.you')}</span>}</p>
+                  <p className="flex min-w-0 items-center gap-1 font-semibold"><PlanName name={e.displayName ?? e.username ?? '—'} plan={e.plan} />{mine && <span className="shrink-0 text-xs text-mist/50"> · {t('ranking.you')}</span>}</p>
                   <p className="truncate text-xs text-mist/55">{e.username ? `@${e.username}` : ''}{identityName(e.identity) ? ` · ${identityName(e.identity)}` : ''}</p>
                 </div>
                 <div className="text-right">

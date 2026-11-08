@@ -2,7 +2,7 @@ import type { QuizAttemptResult } from '@fandom/types';
 import { Badge, Button, Card, cn, Progress, Skeleton } from '@fandom/ui';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { AnimatePresence, motion } from 'framer-motion';
-import { ArrowLeft, ArrowRight, Check, PartyPopper, Radio, RotateCcw, Sparkles, X } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Check, PartyPopper, Radio, RotateCcw, X } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useParams, useSearchParams } from 'react-router';
@@ -13,6 +13,7 @@ import { api } from '@/lib/api';
 import { errorMessage } from '@/lib/errors';
 import { localized } from '@/lib/format';
 import { currentLocale } from '@/lib/i18n';
+import { XpReward } from '@/components/premium';
 
 export default function QuizPage() {
   const { slug = '', quizId = '' } = useParams();
@@ -78,10 +79,8 @@ export default function QuizPage() {
                 <p className="relative mt-2 text-mist/70">{t(result.score === result.total ? 'quiz.perfect' : result.score >= result.total / 2 ? 'quiz.good' : 'quiz.keepTrying')}</p>
               </>
             )}
-            <div className="relative mt-6 flex flex-wrap justify-center gap-2">
-              <Badge variant="gold" className="px-3 py-1.5 text-sm"><Sparkles className="size-4" /> +{result.xpAwarded} XP</Badge>
-              {result.xpRemaining > 0 && <Badge className="px-3 py-1.5 text-sm">{t('quiz.remaining', { xp: result.xpRemaining })}</Badge>}
-            </div>
+            <XpReward className="relative mt-6" xp={result.xpAwarded} bonus={result.xpBonus} />
+            {result.xpRemaining > 0 && <Badge className="relative mt-2 px-3 py-1.5 text-sm">{t('quiz.remaining', { xp: result.xpRemaining })}</Badge>}
             {result.xpAwarded === 0 && result.xpRemaining === 0 && <p className="relative mt-3 text-xs text-mist/50">{t('quiz.noMoreXp')}</p>}
           </Card>
 

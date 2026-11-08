@@ -5,6 +5,7 @@ import type { AdminEvent, EventLeaderboardEntry, EventMessage, EventRoom, Univer
 import { AuditService } from '../audit/audit.service.js';
 import type { AuthenticatedUser } from '../auth/auth.types.js';
 import { AppError } from '../common/app-error.js';
+import { planBadge } from '../common/plan-badge.js';
 import { ENV } from '../config/config.module.js';
 import type { Env } from '../config/env.js';
 import { DatabaseService } from '../database/database.service.js';
@@ -75,8 +76,8 @@ export class EventRoomService {
   }
 
   private async messages(eventId: string, userId: string, limit = 100): Promise<EventMessage[]> {
-    const { rows } = await this.db.query<{ id: number; body: string; created_at: Date; user_id: string; username: string | null; display_name: string | null; identity: string | null }>(
-      `SELECT m.id, m.body, m.created_at, m.user_id, p.username, p.display_name, up.identity->>'key' AS identity
+    const { rows } = await this.db.query<{ id: number; body: string; created_at: Date; user_id: string; username: string | null; display_name: string | null; identity: string | null; plan: string }>(
+      `SELECT m.id, m.body, m.created_at, m.user_id, p.username, p.display_name, up.identity->>'key' AS identity, public.effective_plan(m.user_id) AS plan
          FROM event_messages m
          JOIN events e ON e.id = m.event_id
          JOIN profiles p ON p.user_id = m.user_id
@@ -87,7 +88,7 @@ export class EventRoomService {
     );
     return rows.reverse().map((r) => ({
       id: Number(r.id), body: r.body, createdAt: r.created_at.toISOString(), mine: r.user_id === userId,
-      author: { id: r.user_id, username: r.username, displayName: r.display_name, identity: r.identity },
+      author: { id: r.user_id, username: r.username, displayName: r.display_name, identity: r.identity, plan: planBadge(r.plan) },
     }));
   }
 
@@ -95,8 +96,8 @@ export class EventRoomService {
   private async leaderboard(e: EventRow): Promise<EventLeaderboardEntry[]> {
     if (!e.quiz_id) return [];
     const { opensAt, closesAt } = this.window(e);
-    const { rows } = await this.db.query<{ user_id: string; score: number; total: number; finished_at: Date; username: string | null; display_name: string | null }>(
-      `SELECT DISTINCT ON (a.user_id) a.user_id, a.score, a.total, a.created_at AS finished_at, p.username, p.display_name
+    const { rows } = await this.db.query<{ user_id: string; score: number; total: number; finished_at: Date; username: string | null; display_name: string | null; plan: string }>(
+      `SELECT DISTINCT ON (a.user_id) a.user_id, a.score, a.total, a.created_at AS finished_at, p.username, p.display_name, public.effective_plan(a.user_id) AS plan
          FROM quiz_attempts a
          JOIN event_participants ep ON ep.event_id = $1 AND ep.user_id = a.user_id
          JOIN profiles p ON p.user_id = a.user_id
@@ -107,7 +108,7 @@ export class EventRoomService {
     return rows
       .sort((a, b) => b.score - a.score || a.finished_at.getTime() - b.finished_at.getTime())
       .slice(0, 50)
-      .map((r, i) => ({ rank: i + 1, userId: r.user_id, username: r.username, displayName: r.display_name, score: r.score, total: r.total, finishedAt: r.finished_at.toISOString() }));
+      .map((r, i) => ({ rank: i + 1, userId: r.user_id, username: r.username, displayName: r.display_name, plan: planBadge(r.plan), score: r.score, total: r.total, finishedAt: r.finished_at.toISOString() }));
   }
 
   async room(user: AuthenticatedUser, eventId: string): Promise<EventRoom> {

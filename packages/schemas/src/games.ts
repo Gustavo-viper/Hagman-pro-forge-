@@ -15,5 +15,5 @@ export type SpeedAnswerInput = z.infer<typeof speedAnswerSchema>;
 export const hangmanGuessSchema = z.object({ letter: z.string().regex(/^[A-Za-z]$/, 'invalid_letter').transform((v) => v.toUpperCase()) });
 export type HangmanGuessInput = z.infer<typeof hangmanGuessSchema>;
 
-export const gameLeaderboardQuerySchema = z.object({ game: z.enum(['daily', 'speed', 'hangman']).default('daily') });
+export const gameLeaderboardQuerySchema = z.object({ game: z.enum(['daily', 'speed', 'hangman', 'survival']).default('daily') });
 export type GameLeaderboardQuery = z.infer<typeof gameLeaderboardQuerySchema>;

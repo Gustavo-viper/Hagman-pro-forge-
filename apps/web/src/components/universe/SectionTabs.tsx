@@ -1,4 +1,4 @@
-import { FEATURE_ENGINE } from '@fandom/shared';
+import { FEATURE_ENGINE, PLAN_RANK, PREMIUM_CATEGORIES } from '@fandom/shared';
 import type { IdentityStanding, LoreEntry, MissionProgress, MissionSummary, UniverseEvent } from '@fandom/types';
 import { Badge, Button, cn, Progress, Skeleton } from '@fandom/ui';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -13,6 +13,7 @@ import { api } from '@/lib/api';
 import { errorMessage } from '@/lib/errors';
 import { formatNumber, localized } from '@/lib/format';
 import { currentLocale } from '@/lib/i18n';
+import { PlanBadge, useMyPlan, XpReward } from '@/components/premium';
 
 export function featuresOf(universe: UniverseDetail, engine: string): string[] {
   return universe.features.filter((f) => FEATURE_ENGINE[f] === engine);
@@ -35,6 +36,7 @@ export function SectionChips({ keys, value, onChange }: { keys: string[]; value:
             value === k ? 'border-[color:var(--u-accent)] bg-[color:var(--u-primary)]/40 text-white' : 'border-white/10 bg-white/5 text-mist/70 hover:text-mist',
           )}
         >
+          {PREMIUM_CATEGORIES[k] && <Crown className="mr-1 inline size-3.5 text-gold-300" />}
           {t(`universe.featureNames.${k}`)}
         </button>
       ))}
@@ -87,6 +89,7 @@ export function MissionsTab({ universe, isMember }: { universe: UniverseDetail; 
   const locale = currentLocale();
   const { session } = useAuth();
   const qc = useQueryClient();
+  const plan = useMyPlan();
   const missions = useQuery({
     queryKey: ['universes', universe.slug, 'missions'],
     queryFn: ({ signal }) => api<{ items: MissionSummary[] }>(`/v1/universes/${universe.slug}/missions`, { signal, auth: false }).then((r) => r.items),
@@ -97,13 +100,14 @@ export function MissionsTab({ universe, isMember }: { universe: UniverseDetail; 
     enabled: Boolean(session && isMember),
   });
   const claim = useMutation({
-    mutationFn: (id: string) => api<MissionProgress & { xpAwarded: number }>(`/v1/missions/${id}/claim`, { method: 'POST' }),
+    mutationFn: (id: string) => api<MissionProgress & { xpAwarded: number; xpBonus: number }>(`/v1/missions/${id}/claim`, { method: 'POST' }),
     onSuccess: () => void qc.invalidateQueries({ queryKey: ['me'] }),
   });
   if (missions.isPending) return <div className="space-y-3">{[0, 1, 2].map((i) => <Skeleton key={i} className="h-28" />)}</div>;
   if (missions.isError) return <ErrorState error={missions.error} onRetry={() => void missions.refetch()} />;
   if (missions.data.length === 0) return <EmptyState>{t('sections.noMissions')}</EmptyState>;
   const sections = [...new Set(missions.data.map((m) => m.section))];
+  const allowed = (m: MissionSummary) => !m.premiumPlan || PLAN_RANK[plan] >= PLAN_RANK[m.premiumPlan];
   return (
     <div className="space-y-10">
       {sections.map((sec) => (
@@ -114,10 +118,13 @@ export function MissionsTab({ universe, isMember }: { universe: UniverseDetail; 
               const p = progress.data?.find((x) => x.missionId === m.id);
               const ready = p && !p.completed && p.progress >= m.objectiveCount;
               return (
-                <div key={m.id} className="glass flex flex-col rounded-2xl p-5">
+                <div key={m.id} className={cn('glass flex flex-col rounded-2xl p-5', m.premiumPlan && 'border-gold-300/30 bg-[linear-gradient(160deg,rgb(232_182_76/0.10),rgb(255_255_255/0.02))]')}>
                   <div className="flex items-center gap-2">
-                    <span className="grid size-9 place-items-center rounded-lg bg-[color:var(--u-primary)]/40 text-[color:var(--u-glow)]"><Target className="size-4" /></span>
+                    <span className={cn('grid size-9 place-items-center rounded-lg', m.premiumPlan ? 'bg-gold-400/20 text-gold-200' : 'bg-[color:var(--u-primary)]/40 text-[color:var(--u-glow)]')}>
+                      {m.premiumPlan ? <Crown className="size-4" /> : <Target className="size-4" />}
+                    </span>
                     <h4 className="flex-1 font-semibold">{localized(m.title, locale)}</h4>
+                    {m.premiumPlan && <PlanBadge plan={m.premiumPlan} />}
                     <Badge variant="gold">+{m.xpReward} XP</Badge>
                   </div>
                   <p className="mt-2 flex-1 text-sm text-mist/65">{localized(m.description, locale)}</p>
@@ -130,6 +137,10 @@ export function MissionsTab({ universe, isMember }: { universe: UniverseDetail; 
                   <div className="mt-4">
                     {!session || !isMember ? (
                       <p className="text-sm text-mist/55">{t('universe.identityJoinFirst')}</p>
+                    ) : !allowed(m) ? (
+                      <Button asChild size="sm" variant="gold">
+                        <Link to="/premium"><Lock /> {t('premiumPerks.unlockWith', { plan: t(`dashboard.planNames.${m.premiumPlan}`) })}</Link>
+                      </Button>
                     ) : p?.completed ? (
                       <Badge variant="success" className="px-3 py-1.5"><Check className="size-4" /> {t('sections.missionDone')}</Badge>
                     ) : (
@@ -145,7 +156,12 @@ export function MissionsTab({ universe, isMember }: { universe: UniverseDetail; 
         </section>
       ))}
       {claim.isError && <p role="alert" className="text-sm text-red-300">{errorMessage(claim.error, t)}</p>}
-      {claim.isSuccess && claim.data.xpAwarded > 0 && <p className="text-sm text-emerald-300">{t('sections.claimed', { xp: claim.data.xpAwarded })}</p>}
+      {claim.isSuccess && claim.data.xpAwarded > 0 && (
+        <div className="flex flex-col items-start gap-2">
+          <p className="text-sm text-emerald-300">{t('sections.claimed', { xp: claim.data.xpAwarded })}</p>
+          <XpReward xp={claim.data.xpAwarded} bonus={claim.data.xpBonus} className="items-start" />
+        </div>
+      )}
     </div>
   );
 }

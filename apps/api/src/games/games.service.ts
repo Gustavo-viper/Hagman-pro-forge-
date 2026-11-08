@@ -1,5 +1,6 @@
 import { randomInt } from 'node:crypto';
 import { HttpStatus, Injectable } from '@nestjs/common';
+import { PLAN_RANK, PREMIUM_PERKS, type PlanCode } from '@fandom/shared';
 import type { DailySubmitInput, GameLeaderboardQuery, SpeedAnswerInput } from '@fandom/schemas';
 import type {
   DailyChallenge,
@@ -11,9 +12,11 @@ import type {
   HangmanGame,
   LocalizedText,
   SpeedRound,
+  SurvivalRound,
 } from '@fandom/types';
 import type { AuthenticatedUser } from '../auth/auth.types.js';
 import { AppError } from '../common/app-error.js';
+import { planBadge } from '../common/plan-badge.js';
 import { DatabaseService, type Queryable } from '../database/database.service.js';
 import { RedisService } from '../redis/redis.service.js';
 import { UniversesService } from '../universes/universes.service.js';
@@ -26,12 +29,13 @@ export const DAILY_PERFECT_BONUS = 10;
 export const SPEED_SECONDS = 60;
 const SPEED_GRACE_MS = 3_000;
 export const SPEED_XP_PER_CORRECT = 3;
-export const SPEED_DAILY_XP_CAP = 60;
 const SPEED_MAX_QUESTIONS = 60;
 export const HANGMAN_LIVES = 6;
 export const HANGMAN_WIN_XP = 15;
-export const HANGMAN_REWARDED_WINS_PER_DAY = 5;
 const HANGMAN_AVOID_RECENT = 15;
+export const SURVIVAL_QUESTION_SECONDS = 20;
+export const SURVIVAL_XP_PER_CORRECT = 2;
+const SURVIVAL_GRACE_MS = 2_000;
 
 /** Start of "today" in the games timezone, as a SQL expression. */
 const TODAY_START = `(date_trunc('day', now() AT TIME ZONE '${GAME_TZ}') AT TIME ZONE '${GAME_TZ}')`;
@@ -48,17 +52,19 @@ interface SessionRow {
   id: string;
   user_id: string;
   universe_id: string;
-  game: 'daily' | 'speed' | 'hangman';
+  game: 'daily' | 'speed' | 'hangman' | 'survival';
   status: 'active' | 'won' | 'lost' | 'finished';
   state: Record<string, unknown>;
   score: number;
   total: number;
   xp_awarded: number;
+  xp_bonus: number;
   started_at: Date;
   finished_at: Date | null;
 }
 
 interface SpeedState { order: string[]; index: number; deadline: string; last?: SpeedRound['last'] }
+interface SurvivalState { order: string[]; index: number; questionDeadline: string; last?: SurvivalRound['last'] }
 interface HangmanState { wordId: string; word: string; hint: LocalizedText; guessed: string[] }
 
 const publicQuestion = (q: PoolQuestion): GameQuestion => ({
@@ -140,10 +146,23 @@ export class GamesService {
     return rows;
   }
 
+  private async planOf(db: Queryable, userId: string): Promise<PlanCode> {
+    const { rows } = await db.query<{ plan: PlanCode }>('SELECT public.effective_plan($1) AS plan', [userId]);
+    return rows[0]?.plan ?? 'free';
+  }
+
+  /** Grants base XP (+ premium bonus) for a session and records both on it. */
+  private async grant(tx: Queryable, s: { id: string; user_id: string; universe_id: string }, amount: number, ref: string): Promise<number> {
+    if (amount <= 0) return 0;
+    const { bonus } = await this.xp.awardWithBonus(tx, { userId: s.user_id, universeId: s.universe_id, amount, source: 'game', sourceRef: ref, idempotencyKey: `game:${ref}:${s.id}` });
+    if (bonus > 0) await tx.query('UPDATE game_sessions SET xp_bonus = $2 WHERE id = $1', [s.id, bonus]);
+    return bonus;
+  }
+
   private async invalidateRankings(universeId: string): Promise<void> {
     await this.redis.invalidate(
       ...['all', 'month', 'week'].map((p) => `ranking:v1:${universeId}:${p}`),
-      ...['daily', 'speed', 'hangman'].map((g) => `games:board:v1:${universeId}:${g}`),
+      ...['daily', 'speed', 'hangman', 'survival'].map((g) => `games:board:v1:${universeId}:${g}`),
     );
   }
 
@@ -199,7 +218,7 @@ export class GamesService {
       const answers = (played.state.answers ?? {}) as Record<string, string>;
       const order = (played.state.order ?? Object.keys(answers)) as string[];
       questions = (await this.pool(universe.id, order)).sort((a, b) => order.indexOf(a.id) - order.indexOf(b.id));
-      result = { score: played.score, total: played.total, xpAwarded: played.xp_awarded, finishedAt: played.finished_at!.toISOString(), review: this.review(questions, answers) };
+      result = { score: played.score, total: played.total, xpAwarded: played.xp_awarded, xpBonus: played.xp_bonus, finishedAt: played.finished_at!.toISOString(), review: this.review(questions, answers) };
     } else {
       questions = await this.dailyQuestions(universe.id, day);
     }
@@ -242,9 +261,7 @@ export class GamesService {
         [user.id, universe.id, JSON.stringify({ answers, order: questions.map((q) => q.id) }), score, total, xp, day],
       );
       if (!rows[0]) throw AppError.conflict('daily_already_played', 'You already played today\'s challenge');
-      if (xp > 0) {
-        await this.xp.award(tx, { userId: user.id, universeId: universe.id, amount: xp, source: 'game', sourceRef: `daily:${day}`, idempotencyKey: `game:daily:${rows[0].id}` });
-      }
+      await this.grant(tx, { id: rows[0].id, user_id: user.id, universe_id: universe.id }, xp, 'daily');
     });
     await this.invalidateRankings(universe.id);
     return this.daily(user, slug);
@@ -265,11 +282,12 @@ export class GamesService {
       answered: st.index,
       question: question ? publicQuestion(question) : null,
       xpAwarded: s.xp_awarded,
+      xpBonus: s.xp_bonus,
       ...(st.last ? { last: st.last } : {}),
     };
   }
 
-  /** Closes a speed round once and grants XP within the daily cap. */
+  /** Closes a speed round once and grants XP within the plan's daily cap. */
   private async finishSpeed(tx: Queryable, s: SessionRow): Promise<SessionRow> {
     if (s.status !== 'active') return s;
     const today = await tx.query<{ xp: number }>(
@@ -277,15 +295,15 @@ export class GamesService {
         WHERE user_id = $1 AND universe_id = $2 AND game = 'speed' AND status <> 'active' AND finished_at >= ${TODAY_START}`,
       [s.user_id, s.universe_id],
     );
-    const xp = Math.max(0, Math.min(s.score * SPEED_XP_PER_CORRECT, SPEED_DAILY_XP_CAP - today.rows[0]!.xp));
+    const cap = PREMIUM_PERKS.speedDailyXpCap[await this.planOf(tx, s.user_id)];
+    const xp = Math.max(0, Math.min(s.score * SPEED_XP_PER_CORRECT, cap - today.rows[0]!.xp));
     const { rows } = await tx.query<SessionRow>(
       "UPDATE game_sessions SET status = 'finished', finished_at = now(), xp_awarded = $2 WHERE id = $1 AND status = 'active' RETURNING *",
       [s.id, xp],
     );
-    if (rows[0] && xp > 0) {
-      await this.xp.award(tx, { userId: s.user_id, universeId: s.universe_id, amount: xp, source: 'game', sourceRef: 'speed', idempotencyKey: `game:speed:${s.id}` });
-    }
-    return rows[0] ?? s;
+    if (!rows[0]) return s;
+    const bonus = await this.grant(tx, s, xp, 'speed');
+    return { ...rows[0], xp_bonus: bonus };
   }
 
   async startSpeed(user: AuthenticatedUser, slug: string): Promise<SpeedRound> {
@@ -355,6 +373,7 @@ export class GamesService {
       maxLives: HANGMAN_LIVES,
       word: done ? st.word : null,
       xpAwarded: s.xp_awarded,
+      xpBonus: s.xp_bonus,
     };
   }
 
@@ -411,7 +430,7 @@ export class GamesService {
               AND status = 'won' AND xp_awarded > 0 AND finished_at >= ${TODAY_START}`,
           [s.user_id, s.universe_id],
         );
-        xp = today.rows[0]!.n < HANGMAN_REWARDED_WINS_PER_DAY ? HANGMAN_WIN_XP : 0;
+        xp = today.rows[0]!.n < PREMIUM_PERKS.hangmanRewardedWins[await this.planOf(tx, s.user_id)] ? HANGMAN_WIN_XP : 0;
       }
       const { rows } = await tx.query<SessionRow>(
         `UPDATE game_sessions SET state = $2, status = $3, score = $4, xp_awarded = $5,
@@ -419,13 +438,109 @@ export class GamesService {
           WHERE id = $1 RETURNING *`,
         [s.id, JSON.stringify({ ...st, guessed }), won ? 'won' : lost ? 'lost' : 'active', won ? 1 : 0, xp],
       );
-      if (xp > 0) {
-        await this.xp.award(tx, { userId: s.user_id, universeId: s.universe_id, amount: xp, source: 'game', sourceRef: 'hangman', idempotencyKey: `game:hangman:${s.id}` });
-      }
-      return rows[0]!;
+      const bonus = await this.grant(tx, s, xp, 'hangman');
+      return { ...rows[0]!, xp_bonus: bonus };
     });
     if (session.status !== 'active') await this.invalidateRankings(session.universe_id);
     return this.hangmanView(session);
+  }
+
+  // ---------------------------------------------------------------- survival (subscribers)
+
+  private async survivalView(s: SessionRow): Promise<SurvivalRound> {
+    const st = s.state as unknown as SurvivalState;
+    const currentId = s.status === 'active' ? st.order[st.index] : undefined;
+    const question = currentId ? (await this.pool(s.universe_id, [currentId]))[0] : undefined;
+    return {
+      id: s.id,
+      status: s.status === 'active' ? 'active' : 'finished',
+      score: s.score,
+      answered: st.index,
+      question: question ? publicQuestion(question) : null,
+      questionEndsAt: st.questionDeadline,
+      questionSeconds: SURVIVAL_QUESTION_SECONDS,
+      xpAwarded: s.xp_awarded,
+      xpBonus: s.xp_bonus,
+      ...(st.last ? { last: st.last } : {}),
+    };
+  }
+
+  private async finishSurvival(tx: Queryable, s: SessionRow): Promise<SessionRow> {
+    if (s.status !== 'active') return s;
+    const today = await tx.query<{ xp: number }>(
+      `SELECT COALESCE(sum(xp_awarded), 0)::int AS xp FROM game_sessions
+        WHERE user_id = $1 AND universe_id = $2 AND game = 'survival' AND status <> 'active' AND finished_at >= ${TODAY_START}`,
+      [s.user_id, s.universe_id],
+    );
+    const cap = PREMIUM_PERKS.survivalDailyXpCap[await this.planOf(tx, s.user_id)];
+    const xp = Math.max(0, Math.min(s.score * SURVIVAL_XP_PER_CORRECT, cap - today.rows[0]!.xp));
+    const { rows } = await tx.query<SessionRow>(
+      "UPDATE game_sessions SET status = 'finished', finished_at = now(), xp_awarded = $2 WHERE id = $1 AND status = 'active' RETURNING *",
+      [s.id, xp],
+    );
+    if (!rows[0]) return s;
+    const bonus = await this.grant(tx, s, xp, 'survival');
+    return { ...rows[0], xp_bonus: bonus };
+  }
+
+  private async assertPlan(userId: string, required: Exclude<PlanCode, 'free'>): Promise<void> {
+    const plan = await this.planOf(this.db.pool, userId);
+    if (PLAN_RANK[plan] < PLAN_RANK[required]) {
+      throw new AppError('premium_required', `Requires ${required}`, HttpStatus.FORBIDDEN, { requiredPlan: required });
+    }
+  }
+
+  async startSurvival(user: AuthenticatedUser, slug: string): Promise<SurvivalRound> {
+    const universe = await this.memberUniverse(user, slug);
+    await this.assertPlan(user.id, PREMIUM_PERKS.survivalPlan);
+    const pool = await this.pool(universe.id);
+    if (pool.length === 0) throw AppError.notFound('no_questions', 'No questions in this universe yet');
+    const order = shuffle(pool.map((q) => q.id));
+    const session = await this.db.transaction(async (tx) => {
+      await tx.query('SELECT pg_advisory_xact_lock(hashtext($1))', [`survival:${user.id}:${universe.id}`]);
+      const open = await tx.query<SessionRow>("SELECT * FROM game_sessions WHERE user_id = $1 AND universe_id = $2 AND game = 'survival' AND status = 'active' FOR UPDATE", [user.id, universe.id]);
+      for (const o of open.rows) await this.finishSurvival(tx, o);
+      const questionDeadline = new Date(Date.now() + SURVIVAL_QUESTION_SECONDS * 1000).toISOString();
+      const { rows } = await tx.query<SessionRow>(
+        "INSERT INTO game_sessions (user_id, universe_id, game, state, total) VALUES ($1, $2, 'survival', $3, $4) RETURNING *",
+        [user.id, universe.id, JSON.stringify({ order, index: 0, questionDeadline } satisfies SurvivalState), order.length],
+      );
+      return rows[0]!;
+    });
+    await this.invalidateRankings(universe.id);
+    return this.survivalView(session);
+  }
+
+  /** One mistake (or running out of time on a question) ends the run. */
+  async answerSurvival(user: AuthenticatedUser, id: string, input: SpeedAnswerInput): Promise<SurvivalRound> {
+    await this.assertPlan(user.id, PREMIUM_PERKS.survivalPlan);
+    const session = await this.db.transaction(async (tx) => {
+      const s = await this.lockSession(tx, user, id, 'survival');
+      if (s.status !== 'active') throw AppError.conflict('game_finished', 'This run is over');
+      const st = s.state as unknown as SurvivalState;
+      if (st.order[st.index] !== input.questionId) throw AppError.conflict('wrong_question', 'Answer the current question');
+      const q = (await this.pool(s.universe_id, [input.questionId]))[0];
+      if (!q) throw AppError.notFound('quiz_not_found', 'Question not found');
+      if (!q.options.some((o) => o.key === input.key)) throw new AppError('incomplete_answers', 'Invalid option', HttpStatus.UNPROCESSABLE_ENTITY);
+      const late = Date.now() > Date.parse(st.questionDeadline) + SURVIVAL_GRACE_MS;
+      const correct = !late && q.correct_key === input.key;
+      const next: SurvivalState = {
+        ...st,
+        index: st.index + 1,
+        questionDeadline: new Date(Date.now() + SURVIVAL_QUESTION_SECONDS * 1000).toISOString(),
+        last: { questionId: q.id, correct, correctKey: q.correct_key, timedOut: late },
+      };
+      const { rows } = await tx.query<SessionRow>('UPDATE game_sessions SET state = $2, score = score + $3 WHERE id = $1 RETURNING *', [s.id, JSON.stringify(next), correct ? 1 : 0]);
+      return !correct || next.index >= st.order.length ? this.finishSurvival(tx, rows[0]!) : rows[0]!;
+    });
+    if (session.status !== 'active') await this.invalidateRankings(session.universe_id);
+    return this.survivalView(session);
+  }
+
+  async finishSurvivalRound(user: AuthenticatedUser, id: string): Promise<SurvivalRound> {
+    const session = await this.db.transaction(async (tx) => this.finishSurvival(tx, await this.lockSession(tx, user, id, 'survival')));
+    await this.invalidateRankings(session.universe_id);
+    return this.survivalView(session);
   }
 
   // ---------------------------------------------------------------- overview & leaderboards
@@ -434,15 +549,19 @@ export class GamesService {
     const universe = await this.universes.getActive(slug);
     const day = await this.today();
     const args = [user.id, universe.id];
-    const [daily, speed, hangman] = await Promise.all([
-      this.db.one<{ score: number; total: number }>("SELECT score, total FROM game_sessions WHERE user_id = $1 AND universe_id = $2 AND game = 'daily' AND day = $3", [...args, day]),
+    const stats = (game: string) =>
       this.db.one<{ best: number; week: number; today_xp: number }>(
         `SELECT COALESCE(max(score), 0)::int AS best,
                 COALESCE(max(score) FILTER (WHERE finished_at > now() - interval '7 days'), 0)::int AS week,
                 COALESCE(sum(xp_awarded) FILTER (WHERE finished_at >= ${TODAY_START}), 0)::int AS today_xp
-           FROM game_sessions WHERE user_id = $1 AND universe_id = $2 AND game = 'speed' AND status <> 'active'`,
-        args,
-      ),
+           FROM game_sessions WHERE user_id = $1 AND universe_id = $2 AND game = $3 AND status <> 'active'`,
+        [...args, game],
+      );
+    const [plan, daily, speed, survival, hangman] = await Promise.all([
+      this.planOf(this.db.pool, user.id),
+      this.db.one<{ score: number; total: number }>("SELECT score, total FROM game_sessions WHERE user_id = $1 AND universe_id = $2 AND game = 'daily' AND day = $3", [...args, day]),
+      stats('speed'),
+      stats('survival'),
       this.db.one<{ wins: number; played: number; rewarded_today: number; active_id: string | null }>(
         `SELECT count(*) FILTER (WHERE status = 'won')::int AS wins,
                 count(*) FILTER (WHERE status <> 'active')::int AS played,
@@ -452,40 +571,55 @@ export class GamesService {
         args,
       ),
     ]);
+    const limits = {
+      speedDailyXp: PREMIUM_PERKS.speedDailyXpCap[plan],
+      hangmanRewardedWins: PREMIUM_PERKS.hangmanRewardedWins[plan],
+      survivalDailyXp: PREMIUM_PERKS.survivalDailyXpCap[plan],
+      xpBonusPercent: PREMIUM_PERKS.xpBonusPercent[plan],
+    };
     return {
+      plan,
+      limits,
       daily: { playedToday: Boolean(daily), score: daily?.score ?? null, total: daily?.total ?? null, streak: await this.streak(user.id, universe.id, day) },
-      speed: { best: speed?.best ?? 0, weekBest: speed?.week ?? 0, xpLeftToday: Math.max(0, SPEED_DAILY_XP_CAP - (speed?.today_xp ?? 0)) },
+      speed: { best: speed?.best ?? 0, weekBest: speed?.week ?? 0, xpLeftToday: Math.max(0, limits.speedDailyXp - (speed?.today_xp ?? 0)) },
+      survival: {
+        available: PLAN_RANK[plan] >= PLAN_RANK[PREMIUM_PERKS.survivalPlan],
+        best: survival?.best ?? 0,
+        weekBest: survival?.week ?? 0,
+        xpLeftToday: Math.max(0, limits.survivalDailyXp - (survival?.today_xp ?? 0)),
+      },
       hangman: {
         wins: hangman?.wins ?? 0,
         played: hangman?.played ?? 0,
-        rewardedWinsLeft: Math.max(0, HANGMAN_REWARDED_WINS_PER_DAY - (hangman?.rewarded_today ?? 0)),
+        rewardedWinsLeft: Math.max(0, limits.hangmanRewardedWins - (hangman?.rewarded_today ?? 0)),
         activeId: hangman?.active_id ?? null,
       },
     };
   }
 
-  /** daily: today's results · speed: best round in 7 days · hangman: wins in 7 days. */
+  /** daily: today's results · speed/survival: best run in 7 days · hangman: wins in 7 days. */
   async leaderboard(slug: string, q: GameLeaderboardQuery): Promise<GameLeaderboardEntry[]> {
     const universe = await this.universes.getActive(slug);
     return this.redis.cached(`games:board:v1:${universe.id}:${q.game}`, 15, async () => {
       const people = `JOIN users u ON u.id = s.user_id AND u.status = 'active' JOIN profiles p ON p.user_id = s.user_id`;
+      const who = `s.user_id, p.username, p.display_name, public.effective_plan(s.user_id) AS plan`;
       const sql =
         q.game === 'daily'
-          ? `SELECT s.user_id, p.username, p.display_name, s.score, s.total FROM game_sessions s ${people}
+          ? `SELECT ${who}, s.score, s.total FROM game_sessions s ${people}
               WHERE s.universe_id = $1 AND s.game = 'daily' AND s.day = (now() AT TIME ZONE '${GAME_TZ}')::date
               ORDER BY s.score DESC, s.finished_at ASC LIMIT 20`
-          : q.game === 'speed'
+          : q.game === 'speed' || q.game === 'survival'
             ? `SELECT * FROM (
-                 SELECT DISTINCT ON (s.user_id) s.user_id, p.username, p.display_name, s.score, NULL::int AS total, s.finished_at FROM game_sessions s ${people}
-                  WHERE s.universe_id = $1 AND s.game = 'speed' AND s.status <> 'active' AND s.score > 0 AND s.finished_at > now() - interval '7 days'
+                 SELECT DISTINCT ON (s.user_id) ${who}, s.score, NULL::int AS total, s.finished_at FROM game_sessions s ${people}
+                  WHERE s.universe_id = $1 AND s.game = '${q.game}' AND s.status <> 'active' AND s.score > 0 AND s.finished_at > now() - interval '7 days'
                   ORDER BY s.user_id, s.score DESC, s.finished_at ASC) b
                ORDER BY score DESC, finished_at ASC LIMIT 20`
-            : `SELECT s.user_id, p.username, p.display_name, count(*)::int AS score, NULL::int AS total FROM game_sessions s ${people}
+            : `SELECT ${who}, count(*)::int AS score, NULL::int AS total FROM game_sessions s ${people}
                 WHERE s.universe_id = $1 AND s.game = 'hangman' AND s.status = 'won' AND s.finished_at > now() - interval '7 days'
                 GROUP BY s.user_id, p.username, p.display_name
                 ORDER BY score DESC, max(s.finished_at) ASC LIMIT 20`;
-      const { rows } = await this.db.query<{ user_id: string; username: string | null; display_name: string | null; score: number; total: number | null }>(sql, [universe.id]);
-      return rows.map((r, i) => ({ rank: i + 1, userId: r.user_id, username: r.username, displayName: r.display_name, score: r.score, total: r.total }));
+      const { rows } = await this.db.query<{ user_id: string; username: string | null; display_name: string | null; plan: string; score: number; total: number | null }>(sql, [universe.id]);
+      return rows.map((r, i) => ({ rank: i + 1, userId: r.user_id, username: r.username, displayName: r.display_name, plan: planBadge(r.plan), score: r.score, total: r.total }));
     });
   }
 }

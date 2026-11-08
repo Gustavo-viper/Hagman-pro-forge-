@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import type { XpSource } from '@fandom/shared';
+import { premiumBonus, XP_BONUS_SOURCES, type PlanCode, type XpSource } from '@fandom/shared';
 import type { Queryable } from '../database/database.service.js';
 
 export interface XpAward {
@@ -40,5 +40,21 @@ export class XpService {
       );
     }
     return true;
+  }
+
+  /**
+   * Grants the base reward and, for subscribers, the premium bonus as a separate ledger
+   * entry (`{key}:premium`). Returns the bonus actually granted (0 for Free or replays).
+   */
+  async awardWithBonus(tx: Queryable, award: XpAward): Promise<{ granted: boolean; bonus: number; plan: PlanCode }> {
+    const { rows } = await tx.query<{ plan: PlanCode }>('SELECT public.effective_plan($1) AS plan', [award.userId]);
+    const plan = rows[0]?.plan ?? 'free';
+    const granted = await this.award(tx, award);
+    if (!granted || !(XP_BONUS_SOURCES as readonly string[]).includes(award.source)) return { granted, bonus: 0, plan };
+    const bonus = premiumBonus(award.amount, plan);
+    if (bonus > 0) {
+      await this.award(tx, { ...award, amount: bonus, sourceRef: `premium:${plan}`, idempotencyKey: `${award.idempotencyKey}:premium` });
+    }
+    return { granted, bonus, plan };
   }
 }

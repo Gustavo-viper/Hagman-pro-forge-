@@ -14,6 +14,7 @@ import { api } from '@/lib/api';
 import { errorMessage } from '@/lib/errors';
 import { localized } from '@/lib/format';
 import { currentLocale } from '@/lib/i18n';
+import { PlanName } from '@/components/premium';
 
 function useCountdown(target: string | undefined): string | null {
   const [now, setNow] = useState(Date.now());
@@ -187,7 +188,7 @@ export default function EventRoomPage() {
                         <span className={cn('grid size-7 place-items-center rounded-full text-xs font-bold', l.rank <= 3 ? 'bg-gold-400/20 text-gold-200' : 'bg-white/5 text-mist/60')}>
                           {l.rank <= 3 ? <Medal className="size-3.5" /> : l.rank}
                         </span>
-                        <span className="flex-1 truncate">{l.displayName ?? l.username}</span>
+                        <PlanName name={l.displayName ?? l.username ?? '—'} plan={l.plan} className="flex-1" />
                         <span className="font-semibold">{l.score}/{l.total}</span>
                       </li>
                     ))}

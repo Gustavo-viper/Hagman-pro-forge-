@@ -87,7 +87,8 @@ test('speed round: answer every question before the clock ends and land on the b
     await page.waitForTimeout(550);
   }
   await expect(page.getByText('Tempo esgotado')).toBeVisible();
-  await expect(page.getByText(/\+\d+ XP/)).toBeVisible();
+  await expect(page.getByText(/\+\d+ XP$/)).toBeVisible();
+  await expect(page.getByText(/Com o Fandom Plus você ganharia/)).toBeVisible();
   await page.getByRole('link', { name: 'Ver placares' }).click();
   await page.getByRole('radio', { name: 'Relógio' }).click();
   await expect(page.getByRole('list').filter({ hasText: name })).toBeVisible();

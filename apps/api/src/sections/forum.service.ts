@@ -1,28 +1,31 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
-import { IDENTITY_SCOPED_CATEGORIES } from '@fandom/shared';
+import { IDENTITY_SCOPED_CATEGORIES, PLAN_RANK, PREMIUM_CATEGORIES } from '@fandom/shared';
 import type { CreateReplyInput, CreateTopicInput, ForumListInput, ReportInput } from '@fandom/schemas';
 import type { CursorPage, ForumAuthor, ForumReply, ForumTopicDetail, ForumTopicSummary } from '@fandom/types';
 import type { AuthenticatedUser } from '../auth/auth.types.js';
 import { AppError } from '../common/app-error.js';
+import { planBadge } from '../common/plan-badge.js';
+import { EntitlementsService } from '../subscriptions/entitlements.service.js';
 import { DatabaseService } from '../database/database.service.js';
 import { SectionsService } from './sections.service.js';
 
 interface TopicRow {
   id: string; universe_id: string; universe_slug: string; category: string; identity_scope: string | null; author_id: string;
   title: string; body: string; status: string; reply_count: number; last_activity_at: Date; created_at: Date;
-  username: string | null; display_name: string | null; author_identity: string | null;
+  username: string | null; display_name: string | null; author_identity: string | null; author_plan: string;
 }
 
 const TOPIC_SELECT = `
   SELECT t.id, t.universe_id, u.slug AS universe_slug, t.category, t.identity_scope, t.author_id, t.title, t.body, t.status,
-         t.reply_count, t.last_activity_at, t.created_at, p.username, p.display_name, up.identity->>'key' AS author_identity
+         t.reply_count, t.last_activity_at, t.created_at, p.username, p.display_name, up.identity->>'key' AS author_identity,
+         public.effective_plan(t.author_id) AS author_plan
     FROM forum_topics t
     JOIN universes u ON u.id = t.universe_id
     JOIN profiles p ON p.user_id = t.author_id
     LEFT JOIN universe_profiles up ON up.universe_id = t.universe_id AND up.user_id = t.author_id`;
 
-const author = (id: string, r: { username: string | null; display_name: string | null; author_identity: string | null }): ForumAuthor => ({
-  id, username: r.username, displayName: r.display_name, identity: r.author_identity,
+const author = (id: string, r: { username: string | null; display_name: string | null; author_identity: string | null; author_plan: string }): ForumAuthor => ({
+  id, username: r.username, displayName: r.display_name, identity: r.author_identity, plan: planBadge(r.author_plan),
 });
 
 /** Max posts per author per minute (in addition to the per-IP route throttle). */
@@ -33,10 +36,20 @@ export class ForumService {
   constructor(
     private readonly db: DatabaseService,
     private readonly sections: SectionsService,
+    private readonly entitlements: EntitlementsService,
   ) {}
 
   /** Identity-scoped categories (common rooms) are visible only to members with an identity. */
   private async scopeFor(user: AuthenticatedUser | null, universeId: string, category: string): Promise<string | null> {
+    // Subscriber lounges: reading and posting require the plan (checked on every access).
+    const required = PREMIUM_CATEGORIES[category];
+    if (required) {
+      if (!user) throw AppError.unauthorized('unauthorized', 'Sign in to enter the VIP lounge');
+      const { planCode } = await this.entitlements.snapshot(user.id);
+      if (PLAN_RANK[planCode] < PLAN_RANK[required]) {
+        throw new AppError('premium_required', `Requires ${required}`, HttpStatus.FORBIDDEN, { requiredPlan: required });
+      }
+    }
     if (!IDENTITY_SCOPED_CATEGORIES.includes(category)) return null;
     if (!user) throw AppError.unauthorized('unauthorized', 'Sign in to enter the common room');
     const identity = await this.sections.assertMember(user.id, universeId);
@@ -107,8 +120,9 @@ export class ForumService {
     const t = await this.loadTopic(id);
     const scope = await this.scopeFor(user, t.universe_id, t.category);
     if (t.identity_scope !== scope) throw AppError.notFound('topic_not_found', 'Topic not found');
-    const { rows } = await this.db.query<{ id: string; body: string; created_at: Date; author_id: string; username: string | null; display_name: string | null; author_identity: string | null }>(
-      `SELECT r.id, r.body, r.created_at, r.author_id, p.username, p.display_name, up.identity->>'key' AS author_identity
+    const { rows } = await this.db.query<{ id: string; body: string; created_at: Date; author_id: string; username: string | null; display_name: string | null; author_identity: string | null; author_plan: string }>(
+      `SELECT r.id, r.body, r.created_at, r.author_id, p.username, p.display_name, up.identity->>'key' AS author_identity,
+              public.effective_plan(r.author_id) AS author_plan
          FROM forum_replies r JOIN profiles p ON p.user_id = r.author_id
          LEFT JOIN universe_profiles up ON up.universe_id = $2 AND up.user_id = r.author_id
         WHERE r.topic_id = $1 AND r.status = 'visible' ORDER BY r.created_at, r.id LIMIT 500`,

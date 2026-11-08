@@ -12,6 +12,7 @@ import type {
 } from '@fandom/types';
 import type { AuthenticatedUser } from '../auth/auth.types.js';
 import { AppError } from '../common/app-error.js';
+import { planBadge } from '../common/plan-badge.js';
 import { DatabaseService } from '../database/database.service.js';
 import { RealtimeService } from '../realtime/realtime.service.js';
 import { RedisService } from '../redis/redis.service.js';
@@ -169,11 +170,13 @@ export class QuizzesService {
         [user.id, quizId, JSON.stringify(answers), score, total, xpAwarded, identity],
       );
       const attemptId = rows[0]!.id;
+      let xpBonus = 0;
       if (xpAwarded > 0) {
-        await this.xp.award(tx, {
+        xpBonus = (await this.xp.awardWithBonus(tx, {
           userId: user.id, universeId: quiz.universe_id, amount: xpAwarded, source: 'quiz',
           sourceRef: quizId, idempotencyKey: `quiz:${attemptId}`,
-        });
+        })).bonus;
+        if (xpBonus > 0) await tx.query('UPDATE quiz_attempts SET xp_bonus = $2 WHERE id = $1', [attemptId, xpBonus]);
       }
       if (quiz.sets_identity && identity) {
         const cfg = await tx.query<{ type: string | null }>("SELECT identity_config->>'type' AS type FROM universe_settings WHERE universe_id = $1", [quiz.universe_id]);
@@ -182,7 +185,7 @@ export class QuizzesService {
           [quiz.universe_id, user.id, JSON.stringify({ type: cfg.rows[0]?.type ?? 'identity', key: identity, source: 'quiz' })],
         );
       }
-      return { attemptId, xpAwarded, xpRemaining: Math.max(0, quiz.xp_reward - earned - xpAwarded) };
+      return { attemptId, xpAwarded, xpBonus, xpRemaining: Math.max(0, quiz.xp_reward - earned - xpAwarded) };
     });
 
     // Live quiz nights: tell open event rooms that use this quiz to refresh their scoreboard.
@@ -201,6 +204,7 @@ export class QuizzesService {
       score,
       total,
       xpAwarded: result.xpAwarded,
+      xpBonus: result.xpBonus,
       xpRemaining: quiz.kind === 'trivia' ? result.xpRemaining : 0,
       resultIdentity: identity,
       review: questions.map((q) => ({
@@ -246,8 +250,8 @@ export class QuizzesService {
     return this.redis.cached(`ranking:v1:${universe.id}:${q.period}`, 30, async () => {
       const since = q.period === 'week' ? "now() - interval '7 days'" : q.period === 'month' ? "now() - interval '30 days'" : null;
       const { rows } = since
-        ? await this.db.query<{ user_id: string; xp: number; username: string | null; display_name: string | null; identity: Record<string, unknown> }>(
-            `SELECT t.user_id, sum(t.amount)::int AS xp, p.username, p.display_name, up.identity
+        ? await this.db.query<{ user_id: string; xp: number; username: string | null; display_name: string | null; identity: Record<string, unknown>; plan: string }>(
+            `SELECT t.user_id, sum(t.amount)::int AS xp, p.username, p.display_name, up.identity, public.effective_plan(t.user_id) AS plan
                FROM xp_transactions t
                JOIN users u ON u.id = t.user_id AND u.status = 'active'
                JOIN profiles p ON p.user_id = t.user_id
@@ -258,8 +262,8 @@ export class QuizzesService {
               ORDER BY xp DESC, t.user_id LIMIT 50`,
             [universe.id],
           )
-        : await this.db.query<{ user_id: string; xp: number; username: string | null; display_name: string | null; identity: Record<string, unknown> }>(
-            `SELECT up.user_id, up.xp, p.username, p.display_name, up.identity
+        : await this.db.query<{ user_id: string; xp: number; username: string | null; display_name: string | null; identity: Record<string, unknown>; plan: string }>(
+            `SELECT up.user_id, up.xp, p.username, p.display_name, up.identity, public.effective_plan(up.user_id) AS plan
                FROM universe_profiles up
                JOIN users u ON u.id = up.user_id AND u.status = 'active'
                JOIN profiles p ON p.user_id = up.user_id
@@ -272,6 +276,7 @@ export class QuizzesService {
         userId: r.user_id,
         username: r.username,
         displayName: r.display_name,
+        plan: planBadge(r.plan),
         xp: r.xp,
         level: levelFromXp(r.xp),
         identity: typeof r.identity?.key === 'string' ? r.identity.key : null,

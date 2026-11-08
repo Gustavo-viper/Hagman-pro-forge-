@@ -17,7 +17,7 @@ export const FEATURE_ENGINE: Record<string, SectionEngine> = {
   discography: 'archive',
   // community forum
   discussions: 'forum', theories: 'forum', discussion_groups: 'forum', common_rooms: 'forum',
-  fan_projects: 'forum', translations: 'forum', fan_art: 'forum', investigations: 'forum',
+  fan_projects: 'forum', translations: 'forum', fan_art: 'forum', investigations: 'forum', vip_lounge: 'forum',
   // missions & challenges
   missions: 'missions', challenges: 'missions', rescue_missions: 'missions',
   // events
@@ -33,6 +33,6 @@ export const IDENTITY_SCOPED_CATEGORIES = ['common_rooms'];
 
 export const MISSION_OBJECTIVES = [
   'quiz_complete', 'quiz_perfect', 'forum_topic', 'forum_reply', 'identity_set', 'event_join',
-  'hangman_win', 'daily_complete', 'daily_perfect', 'speed_score',
+  'hangman_win', 'daily_complete', 'daily_perfect', 'speed_score', 'survival_score',
 ] as const;
 export type MissionObjective = (typeof MISSION_OBJECTIVES)[number];

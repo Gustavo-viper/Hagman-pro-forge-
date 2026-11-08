@@ -264,7 +264,8 @@
       "discography": "Discografia",
       "fan_projects": "Projetos de fãs",
       "translations": "Traduções",
-      "fan_art": "Fan arts"
+      "fan_art": "Fan arts",
+      "vip_lounge": "Sala VIP"
     },
     "tabs": {
       "overview": "Visão geral",
@@ -404,8 +405,8 @@
         "a": "Sim, a qualquer momento: os benefícios continuam até o fim do período já pago. Compras on-line podem ser desistidas em até 7 dias (Código de Defesa do Consumidor) — fale com o suporte."
       },
       "fair": {
-        "q": "O Premium dá vantagem?",
-        "a": "Não em rankings ou XP. O Premium é sobre identidade, personalização e espaços especiais. Toda a comunidade essencial continua gratuita."
+        "q": "O que o Premium muda no jogo?",
+        "a": "Assinantes ganham bônus de XP (+20% no Plus, +50% no Ultra), limites diários maiores, o Modo Sobrevivência, a Sala VIP e missões exclusivas. Universos, quizzes, jogos, eventos gratuitos e a comunidade continuam 100% gratuitos, e todas as respostas são conferidas no servidor para todos."
       }
     }
   },
@@ -637,7 +638,8 @@
     "locked": {
       "unauthorized": "Entre na sua conta para acessar este espaço.",
       "identity_required": "Descubra sua identidade (casa) para entrar no salão comunal.",
-      "membership_required": "Entre no universo para acessar este espaço."
+      "membership_required": "Entre no universo para acessar este espaço.",
+      "premium_required": "Exclusivo para assinantes."
     },
     "report": "Denunciar",
     "send": "Enviar",
@@ -764,6 +766,26 @@
       "unit_zero": "0 vitórias",
       "lives_zero": "0 vidas restantes",
       "rewardsLeft_zero": "Hoje as vitórias não valem mais XP (limite de 5 por dia)."
+    },
+    "survival": {
+      "title": "Modo Sobrevivência",
+      "short": "Sobrevivência",
+      "description": "Acerte o máximo que conseguir: um erro e acabou.",
+      "rules": "Perguntas sem fim, 20 segundos para cada uma. O primeiro erro (ou o tempo esgotado) encerra a partida. Cada acerto vale 2 XP.",
+      "start": "Começar",
+      "streak_zero": "0 acertos seguidos",
+      "streak_one": "{{count}} acerto seguido",
+      "streak_other": "{{count}} acertos seguidos",
+      "over": "Fim da sequência",
+      "timedOut": "O tempo acabou",
+      "noXp": "Sem XP nesta partida (limite diário atingido ou nenhum acerto).",
+      "best_zero": "Recorde: 0 seguidos",
+      "best_one": "Recorde: {{count}} seguido",
+      "best_other": "Recorde: {{count}} seguidos",
+      "boardInfo": "Maior sequência de cada assinante nos últimos 7 dias.",
+      "unit_zero": "0 seguidos",
+      "unit_one": "{{count}} seguido",
+      "unit_other": "{{count}} seguidos"
     }
   },
   "music": {
@@ -773,5 +795,44 @@
     "volume": "Volume da trilha sonora",
     "tapToPlay": "Toque em qualquer lugar para ouvir",
     "original": "Trilha original Fandom Universe"
+  },
+  "premiumPerks": {
+    "bonusBadge": "+{{xp}} XP bônus {{plan}}",
+    "wouldEarn": "Com o Fandom Plus você ganharia +{{xp}} XP extras aqui (+{{percent}}%).",
+    "seePlans": "Ver planos",
+    "unlockWith": "Desbloquear com o {{plan}}",
+    "speedLimit": "Seu limite: {{xp}} XP por dia",
+    "hangmanLimit_one": "Seu limite: {{count}} vitória com XP por dia",
+    "hangmanLimit_other": "Seu limite: {{count}} vitórias com XP por dia",
+    "speedUpgrade": "Com o Plus: {{xp}} XP por dia",
+    "hangmanUpgrade": "Com o Plus: {{count}} vitórias com XP por dia",
+    "bonusActive": "Bônus de XP ativo: +{{percent}}%",
+    "exclusive": "Exclusivo {{plan}}",
+    "survivalLocked": "O Modo Sobrevivência é exclusivo para assinantes",
+    "vipLocked": "Sala VIP: o espaço dos assinantes",
+    "vipInfo": "Converse com quem também assina, em um fórum só de assinantes em cada universo.",
+    "vipWelcome": "Você está na Sala VIP: só assinantes Plus e Ultra veem e participam.",
+    "table": {
+      "title": "Compare os planos",
+      "subtitle": "Tudo o que cada plano libera hoje, sem letras miúdas.",
+      "perk": "Vantagem",
+      "plusMissions": "Missões Plus",
+      "allMissions": "Plus + Ultra",
+      "freeEvents": "Gratuitos",
+      "plusEvents": "+ assinantes",
+      "allEvents": "+ Ultra",
+      "example": "Exemplo: um quiz perfeito que vale {{base}} XP rende {{plus}} XP no Plus e {{ultra}} XP no Ultra.",
+      "rows": {
+        "universes": "Todos os universos, quizzes, jogos e trilhas",
+        "xpBonus": "Bônus de XP (quizzes, jogos e missões)",
+        "speed": "XP por dia no contra o relógio",
+        "hangman": "Vitórias com XP por dia na forca",
+        "survival": "Modo Sobrevivência (XP por dia)",
+        "vip": "Sala VIP em cada universo",
+        "missions": "Missões Premium",
+        "events": "Eventos",
+        "badge": "Selo no seu nome"
+      }
+    }
   }
 }

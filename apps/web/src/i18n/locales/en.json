@@ -264,7 +264,8 @@
       "discography": "Discography",
       "fan_projects": "Fan projects",
       "translations": "Translations",
-      "fan_art": "Fan art"
+      "fan_art": "Fan art",
+      "vip_lounge": "VIP lounge"
     },
     "tabs": {
       "overview": "Overview",
@@ -404,8 +405,8 @@
         "a": "Yes, anytime: benefits last until the end of the paid period. Online purchases can be withdrawn within 7 days under Brazilian consumer law — contact support."
       },
       "fair": {
-        "q": "Does Premium give an advantage?",
-        "a": "Not in rankings or XP. Premium is about identity, customization and special spaces. The whole essential community stays free."
+        "q": "What does Premium change in the game?",
+        "a": "Subscribers get an XP bonus (+20% on Plus, +50% on Ultra), higher daily limits, survival mode, the VIP lounge and exclusive missions. Universes, quizzes, games, free events and the community stay 100% free, and every answer is checked on the server for everyone."
       }
     }
   },
@@ -637,7 +638,8 @@
     "locked": {
       "unauthorized": "Sign in to access this space.",
       "identity_required": "Find your identity (house) to enter the common room.",
-      "membership_required": "Join the universe to access this space."
+      "membership_required": "Join the universe to access this space.",
+      "premium_required": "Subscribers only."
     },
     "report": "Report",
     "send": "Send",
@@ -764,6 +766,26 @@
       "rewardsLeft_zero": "Wins earn no more XP today (limit of 5 a day).",
       "lives_zero": "0 lives left",
       "unit_zero": "0 wins"
+    },
+    "survival": {
+      "title": "Survival mode",
+      "short": "Survival",
+      "description": "Get as many right as you can: one mistake and you're out.",
+      "rules": "Endless questions, 20 seconds each. The first mistake (or running out of time) ends the run. Each correct answer is worth 2 XP.",
+      "start": "Start",
+      "streak_zero": "0 in a row",
+      "streak_one": "{{count}} in a row",
+      "streak_other": "{{count}} in a row",
+      "over": "Streak over",
+      "timedOut": "Time's up",
+      "noXp": "No XP this run (daily limit reached or no correct answers).",
+      "best_zero": "Best: 0 in a row",
+      "best_one": "Best: {{count}} in a row",
+      "best_other": "Best: {{count}} in a row",
+      "boardInfo": "Each subscriber's longest streak in the last 7 days.",
+      "unit_zero": "0 in a row",
+      "unit_one": "{{count}} in a row",
+      "unit_other": "{{count}} in a row"
     }
   },
   "music": {
@@ -773,5 +795,44 @@
     "volume": "Soundtrack volume",
     "tapToPlay": "Tap anywhere to listen",
     "original": "Fandom Universe original score"
+  },
+  "premiumPerks": {
+    "bonusBadge": "+{{xp}} XP {{plan}} bonus",
+    "wouldEarn": "With Fandom Plus you'd get +{{xp}} extra XP here (+{{percent}}%).",
+    "seePlans": "See plans",
+    "unlockWith": "Unlock with {{plan}}",
+    "speedLimit": "Your limit: {{xp}} XP a day",
+    "hangmanLimit_one": "Your limit: {{count}} XP-earning win a day",
+    "hangmanLimit_other": "Your limit: {{count}} XP-earning wins a day",
+    "speedUpgrade": "With Plus: {{xp}} XP a day",
+    "hangmanUpgrade": "With Plus: {{count}} XP-earning wins a day",
+    "bonusActive": "XP bonus active: +{{percent}}%",
+    "exclusive": "{{plan}} exclusive",
+    "survivalLocked": "Survival mode is for subscribers",
+    "vipLocked": "VIP lounge: the subscribers' space",
+    "vipInfo": "Talk with fellow subscribers in a subscriber-only forum in every universe.",
+    "vipWelcome": "You're in the VIP lounge: only Plus and Ultra subscribers can see and post here.",
+    "table": {
+      "title": "Compare the plans",
+      "subtitle": "Everything each plan unlocks today, no fine print.",
+      "perk": "Perk",
+      "plusMissions": "Plus missions",
+      "allMissions": "Plus + Ultra",
+      "freeEvents": "Free ones",
+      "plusEvents": "+ subscribers",
+      "allEvents": "+ Ultra",
+      "example": "Example: a perfect quiz worth {{base}} XP gives {{plus}} XP on Plus and {{ultra}} XP on Ultra.",
+      "rows": {
+        "universes": "Every universe, quiz, game and soundtrack",
+        "xpBonus": "XP bonus (quizzes, games and missions)",
+        "speed": "Daily XP in the speed round",
+        "hangman": "XP-earning hangman wins a day",
+        "survival": "Survival mode (daily XP)",
+        "vip": "VIP lounge in every universe",
+        "missions": "Premium missions",
+        "events": "Events",
+        "badge": "Badge next to your name"
+      }
+    }
   }
 }

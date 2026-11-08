@@ -137,6 +137,23 @@ Moderação: `GET /v1/admin/reports?status=open` (admin, suporte, moderador glob
 |---|---|---|---|
 | GET | `/v1/subscription-plans?currency=BRL` | pública | Planos ativos com preços **somente** na moeda pedida (sem conversão) |
 
+
+### Vantagens do Fandom Premium
+
+Os números ficam em um único lugar, `packages/shared/src/premium.ts` (`PREMIUM_PERKS`), usado pela API (que aplica as regras) e pelo site (que mostra a comparação), para que o anunciado seja exatamente o entregue. O plano efetivo vem de `public.effective_plan(user_id)` no SQL, que espelha `entitledPlan` (há teste comparando os dois).
+
+| Vantagem | Free | Plus | Ultra | Onde é aplicada |
+|---|---|---|---|---|
+| Bônus de XP em quizzes, jogos e missões | — | +20% | +50% | `XpService.awardWithBonus`: lançamento separado no livro-razão (`{chave}:premium`, `source_ref = premium:{plano}`); os limites anti-farm usam só a base |
+| XP por dia no contra o relógio | 60 | 120 | 200 | `GamesService.finishSpeed` |
+| Vitórias com XP por dia na forca | 5 | 10 | 20 | `GamesService.guess` |
+| Modo Sobrevivência (`POST /v1/universes/:slug/games/survival`, `POST /v1/games/survival/:id/answers`, `…/finish`) | — | 100 XP/dia | 160 XP/dia | 20 s por pergunta controlados pelo servidor; erro ou tempo esgotado encerra |
+| Sala VIP (`/forum/vip_lounge`) | — | ✓ | ✓ | ler e postar exigem o plano (`premium_required`) |
+| Missões Premium (`missions.premium_plan`) | — | Plus | Plus + Ultra | resgate checa o plano |
+| Selo no nome (`plan` em autores, rankings e placares) | — | Plus | Ultra | `effective_plan()` nas consultas |
+
+Respostas com XP trazem `xpBonus`; `GET /v1/universes/:slug/games/me` traz `plan` e `limits` do jogador.
+
 ## Usuário autenticado
 
 | Método | Rota | Descrição |

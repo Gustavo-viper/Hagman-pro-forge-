@@ -19,7 +19,7 @@ export class PlansController {
   @Public()
   @Get()
   async list(@Query(new ZodPipe(querySchema)) q: z.infer<typeof querySchema>): Promise<{ currency: string; items: SubscriptionPlanSummary[] }> {
-    const items = await this.redis.cached(`plans:v1:${q.currency}`, 300, async () => {
+    const items = await this.redis.cached(`plans:v2:${q.currency}`, 300, async () => {
       const { rows } = await this.db.query<{
         code: SubscriptionPlanSummary['code'];
         name: SubscriptionPlanSummary['name'];

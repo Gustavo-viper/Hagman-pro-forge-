@@ -6,6 +6,7 @@ import { Link } from 'react-router';
 import { useAuth } from '@/auth/AuthProvider';
 import { SectionHeading } from '@/components/Layout';
 import { PlanCards } from '@/components/PlanCards';
+import { PremiumComparison } from '@/components/PremiumComparison';
 import { CardGridSkeleton, ErrorState } from '@/components/states';
 import { useBillingConfig, usePlans, useSubscriptionDetails } from '@/hooks/data';
 
@@ -55,6 +56,8 @@ export default function PremiumPage() {
       </div>
 
       {config.data?.enabled && <p className="mt-6 text-center text-xs text-mist/50">{t('premium.secureNote')}</p>}
+
+      <PremiumComparison />
 
       <section className="mx-auto mt-20 max-w-4xl">
         <h2 className="text-center font-display text-2xl font-bold tracking-wide">{t('premium.faqTitle')}</h2>

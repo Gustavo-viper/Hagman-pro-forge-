@@ -1,7 +1,7 @@
 import type { GameQuestion, SpeedRound } from '@fandom/types';
-import { Badge, Button, Card, cn, Progress } from '@fandom/ui';
+import { Button, Card, cn, Progress } from '@fandom/ui';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { Check, RotateCcw, Sparkles, Timer, X, Zap } from 'lucide-react';
+import { Check, RotateCcw, Timer, X, Zap } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useParams } from 'react-router';
@@ -10,6 +10,7 @@ import { errorMessage } from '@/lib/errors';
 import { localized } from '@/lib/format';
 import { currentLocale } from '@/lib/i18n';
 import { GameShell, optionClass } from './GameShell';
+import { XpReward } from '@/components/premium';
 
 const FEEDBACK_MS = 450;
 
@@ -132,7 +133,7 @@ export default function SpeedPage() {
               <p className="mt-2 font-display text-5xl font-bold">{t('games.speed.score', { count: round.score })}</p>
               <p className="mt-2 text-sm text-mist/60">{t('games.speed.answered', { count: round.answered })}</p>
               {round.xpAwarded > 0 ? (
-                <Badge variant="gold" className="mt-4 px-3 py-1.5 text-sm"><Sparkles className="size-4" /> +{round.xpAwarded} XP</Badge>
+                <XpReward className="mt-4" xp={round.xpAwarded} bonus={round.xpBonus} />
               ) : (
                 <p className="mt-4 text-xs text-mist/50">{t('games.speed.noXp')}</p>
               )}

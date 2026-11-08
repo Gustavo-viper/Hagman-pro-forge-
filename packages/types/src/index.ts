@@ -244,6 +244,8 @@ export interface QuizAttemptResult {
   score: number;
   total: number;
   xpAwarded: number;
+  /** Extra XP from the subscriber's plan (already granted, on top of xpAwarded). */
+  xpBonus: number;
   /** XP still available from this quiz by improving the score. */
   xpRemaining: number;
   /** Personality quizzes: identity key assigned in the universe. */
@@ -264,6 +266,7 @@ export interface RankingEntry {
   userId: string;
   username: string | null;
   displayName: string | null;
+  plan: PlanBadge;
   xp: number;
   level: number;
   identity: string | null;
@@ -284,7 +287,12 @@ export interface ForumAuthor {
   username: string | null;
   displayName: string | null;
   identity: string | null;
+  /** Subscriber badge shown next to the name. */
+  plan: PlanBadge;
 }
+
+/** Plan badge shown next to names ('plus' | 'ultra'), null for Free. */
+export type PlanBadge = 'plus' | 'ultra' | null;
 
 export interface ForumTopicSummary {
   id: string;
@@ -323,6 +331,8 @@ export interface MissionSummary {
   objectiveCount: number;
   xpReward: number;
   endsAt: string | null;
+  /** Only subscribers of this plan (or higher) can claim it. */
+  premiumPlan: 'plus' | 'ultra' | null;
 }
 
 export interface MissionProgress {
@@ -379,6 +389,7 @@ export interface EventLeaderboardEntry {
   rank: number;
   userId: string;
   displayName: string | null;
+  plan: PlanBadge;
   username: string | null;
   score: number;
   total: number;
@@ -407,7 +418,7 @@ export interface AdminEvent extends UniverseEvent {
 
 // ---------------------------------------------------------------- mini-games
 
-export type GameKind = 'daily' | 'speed' | 'hangman';
+export type GameKind = 'daily' | 'speed' | 'hangman' | 'survival';
 
 /** A question as served by a game: never includes the answer. */
 export interface GameQuestion {
@@ -428,6 +439,7 @@ export interface DailyResult {
   score: number;
   total: number;
   xpAwarded: number;
+  xpBonus: number;
   finishedAt: string;
   review: GameReviewItem[];
 }
@@ -453,8 +465,23 @@ export interface SpeedRound {
   answered: number;
   question: GameQuestion | null;
   xpAwarded: number;
+  xpBonus: number;
   /** Present after an answer. */
   last?: { questionId: string; correct: boolean; correctKey: string };
+}
+
+/** Survival mode (subscribers): one mistake or a timed-out question ends the run. */
+export interface SurvivalRound {
+  id: string;
+  status: 'active' | 'finished';
+  score: number;
+  answered: number;
+  question: GameQuestion | null;
+  questionEndsAt: string;
+  questionSeconds: number;
+  xpAwarded: number;
+  xpBonus: number;
+  last?: { questionId: string; correct: boolean; correctKey: string; timedOut: boolean };
 }
 
 export interface HangmanGame {
@@ -470,9 +497,14 @@ export interface HangmanGame {
   /** Revealed when the game ends. */
   word: string | null;
   xpAwarded: number;
+  xpBonus: number;
 }
 
 export interface GamesOverview {
+  plan: 'free' | 'plus' | 'ultra';
+  /** Limits of the user's plan (the web shows what higher plans unlock). */
+  limits: { speedDailyXp: number; hangmanRewardedWins: number; survivalDailyXp: number; xpBonusPercent: number };
+  survival: { available: boolean; best: number; weekBest: number; xpLeftToday: number };
   daily: { playedToday: boolean; score: number | null; total: number | null; streak: number };
   speed: { best: number; weekBest: number; xpLeftToday: number };
   hangman: { wins: number; played: number; rewardedWinsLeft: number; activeId: string | null };
@@ -483,6 +515,7 @@ export interface GameLeaderboardEntry {
   userId: string;
   username: string | null;
   displayName: string | null;
+  plan: PlanBadge;
   score: number;
   total: number | null;
 }

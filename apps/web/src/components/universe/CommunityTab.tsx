@@ -1,7 +1,7 @@
 import type { CursorPage, ForumTopicDetail, ForumTopicSummary } from '@fandom/types';
 import { Alert, Button, Input, Label, Skeleton } from '@fandom/ui';
 import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Lock, MessageSquare, PenLine } from 'lucide-react';
+import { Crown, Lock, MessageSquare, PenLine } from 'lucide-react';
 import { useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router';
@@ -13,13 +13,15 @@ import { errorMessage } from '@/lib/errors';
 import { formatDate } from '@/lib/format';
 import { currentLocale } from '@/lib/i18n';
 import { featuresOf, SectionChips } from './SectionTabs';
+import { PlanName, PremiumLock } from '@/components/premium';
+import { PREMIUM_CATEGORIES } from '@fandom/shared';
 
 export function AuthorLine({ author, at, universe }: { author: ForumTopicSummary['author']; at: string; universe: UniverseDetail }) {
   const locale = currentLocale();
   const identity = author.identity ? universe.identityConfig.options?.find((o) => o.key === author.identity) : undefined;
   return (
     <p className="text-xs text-mist/55">
-      <span className="font-semibold text-mist/80">{author.displayName ?? author.username ?? '—'}</span>
+      <PlanName name={author.displayName ?? author.username ?? '—'} plan={author.plan} className="font-semibold text-mist/80" />
       {author.username && ` @${author.username}`}
       {identity && <span style={{ color: identity.color }}> · {identity.name[locale] ?? identity.key}</span>}
       {' · '}{formatDate(at, locale)}
@@ -92,18 +94,23 @@ export function CommunityTab({ universe, category, onCategory, isMember }: { uni
   const items = topics.data?.pages.flatMap((p) => p.items) ?? [];
   const scope = topics.data?.pages[0]?.scope ?? null;
   const scopeName = scope ? universe.identityConfig.options?.find((o) => o.key === scope)?.name[currentLocale()] ?? scope : null;
-  const locked = topics.error instanceof ApiError && ['unauthorized', 'identity_required', 'membership_required'].includes(topics.error.code);
+  const locked = topics.error instanceof ApiError && ['unauthorized', 'identity_required', 'membership_required', 'premium_required'].includes(topics.error.code);
+  const premiumLocked = topics.error instanceof ApiError && topics.error.code === 'premium_required';
+  const vip = PREMIUM_CATEGORIES[current];
 
   return (
     <div>
       <SectionChips keys={keys} value={current} onChange={(c) => { setWriting(false); onCategory(c); }} />
       {scopeName && <Alert variant="info" className="mb-4"><Lock className="size-4 shrink-0" /> {t('sections.commonRoomOf', { name: scopeName })}</Alert>}
+      {vip && !locked && !topics.isPending && <Alert variant="warning" className="mb-4"><Crown className="size-4 shrink-0" /> {t('premiumPerks.vipWelcome')}</Alert>}
       {session && isMember && !locked && !writing && (
         <Button className="mb-6" onClick={() => setWriting(true)}><PenLine /> {t('sections.newTopic')}</Button>
       )}
       {writing && <NewTopicForm universe={universe} category={current} onDone={() => setWriting(false)} />}
       {topics.isPending ? (
         <div className="space-y-3">{[0, 1, 2].map((i) => <Skeleton key={i} className="h-24" />)}</div>
+      ) : premiumLocked && vip ? (
+        <PremiumLock plan={vip} title={t('premiumPerks.vipLocked')}>{t('premiumPerks.vipInfo')}</PremiumLock>
       ) : locked ? (
         <EmptyState icon={<Lock className="size-8 text-[color:var(--u-glow)]" />}>{t(`sections.locked.${(topics.error as ApiError).code}`)}</EmptyState>
       ) : topics.isError ? (
