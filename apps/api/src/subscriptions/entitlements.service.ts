@@ -10,6 +10,7 @@ interface Row {
   current_period_end: Date | null;
   grace_until: Date | null;
   cancel_at_period_end: boolean;
+  provider?: string;
 }
 
 /**
@@ -42,20 +43,21 @@ export class EntitlementsService {
 
   async snapshot(userId: string, now = new Date()): Promise<SubscriptionSnapshot> {
     const row = await this.db.one<Row>(
-      `SELECT s.plan_code, s.status, p.billing_interval, s.current_period_end, s.grace_until, s.cancel_at_period_end
+      `SELECT s.plan_code, s.status, p.billing_interval, s.current_period_end, s.grace_until, s.cancel_at_period_end, s.provider
          FROM subscriptions s JOIN plan_prices p ON p.id = s.price_id
         WHERE s.user_id = $1 AND s.status IN ('pending','active','past_due','cancelled')
         LIMIT 1`,
       [userId],
     );
     const planCode = entitledPlan(row, now);
-    if (!row) return { planCode, status: 'free', interval: null, currentPeriodEnd: null, cancelAtPeriodEnd: false };
+    if (!row) return { planCode, status: 'free', interval: null, currentPeriodEnd: null, cancelAtPeriodEnd: false, trial: false };
     return {
       planCode,
       status: row.status,
-      interval: row.billing_interval,
+      interval: row.provider === 'trial' ? null : row.billing_interval,
       currentPeriodEnd: row.current_period_end?.toISOString() ?? null,
       cancelAtPeriodEnd: row.cancel_at_period_end,
+      trial: row.provider === 'trial' && planCode !== 'free',
     };
   }
 }

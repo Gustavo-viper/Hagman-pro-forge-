@@ -5,7 +5,8 @@ const PLAN_NAMES: Record<string, string> = { plus: 'Fandom Plus', ultra: 'Fandom
 
 /**
  * InfinitePay has no recurring billing, so periods are prepaid. Users with an active (not
- * cancelled) subscription ending within `daysBefore` days get ONE reminder per period.
+ * cancelled) subscription ending within `daysBefore` days get ONE reminder per period;
+ * free trials get one 'trial_ending' reminder 2 days before they end.
  * Returns the emails to enqueue; rows are marked in the same transaction (no duplicates).
  */
 export async function collectRenewalReminders(
@@ -16,14 +17,16 @@ export async function collectRenewalReminders(
   try {
     const { rows } = await client.query<{
       id: string; email: string; locale: Locale; timezone: string; plan_code: string;
-      current_period_end: Date; amount_minor: number; currency: string;
+      current_period_end: Date; amount_minor: number; currency: string; provider: string;
     }>(
-      `SELECT s.id, u.email, p.locale, p.timezone, s.plan_code, s.current_period_end, pp.amount_minor, pp.currency
+      `SELECT s.id, u.email, p.locale, p.timezone, s.plan_code, s.current_period_end, pp.amount_minor, pp.currency, s.provider
          FROM subscriptions s
          JOIN users u ON u.id = s.user_id AND u.status = 'active'
          JOIN profiles p ON p.user_id = s.user_id
          JOIN plan_prices pp ON pp.id = s.price_id
-        WHERE s.status = 'active' AND NOT s.cancel_at_period_end
+        WHERE ((s.status = 'active' AND NOT s.cancel_at_period_end AND s.provider <> 'trial')
+               -- Free trials end as 'cancelled': remind 2 days before (once), never charged automatically.
+               OR (s.status = 'cancelled' AND s.provider = 'trial' AND s.current_period_end <= now() + interval '2 days'))
           AND s.current_period_end > now()
           AND s.current_period_end <= now() + make_interval(days => $1)
           AND s.renewal_reminder_sent_for IS DISTINCT FROM s.current_period_end
@@ -42,9 +45,9 @@ export async function collectRenewalReminders(
     const base = opts.appUrl.replace(/\/+$/, '');
     return rows.map((r) => ({
       to: r.email,
-      template: 'subscription_renewal_reminder',
+      template: r.provider === 'trial' ? 'trial_ending' : 'subscription_renewal_reminder',
       locale: r.locale,
-      link: `${base}/account/subscription`,
+      link: r.provider === 'trial' ? `${base}/premium` : `${base}/account/subscription`,
       details: {
         plan: PLAN_NAMES[r.plan_code] ?? r.plan_code,
         until: new Intl.DateTimeFormat(r.locale, { dateStyle: 'long', timeZone: r.timezone }).format(r.current_period_end),

@@ -89,18 +89,40 @@ export function hangmanWrong(word: string, guessed: string[]): string[] {
   return guessed.filter((l) => !letters.has(l));
 }
 
-/** Consecutive days ending today (or yesterday when today is not played yet). Days are YYYY-MM-DD. */
-export function dailyStreak(days: string[], today: string): number {
+/**
+ * Daily streak: consecutive days played, ending today (or yesterday while today is still
+ * open). Subscribers have shields: up to `shieldsPerWeek` missed days within any 7 days are
+ * covered and do not break the streak (covered days do not count as played). Days are YYYY-MM-DD.
+ */
+export function streakInfo(days: string[], today: string, shieldsPerWeek = 0): { streak: number; covered: string[] } {
   const set = new Set(days);
-  const step = (d: string) => new Date(Date.parse(`${d}T00:00:00Z`) - 86_400_000).toISOString().slice(0, 10);
+  const earliest = days.length ? days.reduce((a, b) => (a < b ? a : b)) : null;
+  const toMs = (d: string) => Date.parse(`${d}T00:00:00Z`);
+  const step = (d: string) => new Date(toMs(d) - 86_400_000).toISOString().slice(0, 10);
   let cursor = set.has(today) ? today : step(today);
-  let n = 0;
-  while (set.has(cursor)) {
-    n++;
-    cursor = step(cursor);
+  let streak = 0;
+  const covered: string[] = [];
+  for (;;) {
+    if (set.has(cursor)) {
+      streak++;
+      cursor = step(cursor);
+      continue;
+    }
+    // A gap can be covered only if older play exists and the shield budget for that week allows it.
+    const recent = covered.filter((d) => toMs(d) - toMs(cursor) < 7 * 86_400_000).length;
+    if (streak > 0 && earliest !== null && cursor > earliest && recent < shieldsPerWeek) {
+      covered.push(cursor);
+      cursor = step(cursor);
+      continue;
+    }
+    break;
   }
-  return n;
+  // Shields only count when they actually bridged to an older played day.
+  const lastPlayed = cursor;
+  return { streak, covered: covered.filter((d) => d > lastPlayed) };
 }
+
+export const dailyStreak = (days: string[], today: string, shieldsPerWeek = 0): number => streakInfo(days, today, shieldsPerWeek).streak;
 
 function shuffle<T>(items: T[]): T[] {
   const a = [...items];
@@ -196,12 +218,18 @@ export class GamesService {
     }));
   }
 
-  private async streak(userId: string, universeId: string, today: string): Promise<number> {
-    const { rows } = await this.db.query<{ day: string }>(
-      "SELECT day::text AS day FROM game_sessions WHERE user_id = $1 AND universe_id = $2 AND game = 'daily' ORDER BY day DESC LIMIT 400",
-      [userId, universeId],
-    );
-    return dailyStreak(rows.map((r) => r.day), today);
+  private async streak(userId: string, universeId: string, today: string): Promise<{ streak: number; shieldsPerWeek: number; shieldsUsed: number }> {
+    const [{ rows }, plan] = await Promise.all([
+      this.db.query<{ day: string }>(
+        "SELECT day::text AS day FROM game_sessions WHERE user_id = $1 AND universe_id = $2 AND game = 'daily' ORDER BY day DESC LIMIT 400",
+        [userId, universeId],
+      ),
+      this.planOf(this.db.pool, userId),
+    ]);
+    const shieldsPerWeek = PREMIUM_PERKS.streakShieldsPerWeek[plan];
+    const info = streakInfo(rows.map((r) => r.day), today, shieldsPerWeek);
+    const weekAgo = new Date(Date.parse(`${today}T00:00:00Z`) - 7 * 86_400_000).toISOString().slice(0, 10);
+    return { streak: info.streak, shieldsPerWeek, shieldsUsed: info.covered.filter((d) => d > weekAgo).length };
   }
 
   async daily(user: AuthenticatedUser, slug: string): Promise<DailyChallenge> {
@@ -226,7 +254,7 @@ export class GamesService {
       day,
       questions: questions.map(publicQuestion),
       result,
-      streak: await this.streak(user.id, universe.id, day),
+      streak: (await this.streak(user.id, universe.id, day)).streak,
       xpPerCorrect: DAILY_XP_PER_CORRECT,
       perfectBonus: DAILY_PERFECT_BONUS,
     };
@@ -576,11 +604,12 @@ export class GamesService {
       hangmanRewardedWins: PREMIUM_PERKS.hangmanRewardedWins[plan],
       survivalDailyXp: PREMIUM_PERKS.survivalDailyXpCap[plan],
       xpBonusPercent: PREMIUM_PERKS.xpBonusPercent[plan],
+      streakShieldsPerWeek: PREMIUM_PERKS.streakShieldsPerWeek[plan],
     };
     return {
       plan,
       limits,
-      daily: { playedToday: Boolean(daily), score: daily?.score ?? null, total: daily?.total ?? null, streak: await this.streak(user.id, universe.id, day) },
+      daily: { playedToday: Boolean(daily), score: daily?.score ?? null, total: daily?.total ?? null, ...(await this.streak(user.id, universe.id, day)) },
       speed: { best: speed?.best ?? 0, weekBest: speed?.week ?? 0, xpLeftToday: Math.max(0, limits.speedDailyXp - (speed?.today_xp ?? 0)) },
       survival: {
         available: PLAN_RANK[plan] >= PLAN_RANK[PREMIUM_PERKS.survivalPlan],

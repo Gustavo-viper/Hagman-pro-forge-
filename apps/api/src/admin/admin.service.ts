@@ -64,9 +64,10 @@ const toRow = (r: UserRow): AdminUserRow => ({
   plan: {
     planCode: r.effective_plan,
     status: r.sub_status ?? 'free',
-    interval: r.sub_provider === 'manual' ? null : r.billing_interval,
+    interval: r.sub_provider === 'manual' || r.sub_provider === 'trial' ? null : r.billing_interval,
     currentPeriodEnd: r.current_period_end?.toISOString() ?? null,
     cancelAtPeriodEnd: r.cancel_at_period_end ?? false,
+    trial: r.sub_provider === 'trial' && r.effective_plan !== 'free',
     provider: r.sub_provider,
   },
 });
@@ -212,6 +213,7 @@ export class AdminService {
           `UPDATE subscriptions SET status = 'active',
                   current_period_end = GREATEST(COALESCE(current_period_end, now()), now()) + make_interval(days => $2),
                   grace_until = NULL, cancel_at_period_end = false, cancelled_at = NULL, renewal_reminder_sent_for = NULL,
+                  provider = CASE WHEN provider = 'trial' THEN 'manual' ELSE provider END,
                   granted_by = $3, grant_note = $4
             WHERE id = $1`,
           [open.id, input.days, admin.id, input.reason],

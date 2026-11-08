@@ -154,6 +154,21 @@ Os números ficam em um único lugar, `packages/shared/src/premium.ts` (`PREMIUM
 
 Respostas com XP trazem `xpBonus`; `GET /v1/universes/:slug/games/me` traz `plan` e `limits` do jogador.
 
+| Também | Free | Plus | Ultra | Onde |
+|---|---|---|---|---|
+| Proteção da sequência diária | — | 1 dia perdido/semana | 2 dias/semana | `streakInfo()` em `games.service.ts`; `games/me` traz `shieldsPerWeek` e `shieldsUsed` |
+| Estatísticas detalhadas (`GET /v1/me/stats`) | — | ✓ | ✓ | `@RequiresPlan('plus')`: XP por dia (30 dias, fuso do usuário, bônus separado), XP por fonte, precisão, recordes por universo |
+
+### Teste grátis do Fandom Plus
+
+`GET /v1/billing/trial` → `{ eligible, reason, plan: 'plus', days: 7 }` · `POST /v1/billing/trial`.
+
+- Uma vez por conta: só quem nunca teve assinatura, adulto, com e-mail verificado e perfil completo (`trial_unavailable`, `email_not_verified`, `onboarding_required`).
+- Não pede cartão e nunca cobra: é uma assinatura `provider = 'trial'` com status `cancelled` e fim do período em 7 dias, então simplesmente expira (sem carência) pelo job de ciclo de vida.
+- Durante o teste: pagar o Plus soma o mês aos dias restantes e converte a assinatura em `infinitepay`; o Ultra pode ser comprado na hora (o teste é encerrado); "reativar" não se aplica.
+- O worker envia um e-mail `trial_ending` 2 dias antes do fim (uma vez), com link para os planos.
+- Auditoria: `billing.trial_started`.
+
 ## Usuário autenticado
 
 | Método | Rota | Descrição |

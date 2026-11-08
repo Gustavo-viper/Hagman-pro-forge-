@@ -14,6 +14,8 @@ import { errorMessage } from '@/lib/errors';
 import { formatDate, formatNumber } from '@/lib/format';
 import { currentLocale } from '@/lib/i18n';
 import { OnboardingForm } from './OnboardingForm';
+import { StatsSection } from '@/components/dashboard/StatsSection';
+import { TrialOffer } from '@/components/premium';
 
 function LevelOrb({ level, progress }: { level: number; progress: number }) {
   const r = 52;
@@ -182,6 +184,8 @@ function Universes({ data }: { data: DashboardResponse }) {
           )}
         </div>
       </section>
+      <TrialOffer className="mt-12" />
+      <StatsSection />
       {others.length > 0 && (
         <section className="mt-12" aria-labelledby="discover-universes">
           <h2 id="discover-universes" className="font-display text-2xl font-bold tracking-wide">

@@ -73,13 +73,13 @@ export function GamesPanel({ universe, isMember, signedIn }: { universe: Univers
   };
   // What the player's plan gives in each game, and what Plus would give (shown to Free players).
   const limit: Record<GameKind, string | null> = {
-    daily: null,
+    daily: o && o.daily.shieldsPerWeek > 0 ? t('premiumPerks.shieldLimit', { count: o.daily.shieldsPerWeek, used: o.daily.shieldsUsed }) : null,
     speed: o ? t('premiumPerks.speedLimit', { xp: o.limits.speedDailyXp }) : null,
     hangman: o ? t('premiumPerks.hangmanLimit', { count: o.limits.hangmanRewardedWins }) : null,
     survival: null,
   };
   const upgrade: Record<GameKind, string | null> = {
-    daily: null,
+    daily: o?.plan === 'free' ? t('premiumPerks.shieldUpgrade') : null,
     speed: o?.plan === 'free' ? t('premiumPerks.speedUpgrade', { xp: PREMIUM_PERKS.speedDailyXpCap.plus }) : null,
     hangman: o?.plan === 'free' ? t('premiumPerks.hangmanUpgrade', { count: PREMIUM_PERKS.hangmanRewardedWins.plus }) : null,
     survival: null,

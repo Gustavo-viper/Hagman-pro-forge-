@@ -2,7 +2,7 @@ import { Body, Controller, Get, HttpCode, Post, Query, Req } from '@nestjs/commo
 import { SkipThrottle, Throttle } from '@nestjs/throttler';
 import type { Request } from 'express';
 import { checkoutSchema, confirmPaymentSchema, type CheckoutInput, type ConfirmPaymentInput } from '@fandom/schemas';
-import type { BillingConfig, CheckoutResponse, ConfirmPaymentResponse, SubscriptionDetails } from '@fandom/types';
+import type { BillingConfig, CheckoutResponse, ConfirmPaymentResponse, SubscriptionDetails, TrialStatus } from '@fandom/types';
 import type { AuthenticatedUser } from '../auth/auth.types.js';
 import { CurrentUser, Public } from '../common/decorators.js';
 import { ZodPipe } from '../common/zod.pipe.js';
@@ -39,6 +39,18 @@ export class BillingController {
   @HttpCode(200)
   cancel(@CurrentUser() user: AuthenticatedUser): Promise<SubscriptionDetails> {
     return this.billing.cancel(user);
+  }
+
+  @Get('trial')
+  trial(@CurrentUser() user: AuthenticatedUser): Promise<TrialStatus> {
+    return this.billing.trialStatus(user);
+  }
+
+  @Throttle({ default: { limit: () => Number(process.env.CHECKOUT_RATE_LIMIT_MAX ?? 10), ttl: 60_000 } })
+  @Post('trial')
+  @HttpCode(200)
+  startTrial(@CurrentUser() user: AuthenticatedUser): Promise<SubscriptionDetails> {
+    return this.billing.startTrial(user);
   }
 
   @Post('subscription/reactivate')

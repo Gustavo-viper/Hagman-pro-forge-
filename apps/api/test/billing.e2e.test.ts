@@ -177,6 +177,59 @@ describe.runIf(enabled)('Billing (InfinitePay)', () => {
     expect((await http.post('/v1/billing/checkout').set(bearer(u.token)).send({ planCode: 'plus', interval: 'month' }).expect(502)).body.code).toBe('payment_provider_error');
     expect((await db.one<{ status: string }>('SELECT status FROM payment_transactions WHERE user_id = $1', [u.id]))!.status).toBe('failed');
   });
+
+  describe('free Fandom Plus trial', () => {
+    it('is offered once to adults with a verified email who never subscribed', async () => {
+      const fresh = await register(app);
+      expect((await http.get('/v1/billing/trial').set(bearer(fresh.token)).expect(200)).body).toMatchObject({ eligible: false, reason: 'onboarding_required', plan: 'plus', days: 7 });
+      await http.post('/v1/me/onboarding').set(bearer(fresh.token)).send(onboardingBody()).expect(201);
+      expect((await http.get('/v1/billing/trial').set(bearer(fresh.token))).body.reason).toBe('email_not_verified');
+      expect((await http.post('/v1/billing/trial').set(bearer(fresh.token)).expect(403)).body.code).toBe('email_not_verified');
+      const teen = await customer({ birthdate: `${new Date().getUTCFullYear() - 15}-01-01` });
+      expect((await http.get('/v1/billing/trial').set(bearer(teen.token))).body).toMatchObject({ eligible: false, reason: 'minor' });
+      expect((await http.post('/v1/billing/trial').set(bearer(teen.token)).expect(403)).body.code).toBe('trial_unavailable');
+
+      const u = await customer();
+      expect((await http.get('/v1/billing/trial').set(bearer(u.token))).body).toMatchObject({ eligible: true, reason: null });
+      const started = (await http.post('/v1/billing/trial').set(bearer(u.token)).expect(200)).body;
+      expect(started.subscription).toMatchObject({ planCode: 'plus', status: 'cancelled', trial: true, cancelAtPeriodEnd: true, interval: null });
+      expect(started).toMatchObject({ renewablePlan: null, canCheckout: true });
+      const days = (new Date(started.subscription.currentPeriodEnd).getTime() - Date.now()) / 86_400_000;
+      expect(days).toBeGreaterThan(6.9);
+      expect(days).toBeLessThan(7.1);
+      expect((await http.get('/v1/me').set(bearer(u.token))).body.subscription).toMatchObject({ planCode: 'plus', trial: true });
+      // Once per account, and a trial cannot be "reactivated" into an auto-renewing plan.
+      expect((await http.post('/v1/billing/trial').set(bearer(u.token)).expect(403)).body.code).toBe('trial_unavailable');
+      expect((await http.get('/v1/billing/trial').set(bearer(u.token))).body.reason).toBe('already_used');
+      expect((await http.post('/v1/billing/subscription/reactivate').set(bearer(u.token)).expect(409)).body.code).toBe('cannot_reactivate');
+      const audit = await db.one<{ n: number }>("SELECT count(*)::int AS n FROM audit_logs WHERE action = 'billing.trial_started' AND actor_user_id = $1", [u.id]);
+      expect(audit!.n).toBe(1);
+    });
+
+    it('paying for Plus during the trial keeps the remaining days and becomes a real subscription', async () => {
+      const u = await customer();
+      await http.post('/v1/billing/trial').set(bearer(u.token)).expect(200);
+      const { orderNsu } = (await http.post('/v1/billing/checkout').set(bearer(u.token)).send({ planCode: 'plus', interval: 'month' }).expect(201)).body;
+      paid(1490);
+      const ok = (await http.post('/v1/billing/confirm').set(bearer(u.token)).send({ orderNsu, transactionNsu: 'tx-trial', slug: 'inv-trial' }).expect(200)).body;
+      expect(ok.subscription).toMatchObject({ planCode: 'plus', status: 'active', trial: false, cancelAtPeriodEnd: false });
+      const days = (new Date(ok.subscription.currentPeriodEnd).getTime() - Date.now()) / 86_400_000;
+      expect(days).toBeGreaterThan(34); // 7 trial days + one month
+      const sub = await db.one<{ provider: string }>("SELECT provider FROM subscriptions WHERE user_id = $1 AND status = 'active'", [u.id]);
+      expect(sub!.provider).toBe('infinitepay');
+    });
+
+    it('a trial never blocks buying Ultra right away', async () => {
+      const u = await customer();
+      await http.post('/v1/billing/trial').set(bearer(u.token)).expect(200);
+      const { orderNsu } = (await http.post('/v1/billing/checkout').set(bearer(u.token)).send({ planCode: 'ultra', interval: 'month' }).expect(201)).body;
+      paid(2990);
+      const ok = (await http.post('/v1/billing/confirm').set(bearer(u.token)).send({ orderNsu, transactionNsu: 'tx-u', slug: 'inv-u' }).expect(200)).body;
+      expect(ok.subscription).toMatchObject({ planCode: 'ultra', status: 'active', trial: false });
+      const subs = await db.query<{ provider: string; status: string }>('SELECT provider, status FROM subscriptions WHERE user_id = $1 ORDER BY created_at', [u.id]);
+      expect(subs.rows).toEqual([{ provider: 'trial', status: 'expired' }, { provider: 'infinitepay', status: 'active' }]);
+    });
+  });
 });
 
 describe.runIf(enabled)('Billing disabled without credentials', () => {
@@ -192,4 +245,6 @@ describe.runIf(enabled)('Billing disabled without credentials', () => {
     expect((await http.post('/v1/billing/checkout').set({ Authorization: `Bearer ${u.token}` }).send({ planCode: 'plus', interval: 'month' }).expect(503)).body.code).toBe('billing_unavailable');
     await app.close();
   });
+
 });
+

@@ -378,7 +378,8 @@
     "wrong_question": "Essa pergunta já passou. Responda a pergunta atual.",
     "game_not_found": "Partida não encontrada.",
     "no_questions": "Este universo ainda não tem perguntas para este jogo.",
-    "no_words": "Este universo ainda não tem palavras para a forca."
+    "no_words": "Este universo ainda não tem palavras para a forca.",
+    "trial_unavailable": "O teste grátis não está disponível para esta conta."
   },
   "premium": {
     "title": "Desbloqueie o seu lado Premium",
@@ -831,8 +832,75 @@
         "vip": "Sala VIP em cada universo",
         "missions": "Missões Premium",
         "events": "Eventos",
-        "badge": "Selo no seu nome"
-      }
+        "badge": "Selo no seu nome",
+        "stats": "Estatísticas detalhadas",
+        "shields": "Proteção da sequência diária"
+      },
+      "perWeek_one": "{{count}} dia/semana",
+      "perWeek_other": "{{count}} dias/semana"
+    },
+    "shieldLimit_one": "Proteção de sequência: {{count}} dia por semana (usada: {{used}})",
+    "shieldLimit_other": "Proteção de sequência: {{count}} dias por semana (usada: {{used}})",
+    "shieldUpgrade": "Com o Plus: perder um dia não quebra sua sequência"
+  },
+  "trial": {
+    "title": "Experimente o Fandom Plus grátis por {{days}} dias",
+    "info": "Sem cartão e sem cobrança automática: bônus de XP, Modo Sobrevivência, Sala VIP, missões Plus e estatísticas liberados agora. Uma vez por conta.",
+    "start": "Começar teste grátis",
+    "signUp": "Criar conta e testar",
+    "started": "Pronto! Você tem o Fandom Plus até {{date}}. Aproveite!",
+    "tryFree": "Testar grátis por {{days}} dias",
+    "status": "Teste grátis",
+    "note": "Seu teste grátis termina na data acima. Nenhuma cobrança é feita: assine quando quiser para continuar.",
+    "keepPlus": "Assinar para continuar"
+  },
+  "stats": {
+    "title": "Suas estatísticas",
+    "lockedTitle": "Estatísticas detalhadas são do Fandom Plus",
+    "lockedInfo": "Veja seu XP dia a dia, o bônus Premium que você ganhou, sua precisão nos quizzes e seus recordes em cada universo.",
+    "chartLabel": "XP por dia nos últimos 30 dias",
+    "chartTitle": "XP por dia (últimos {{days}} dias)",
+    "tableView": "Ver como tabela",
+    "day": "Dia",
+    "legend": {
+      "base": "XP",
+      "bonus": "Bônus Premium"
+    },
+    "tiles": {
+      "xp": "XP nos últimos {{days}} dias",
+      "bonusHint": "{{xp}} de bônus Premium",
+      "activeDays": "Dias ativos",
+      "accuracy": "Precisão nos quizzes",
+      "perfectHint_one": "{{count}} quiz gabaritado",
+      "perfectHint_other": "{{count}} quizzes gabaritados",
+      "games": "Partidas jogadas",
+      "missionsHint_one": "{{count}} missão concluída",
+      "missionsHint_other": "{{count}} missões concluídas",
+      "perfectHint_zero": "nenhum quiz gabaritado ainda",
+      "missionsHint_zero": "nenhuma missão concluída ainda"
+    },
+    "sourcesTitle": "De onde veio seu XP",
+    "sources": {
+      "quiz": "Quizzes",
+      "game": "Jogos",
+      "mission": "Missões",
+      "event": "Eventos",
+      "onboarding": "Boas-vindas",
+      "premium": "Bônus Premium",
+      "challenge": "Desafios",
+      "admin_adjustment": "Ajustes da equipe",
+      "community_help": "Ajuda à comunidade",
+      "achievement": "Conquistas"
+    },
+    "cols": {
+      "universe": "Universo",
+      "level": "Nível",
+      "accuracy": "Precisão",
+      "quizzes": "Quizzes",
+      "streak": "Sequência diária",
+      "speed": "Recorde relógio",
+      "survival": "Recorde sobrevivência",
+      "hangman": "Vitórias na forca"
     }
   }
 }

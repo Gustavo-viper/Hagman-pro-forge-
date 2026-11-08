@@ -1,18 +1,74 @@
-import { premiumBonus, PREMIUM_PERKS, type PlanCode } from '@fandom/shared';
-import type { PlanBadge as PlanBadgeValue } from '@fandom/types';
-import { Badge, Button, cn } from '@fandom/ui';
-import { Crown, Sparkles } from 'lucide-react';
+import { premiumBonus, PREMIUM_PERKS, PREMIUM_TRIAL, type PlanCode } from '@fandom/shared';
+import type { PlanBadge as PlanBadgeValue, SubscriptionDetails, TrialStatus } from '@fandom/types';
+import { Alert, Badge, Button, cn } from '@fandom/ui';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { Crown, Gift, Sparkles } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 import { useAuth } from '@/auth/AuthProvider';
 import { useMe } from '@/hooks/data';
+import { api } from '@/lib/api';
+import { errorMessage } from '@/lib/errors';
+import { formatDate } from '@/lib/format';
+import { currentLocale } from '@/lib/i18n';
 
 /** Plan the signed-in user is entitled to right now ('free' when signed out). */
 export function useMyPlan(): PlanCode {
   const { session } = useAuth();
   const me = useMe();
   return session ? (me.data?.subscription.planCode ?? 'free') : 'free';
+}
+
+/** Free-trial eligibility of the signed-in user (never offered to signed-out visitors here). */
+export function useTrialStatus() {
+  const { session } = useAuth();
+  return useQuery({
+    queryKey: ['me', 'trial'],
+    queryFn: ({ signal }) => api<TrialStatus>('/v1/billing/trial', { signal }),
+    enabled: Boolean(session),
+    staleTime: 60_000,
+  });
+}
+
+/**
+ * Free Fandom Plus trial offer: a start button for eligible users, a sign-up invite for
+ * visitors, nothing for everyone else. No card, no automatic charge.
+ */
+export function TrialOffer({ className }: { className?: string }) {
+  const { t } = useTranslation();
+  const locale = currentLocale();
+  const { session } = useAuth();
+  const qc = useQueryClient();
+  const trial = useTrialStatus();
+  const start = useMutation({
+    mutationFn: () => api<SubscriptionDetails>('/v1/billing/trial', { method: 'POST' }),
+    onSuccess: () => void qc.invalidateQueries({ queryKey: ['me'] }),
+  });
+  if (start.isSuccess) {
+    return (
+      <Alert variant="success" className={className}>
+        <Gift className="size-5 shrink-0" />
+        <span>{t('trial.started', { date: start.data.subscription.currentPeriodEnd ? formatDate(start.data.subscription.currentPeriodEnd, locale) : '' })}</span>
+      </Alert>
+    );
+  }
+  if (session && !trial.data?.eligible) return null;
+  return (
+    <div className={cn('flex flex-col gap-4 rounded-2xl border border-gold-300/40 bg-[linear-gradient(120deg,rgb(232_182_76/0.16),rgb(124_58_237/0.12))] p-5 sm:flex-row sm:items-center', className)}>
+      <span className="grid size-12 shrink-0 place-items-center rounded-xl bg-gold-400/20 text-gold-200"><Gift className="size-6" /></span>
+      <div className="flex-1">
+        <p className="font-display text-lg font-bold text-gold-100">{t('trial.title', { days: PREMIUM_TRIAL.days })}</p>
+        <p className="mt-1 text-sm text-mist/70">{t('trial.info')}</p>
+        {start.isError && <p role="alert" className="mt-2 text-sm text-red-300">{errorMessage(start.error, t)}</p>}
+      </div>
+      {session ? (
+        <Button variant="gold" loading={start.isPending} onClick={() => start.mutate()}>{t('trial.start')}</Button>
+      ) : (
+        <Button asChild variant="gold"><Link to="/register">{t('trial.signUp')}</Link></Button>
+      )}
+    </div>
+  );
 }
 
 /** Small subscriber badge shown next to names. */
@@ -75,6 +131,8 @@ export function XpReward({ xp, bonus, className }: { xp: number; bonus: number; 
 /** Locked premium content: explains what the plan unlocks and links to the plans page. */
 export function PremiumLock({ plan, title, children, compact }: { plan: Exclude<PlanCode, 'free'>; title: string; children?: ReactNode; compact?: boolean }) {
   const { t } = useTranslation();
+  const trial = useTrialStatus();
+  const tryFree = plan === PREMIUM_TRIAL.plan && trial.data?.eligible;
   return (
     <div className={cn('rounded-2xl border border-gold-300/30 bg-[linear-gradient(160deg,rgb(232_182_76/0.12),rgb(255_255_255/0.02))]', compact ? 'p-4' : 'p-6 text-center')}>
       <p className={cn('flex items-center gap-2 font-semibold text-gold-100', !compact && 'justify-center font-display text-lg')}>
@@ -82,7 +140,7 @@ export function PremiumLock({ plan, title, children, compact }: { plan: Exclude<
       </p>
       {children && <div className="mt-2 text-sm text-mist/70">{children}</div>}
       <Button asChild size="sm" variant="gold" className="mt-4">
-        <Link to="/premium">{t('premiumPerks.unlockWith', { plan: t(`dashboard.planNames.${plan}`) })}</Link>
+        <Link to="/premium">{tryFree ? t('trial.tryFree', { days: PREMIUM_TRIAL.days }) : t('premiumPerks.unlockWith', { plan: t(`dashboard.planNames.${plan}`) })}</Link>
       </Button>
     </div>
   );

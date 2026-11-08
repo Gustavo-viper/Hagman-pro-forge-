@@ -14,7 +14,14 @@ export const PREMIUM_PERKS = {
   /** Survival mode: minimum plan and daily XP per universe. */
   survivalPlan: 'plus',
   survivalDailyXpCap: { free: 0, plus: 100, ultra: 160 },
+  /** Missed days per 7 days that do not break the daily challenge streak. */
+  streakShieldsPerWeek: { free: 0, plus: 1, ultra: 2 },
+  /** Detailed statistics on the dashboard: minimum plan. */
+  statsPlan: 'plus',
 } as const satisfies Record<string, unknown>;
+
+/** Free trial: once per account (never subscribed before), adults with a verified email. */
+export const PREMIUM_TRIAL = { plan: 'plus', days: 7 } as const;
 
 /** XP sources that receive the premium bonus. */
 export const XP_BONUS_SOURCES = ['quiz', 'game', 'mission'] as const;

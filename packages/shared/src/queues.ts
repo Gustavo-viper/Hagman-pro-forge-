@@ -21,6 +21,7 @@ export const EMAIL_TEMPLATES = [
   'subscription_renewal_reminder',
   'event_reminder',
   'event_cancelled',
+  'trial_ending',
 ] as const;
 export type EmailTemplate = (typeof EMAIL_TEMPLATES)[number];
 

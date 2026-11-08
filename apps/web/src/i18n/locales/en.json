@@ -378,7 +378,8 @@
     "wrong_question": "That question has passed. Answer the current one.",
     "game_not_found": "Game not found.",
     "no_questions": "This universe has no questions for this game yet.",
-    "no_words": "This universe has no hangman words yet."
+    "no_words": "This universe has no hangman words yet.",
+    "trial_unavailable": "The free trial isn't available for this account."
   },
   "premium": {
     "title": "Unlock your Premium side",
@@ -831,8 +832,75 @@
         "vip": "VIP lounge in every universe",
         "missions": "Premium missions",
         "events": "Events",
-        "badge": "Badge next to your name"
-      }
+        "badge": "Badge next to your name",
+        "stats": "Detailed statistics",
+        "shields": "Daily streak shield"
+      },
+      "perWeek_one": "{{count}} day/week",
+      "perWeek_other": "{{count}} days/week"
+    },
+    "shieldLimit_one": "Streak shield: {{count}} day a week (used: {{used}})",
+    "shieldLimit_other": "Streak shield: {{count}} days a week (used: {{used}})",
+    "shieldUpgrade": "With Plus: missing a day won't break your streak"
+  },
+  "trial": {
+    "title": "Try Fandom Plus free for {{days}} days",
+    "info": "No card and no automatic charge: XP bonus, survival mode, VIP lounge, Plus missions and statistics unlocked now. Once per account.",
+    "start": "Start free trial",
+    "signUp": "Create account and try",
+    "started": "Done! You have Fandom Plus until {{date}}. Enjoy!",
+    "tryFree": "Try free for {{days}} days",
+    "status": "Free trial",
+    "note": "Your free trial ends on the date above. You are never charged: subscribe whenever you like to keep going.",
+    "keepPlus": "Subscribe to keep it"
+  },
+  "stats": {
+    "title": "Your statistics",
+    "lockedTitle": "Detailed statistics are a Fandom Plus perk",
+    "lockedInfo": "See your XP day by day, the Premium bonus you earned, your quiz accuracy and your records in every universe.",
+    "chartLabel": "XP per day over the last 30 days",
+    "chartTitle": "XP per day (last {{days}} days)",
+    "tableView": "View as table",
+    "day": "Day",
+    "legend": {
+      "base": "XP",
+      "bonus": "Premium bonus"
+    },
+    "tiles": {
+      "xp": "XP in the last {{days}} days",
+      "bonusHint": "{{xp}} Premium bonus",
+      "activeDays": "Active days",
+      "accuracy": "Quiz accuracy",
+      "perfectHint_one": "{{count}} perfect quiz",
+      "perfectHint_other": "{{count}} perfect quizzes",
+      "games": "Games played",
+      "missionsHint_one": "{{count}} mission completed",
+      "missionsHint_other": "{{count}} missions completed",
+      "perfectHint_zero": "no perfect quizzes yet",
+      "missionsHint_zero": "no missions completed yet"
+    },
+    "sourcesTitle": "Where your XP came from",
+    "sources": {
+      "quiz": "Quizzes",
+      "game": "Games",
+      "mission": "Missions",
+      "event": "Events",
+      "onboarding": "Welcome",
+      "premium": "Premium bonus",
+      "challenge": "Challenges",
+      "admin_adjustment": "Staff adjustments",
+      "community_help": "Community help",
+      "achievement": "Achievements"
+    },
+    "cols": {
+      "universe": "Universe",
+      "level": "Level",
+      "accuracy": "Accuracy",
+      "quizzes": "Quizzes",
+      "streak": "Daily streak",
+      "speed": "Speed best",
+      "survival": "Survival best",
+      "hangman": "Hangman wins"
     }
   }
 }

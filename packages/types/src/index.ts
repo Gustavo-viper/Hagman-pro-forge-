@@ -105,6 +105,16 @@ export interface SubscriptionSnapshot {
   interval: BillingInterval | null;
   currentPeriodEnd: string | null;
   cancelAtPeriodEnd: boolean;
+  /** Free trial in progress (ends at currentPeriodEnd unless the user subscribes). */
+  trial: boolean;
+}
+
+export interface TrialStatus {
+  eligible: boolean;
+  /** Why not eligible: already_used, minor, email_not_verified, onboarding_required. */
+  reason: string | null;
+  plan: 'plus';
+  days: number;
 }
 
 export interface MeProfile {
@@ -503,9 +513,9 @@ export interface HangmanGame {
 export interface GamesOverview {
   plan: 'free' | 'plus' | 'ultra';
   /** Limits of the user's plan (the web shows what higher plans unlock). */
-  limits: { speedDailyXp: number; hangmanRewardedWins: number; survivalDailyXp: number; xpBonusPercent: number };
+  limits: { speedDailyXp: number; hangmanRewardedWins: number; survivalDailyXp: number; xpBonusPercent: number; streakShieldsPerWeek: number };
   survival: { available: boolean; best: number; weekBest: number; xpLeftToday: number };
-  daily: { playedToday: boolean; score: number | null; total: number | null; streak: number };
+  daily: { playedToday: boolean; score: number | null; total: number | null; streak: number; shieldsPerWeek: number; shieldsUsed: number };
   speed: { best: number; weekBest: number; xpLeftToday: number };
   hangman: { wins: number; played: number; rewardedWinsLeft: number; activeId: string | null };
 }
@@ -518,4 +528,37 @@ export interface GameLeaderboardEntry {
   plan: PlanBadge;
   score: number;
   total: number | null;
+}
+
+// ---------------------------------------------------------------- detailed statistics (subscribers)
+
+export interface PlayerStats {
+  periodDays: number;
+  /** One entry per day of the period (user's timezone), oldest first; bonus = premium XP bonus. */
+  xpByDay: { day: string; xp: number; bonus: number }[];
+  /** XP of the period by source; the premium bonus is reported as 'premium'. */
+  xpBySource: { source: string; xp: number }[];
+  totals: {
+    xpPeriod: number;
+    bonusPeriod: number;
+    activeDays: number;
+    quizzesCompleted: number;
+    perfectQuizzes: number;
+    /** Share of correct answers in trivia quizzes (0..1), null before the first quiz. */
+    accuracy: number | null;
+    gamesPlayed: number;
+    missionsCompleted: number;
+  };
+  universes: {
+    slug: string;
+    name: LocalizedText;
+    xp: number;
+    level: number;
+    accuracy: number | null;
+    quizzesCompleted: number;
+    dailyStreak: number;
+    speedBest: number;
+    survivalBest: number;
+    hangmanWins: number;
+  }[];
 }

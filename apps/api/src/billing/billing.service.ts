@@ -1,8 +1,8 @@
 import { randomUUID, timingSafeEqual } from 'node:crypto';
 import { HttpStatus, Inject, Injectable, Logger } from '@nestjs/common';
-import { formatMoney, type BillingInterval, type Locale, type PlanCode } from '@fandom/shared';
+import { formatMoney, PREMIUM_TRIAL, type BillingInterval, type Locale, type PlanCode } from '@fandom/shared';
 import type { CheckoutInput, ConfirmPaymentInput } from '@fandom/schemas';
-import type { BillingConfig, CheckoutResponse, ConfirmPaymentResponse, PaymentSummary, SubscriptionDetails } from '@fandom/types';
+import type { BillingConfig, CheckoutResponse, ConfirmPaymentResponse, PaymentSummary, SubscriptionDetails, TrialStatus } from '@fandom/types';
 import { AuditService } from '../audit/audit.service.js';
 import type { AuthenticatedUser } from '../auth/auth.types.js';
 import { AppError } from '../common/app-error.js';
@@ -43,6 +43,7 @@ interface OpenSubscription {
   current_period_end: Date | null;
   grace_until: Date | null;
   cancel_at_period_end: boolean;
+  provider: string;
 }
 
 export interface WebhookMeta {
@@ -77,7 +78,7 @@ export class BillingService {
 
   private async openSubscription(userId: string, lock = false, q: Queryable = this.db.pool): Promise<OpenSubscription | null> {
     const { rows } = await q.query<OpenSubscription>(
-      `SELECT s.id, s.plan_code, s.status, p.billing_interval, s.current_period_end, s.grace_until, s.cancel_at_period_end
+      `SELECT s.id, s.plan_code, s.status, p.billing_interval, s.current_period_end, s.grace_until, s.cancel_at_period_end, s.provider
          FROM subscriptions s JOIN plan_prices p ON p.id = s.price_id
         WHERE s.user_id = $1 AND s.status IN ('pending','active','past_due','cancelled')
         LIMIT 1 ${lock ? 'FOR UPDATE OF s' : ''}`,
@@ -116,7 +117,7 @@ export class BillingService {
 
     // Plan changes take effect when the current paid period ends (no proration on InfinitePay).
     const open = await this.openSubscription(user.id);
-    if (open && open.plan_code !== input.planCode && entitledPlan(open, new Date()) !== 'free') {
+    if (open && open.provider !== 'trial' && open.plan_code !== input.planCode && entitledPlan(open, new Date()) !== 'free') {
       throw AppError.conflict('plan_change_unavailable', 'You can switch plans when the current period ends');
     }
 
@@ -249,7 +250,7 @@ export class BillingService {
         // Renewal: extend from the end of the paid period (or from now if it already lapsed).
         fromStatus = open.status;
         await tx.query(
-          `UPDATE subscriptions SET status = 'active', price_id = $2,
+          `UPDATE subscriptions SET status = 'active', price_id = $2, provider = 'infinitepay',
                   current_period_start = CASE WHEN current_period_end > now() THEN current_period_start ELSE now() END,
                   current_period_end = GREATEST(COALESCE(current_period_end, now()), now()) + ${intervalSql},
                   grace_until = NULL, cancel_at_period_end = false, cancelled_at = NULL, renewal_reminder_sent_for = NULL
@@ -350,7 +351,8 @@ export class BillingService {
       currentPrice: price ? { amountMinor: price.amount_minor, currency: price.currency } : null,
       payments: payments.rows.map(toPaymentSummary),
       canCheckout: this.enabled && elig.ok,
-      renewablePlan: open && snapshot.planCode !== 'free' ? open.plan_code : null,
+      // A trial is not renewable: any plan can be bought right away.
+      renewablePlan: open && open.provider !== 'trial' && snapshot.planCode !== 'free' ? open.plan_code : null,
     };
   }
 
@@ -372,7 +374,7 @@ export class BillingService {
   async reactivate(user: AuthenticatedUser): Promise<SubscriptionDetails> {
     await this.db.transaction(async (tx) => {
       const open = await this.openSubscription(user.id, true, tx);
-      if (!open || open.status !== 'cancelled' || !open.current_period_end || open.current_period_end <= new Date()) {
+      if (!open || open.provider === 'trial' || open.status !== 'cancelled' || !open.current_period_end || open.current_period_end <= new Date()) {
         throw AppError.conflict('cannot_reactivate', 'Nothing to reactivate: start a new subscription instead');
       }
       await tx.query("UPDATE subscriptions SET status = 'active', cancel_at_period_end = false, cancelled_at = NULL WHERE id = $1", [open.id]);
@@ -380,6 +382,52 @@ export class BillingService {
         "INSERT INTO subscription_status_history (subscription_id, from_status, to_status, reason, actor) VALUES ($1, 'cancelled', 'active', 'user_reactivated', $2)",
         [open.id, `user:${user.id}`],
       );
+    });
+    return this.details(user);
+  }
+
+  // ------------------------------------------------------------------ free trial
+
+  /** One free Fandom Plus trial per account: adults, verified email, never subscribed before. */
+  async trialStatus(user: AuthenticatedUser): Promise<TrialStatus> {
+    const base = { plan: PREMIUM_TRIAL.plan, days: PREMIUM_TRIAL.days };
+    const p = await this.db.one<{ done: boolean; is_minor: boolean; subscribed: boolean }>(
+      `SELECT p.onboarding_completed_at IS NOT NULL AS done, p.is_minor,
+              EXISTS (SELECT 1 FROM subscriptions s WHERE s.user_id = p.user_id) AS subscribed
+         FROM profiles p WHERE p.user_id = $1`,
+      [user.id],
+    );
+    const reason = !p?.done ? 'onboarding_required' : p.is_minor ? 'minor' : p.subscribed ? 'already_used' : !user.emailVerified ? 'email_not_verified' : null;
+    return { ...base, eligible: reason === null, reason };
+  }
+
+  async startTrial(user: AuthenticatedUser): Promise<SubscriptionDetails> {
+    const status = await this.trialStatus(user);
+    if (!status.eligible) {
+      const code = status.reason === 'email_not_verified' ? 'email_not_verified' : status.reason === 'onboarding_required' ? 'onboarding_required' : 'trial_unavailable';
+      throw AppError.forbidden(code, 'The free trial is not available for this account');
+    }
+    await this.db.transaction(async (tx) => {
+      // Serializes concurrent requests; the one-open-subscription index is the final guard.
+      await tx.query('SELECT pg_advisory_xact_lock(hashtext($1))', [`trial:${user.id}`]);
+      const used = await tx.query('SELECT 1 FROM subscriptions WHERE user_id = $1 LIMIT 1', [user.id]);
+      if (used.rowCount) throw AppError.forbidden('trial_unavailable', 'The free trial was already used');
+      const price = await tx.query<{ id: string }>(
+        "SELECT id FROM plan_prices WHERE plan_code = $1 AND billing_interval = 'month' AND currency = 'BRL' LIMIT 1",
+        [PREMIUM_TRIAL.plan],
+      );
+      if (!price.rows[0]) throw AppError.notFound('price_not_found', 'Plan price not configured');
+      // 'cancelled' + period end = trial end: it simply expires (no grace) unless the user subscribes.
+      const { rows } = await tx.query<{ id: string }>(
+        `INSERT INTO subscriptions (user_id, plan_code, price_id, status, provider, current_period_start, current_period_end, cancel_at_period_end, grant_note)
+         VALUES ($1, $2, $3, 'cancelled', 'trial', now(), now() + make_interval(days => $4), true, 'free trial') RETURNING id`,
+        [user.id, PREMIUM_TRIAL.plan, price.rows[0].id, PREMIUM_TRIAL.days],
+      );
+      await tx.query(
+        "INSERT INTO subscription_status_history (subscription_id, from_status, to_status, reason, actor) VALUES ($1, NULL, 'cancelled', 'free_trial_started', $2)",
+        [rows[0]!.id, `user:${user.id}`],
+      );
+      await this.audit.log(tx, { actorUserId: user.id, action: 'billing.trial_started', targetType: 'subscription', targetId: rows[0]!.id, metadata: { plan: PREMIUM_TRIAL.plan, days: PREMIUM_TRIAL.days } });
     });
     return this.details(user);
   }

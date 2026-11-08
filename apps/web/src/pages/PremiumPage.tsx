@@ -7,6 +7,7 @@ import { useAuth } from '@/auth/AuthProvider';
 import { SectionHeading } from '@/components/Layout';
 import { PlanCards } from '@/components/PlanCards';
 import { PremiumComparison } from '@/components/PremiumComparison';
+import { TrialOffer } from '@/components/premium';
 import { CardGridSkeleton, ErrorState } from '@/components/states';
 import { useBillingConfig, usePlans, useSubscriptionDetails } from '@/hooks/data';
 
@@ -42,6 +43,8 @@ export default function PremiumPage() {
           </span>
         </Alert>
       )}
+
+      <TrialOffer className="mx-auto mt-8 max-w-3xl" />
 
       <div className="mt-12">
         {plans.isPending ? (

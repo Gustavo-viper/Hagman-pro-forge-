@@ -20,6 +20,8 @@ export function PremiumComparison() {
     { key: 'hangman', cells: { free: P.hangmanRewardedWins.free, plus: P.hangmanRewardedWins.plus, ultra: P.hangmanRewardedWins.ultra } },
     { key: 'survival', cells: { free: no, plus: `${P.survivalDailyXpCap.plus} XP`, ultra: `${P.survivalDailyXpCap.ultra} XP` } },
     { key: 'vip', cells: { free: no, plus: yes, ultra: yes } },
+    { key: 'stats', cells: { free: no, plus: yes, ultra: yes } },
+    { key: 'shields', cells: { free: no, plus: t('premiumPerks.table.perWeek', { count: P.streakShieldsPerWeek.plus }), ultra: t('premiumPerks.table.perWeek', { count: P.streakShieldsPerWeek.ultra }) } },
     { key: 'missions', cells: { free: no, plus: t('premiumPerks.table.plusMissions'), ultra: t('premiumPerks.table.allMissions') } },
     { key: 'events', cells: { free: t('premiumPerks.table.freeEvents'), plus: t('premiumPerks.table.plusEvents'), ultra: t('premiumPerks.table.allEvents') } },
     { key: 'badge', cells: { free: no, plus: <PlanBadge plan="plus" />, ultra: <PlanBadge plan="ultra" /> } },

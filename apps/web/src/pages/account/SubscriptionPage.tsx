@@ -96,9 +96,9 @@ export default function SubscriptionPage() {
                       <div>
                         <p className="font-display text-2xl font-bold">{t(`dashboard.planNames.${s.planCode}`)}</p>
                         <p className="text-sm text-mist/60">
-                          {t(`dashboard.statuses.${s.status}`)}
+                          {s.trial ? t('trial.status') : t(`dashboard.statuses.${s.status}`)}
                           {s.interval && ` · ${s.interval === 'month' ? t('landing.plans.monthly') : t('landing.plans.yearly')}`}
-                          {d.currentPrice && isPaid && ` · ${money(d.currentPrice.amountMinor, d.currentPrice.currency, locale)}`}
+                          {d.currentPrice && isPaid && !s.trial && ` · ${money(d.currentPrice.amountMinor, d.currentPrice.currency, locale)}`}
                         </p>
                       </div>
                     </div>
@@ -109,7 +109,7 @@ export default function SubscriptionPage() {
                       </div>
                     )}
                   </div>
-                  <p className="relative mt-5 text-sm text-mist/60">{isPaid ? (s.cancelAtPeriodEnd ? t('subscription.cancelledNote') : t('subscription.prepaidNote')) : t('subscription.freeNote')}</p>
+                  <p className="relative mt-5 text-sm text-mist/60">{s.trial ? t('trial.note') : isPaid ? (s.cancelAtPeriodEnd ? t('subscription.cancelledNote') : t('subscription.prepaidNote')) : t('subscription.freeNote')}</p>
                   <div className="relative mt-6 flex flex-wrap gap-3">
                     {isPaid && d.renewablePlan && s.interval && !s.cancelAtPeriodEnd && (
                       <Button loading={checkout.isPending || checkout.isSuccess} disabled={!d.canCheckout} onClick={() => checkout.mutate({ planCode: d.renewablePlan as 'plus' | 'ultra', interval: s.interval! })}>
@@ -122,7 +122,8 @@ export default function SubscriptionPage() {
                         {t('subscription.cancel')}
                       </Button>
                     )}
-                    {isPaid && s.status === 'cancelled' && (
+                    {s.trial && <Button asChild variant="gold"><Link to="/premium">{t('trial.keepPlus')}</Link></Button>}
+                    {isPaid && !s.trial && s.status === 'cancelled' && (
                       <Button variant="glass" loading={reactivate.isPending} onClick={() => reactivate.mutate()}>{t('subscription.reactivate')}</Button>
                     )}
                     {isPaid && <Button asChild variant="ghost"><Link to="/premium">{t('subscription.seeAllPlans')}</Link></Button>}

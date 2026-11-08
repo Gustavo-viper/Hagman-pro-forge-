@@ -14,14 +14,14 @@ VALUES
   ('plus',
    '{"pt-BR":"Fandom Plus","en":"Fandom Plus"}',
    '{"pt-BR":"Evolua mais rápido e tenha acesso aos espaços de assinantes.","en":"Level up faster and get into the subscriber spaces."}',
-   '{"pt-BR":["Tudo do Free","+20% de XP em quizzes, jogos e missões","Modo Sobrevivência em todos os universos","Sala VIP: fórum exclusivo de assinantes em cada universo","Missões Plus com recompensas maiores","120 XP por dia no contra o relógio e 10 vitórias com XP na forca","Eventos exclusivos para assinantes","Selo Plus no seu nome em fóruns, chats e placares"],
-     "en":["Everything in Free","+20% XP on quizzes, games and missions","Survival mode in every universe","VIP lounge: subscriber-only forum in every universe","Plus missions with bigger rewards","120 XP a day in the speed round and 10 XP-earning hangman wins","Subscriber-only events","Plus badge next to your name in forums, chats and leaderboards"]}',
+   '{"pt-BR":["Tudo do Free","+20% de XP em quizzes, jogos e missões","Modo Sobrevivência em todos os universos","Sala VIP: fórum exclusivo de assinantes em cada universo","Missões Plus com recompensas maiores","Estatísticas detalhadas no seu painel","Proteção de sequência: 1 dia perdido por semana não quebra seu desafio diário","120 XP por dia no contra o relógio e 10 vitórias com XP na forca","Eventos exclusivos para assinantes","Selo Plus no seu nome em fóruns, chats e placares"],
+     "en":["Everything in Free","+20% XP on quizzes, games and missions","Survival mode in every universe","VIP lounge: subscriber-only forum in every universe","Plus missions with bigger rewards","Detailed statistics on your dashboard","Streak shield: 1 missed day a week keeps your daily streak","120 XP a day in the speed round and 10 XP-earning hangman wins","Subscriber-only events","Plus badge next to your name in forums, chats and leaderboards"]}',
    10),
   ('ultra',
    '{"pt-BR":"Fandom Ultra","en":"Fandom Ultra"}',
    '{"pt-BR":"A experiência máxima do Fandom Universe.","en":"The ultimate Fandom Universe experience."}',
-   '{"pt-BR":["Tudo do Fandom Plus","+50% de XP em quizzes, jogos e missões","200 XP por dia no contra o relógio e 20 vitórias com XP na forca","Missões Ultra lendárias","Eventos exclusivos Ultra","Selo Ultra dourado e nome em destaque"],
-     "en":["Everything in Fandom Plus","+50% XP on quizzes, games and missions","200 XP a day in the speed round and 20 XP-earning hangman wins","Legendary Ultra missions","Ultra-exclusive events","Golden Ultra badge and highlighted name"]}',
+   '{"pt-BR":["Tudo do Fandom Plus","+50% de XP em quizzes, jogos e missões","Proteção de sequência: 2 dias perdidos por semana","200 XP por dia no contra o relógio e 20 vitórias com XP na forca","Missões Ultra lendárias","Eventos exclusivos Ultra","Selo Ultra dourado e nome em destaque"],
+     "en":["Everything in Fandom Plus","+50% XP on quizzes, games and missions","Streak shield: 2 missed days a week","200 XP a day in the speed round and 20 XP-earning hangman wins","Legendary Ultra missions","Ultra-exclusive events","Golden Ultra badge and highlighted name"]}',
    20)
 ON CONFLICT (code) DO NOTHING;
 

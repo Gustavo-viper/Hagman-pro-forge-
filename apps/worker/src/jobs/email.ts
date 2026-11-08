@@ -70,7 +70,7 @@ const COPY: Record<EmailTemplate, Record<Locale, Copy>> = {
     'pt-BR': {
       subject: 'Sua assinatura vence em breve — Fandom Universe',
       heading: 'Hora de renovar',
-      body: (d) => `Seu plano ${d.plan} vence em ${d.until}. Renove agora para não perder emblemas, molduras e acesso às áreas exclusivas.`,
+      body: (d) => `Seu plano ${d.plan} vence em ${d.until}. Renove agora para manter o bônus de XP, o Modo Sobrevivência, a Sala VIP e seu selo de assinante.`,
       cta: 'Renovar assinatura',
       expiry: none,
       ignore: 'Se não quiser renovar, não precisa fazer nada: sua conta volta ao plano Free ao fim do período.',
@@ -78,10 +78,28 @@ const COPY: Record<EmailTemplate, Record<Locale, Copy>> = {
     en: {
       subject: 'Your subscription ends soon — Fandom Universe',
       heading: 'Time to renew',
-      body: (d) => `Your ${d.plan} plan ends on ${d.until}. Renew now to keep your badges, frames and access to exclusive areas.`,
+      body: (d) => `Your ${d.plan} plan ends on ${d.until}. Renew now to keep your XP bonus, survival mode, the VIP lounge and your subscriber badge.`,
       cta: 'Renew subscription',
       expiry: none,
       ignore: "If you don't want to renew, do nothing: your account returns to Free when the period ends.",
+    },
+  },
+  trial_ending: {
+    'pt-BR': {
+      subject: 'Seu teste grátis do Fandom Plus termina em breve',
+      heading: 'Seu teste está acabando',
+      body: (d) => `Seu teste grátis do ${d.plan} termina em ${d.until}. Assine por ${d.amount}/mês para continuar com +20% de XP, o Modo Sobrevivência, a Sala VIP, as missões Plus e seu selo de assinante.`,
+      cta: 'Continuar com o Plus',
+      expiry: none,
+      ignore: 'Se não quiser assinar, não precisa fazer nada: nenhuma cobrança é feita e sua conta volta ao plano Free.',
+    },
+    en: {
+      subject: 'Your Fandom Plus free trial ends soon',
+      heading: 'Your trial is ending',
+      body: (d) => `Your ${d.plan} free trial ends on ${d.until}. Subscribe for ${d.amount}/month to keep +20% XP, survival mode, the VIP lounge, Plus missions and your subscriber badge.`,
+      cta: 'Keep Plus',
+      expiry: none,
+      ignore: "If you don't want to subscribe, do nothing: you are never charged and your account returns to Free.",
     },
   },
   email_verification: {

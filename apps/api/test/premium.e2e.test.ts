@@ -174,4 +174,43 @@ describe.runIf(enabled)('Fandom Premium perks', () => {
     const plus = plans.find((p: { code: string }) => p.code === 'plus');
     expect(plus.benefits['pt-BR']).toEqual(expect.arrayContaining(['+20% de XP em quizzes, jogos e missões', 'Modo Sobrevivência em todos os universos']));
   });
+
+  it('detailed statistics are a Plus perk, built from the real ledgers', async () => {
+    const free = await fan('greys-anatomy', 'Estatística Free');
+    const plus = await fan('greys-anatomy', 'Estatística Plus', 'plus');
+    expect((await http.get('/v1/me/stats').set(bearer(free.token)).expect(403)).body).toMatchObject({ code: 'premium_required', details: { requiredPlan: 'plus' } });
+
+    const id = await quizId('greys-anatomy', 'plantao-em-seattle');
+    await http.post(`/v1/quizzes/${id}/attempts`).set(bearer(plus.token)).send({ answers: await perfectAnswers(id) }).expect(201);
+    const stats = (await http.get('/v1/me/stats').set(bearer(plus.token)).expect(200)).body;
+    expect(stats.periodDays).toBe(30);
+    expect(stats.xpByDay).toHaveLength(30);
+    // 50 XP onboarding reward + 60 XP quiz + 12 XP Plus bonus, all today.
+    expect(stats.xpByDay.at(-1)).toMatchObject({ xp: 110, bonus: 12 });
+    expect(stats.totals).toMatchObject({ xpPeriod: 122, bonusPeriod: 12, activeDays: 1, quizzesCompleted: 1, perfectQuizzes: 1, accuracy: 1 });
+    expect(stats.xpBySource).toEqual([{ source: 'quiz', xp: 60 }, { source: 'onboarding', xp: 50 }, { source: 'premium', xp: 12 }]);
+    expect(stats.universes[0]).toMatchObject({ slug: 'greys-anatomy', xp: 72, accuracy: 1, quizzesCompleted: 1 });
+  });
+
+  it('streak shields keep the daily streak alive for subscribers (Plus 1, Ultra 2 per week)', async () => {
+    const seed = async (u: TestUser, ago: number[]) => {
+      for (const d of ago) {
+        await db.query(
+          `INSERT INTO game_sessions (user_id, universe_id, game, status, score, total, day, finished_at)
+           SELECT $1, id, 'daily', 'finished', 5, 5, (now() AT TIME ZONE 'America/Sao_Paulo')::date - $2::int, now() FROM universes WHERE slug = 'supernatural'`,
+          [u.id, d],
+        );
+      }
+    };
+    const free = await fan('supernatural', 'Escudo Free');
+    const plus = await fan('supernatural', 'Escudo Plus', 'plus');
+    const ultra = await fan('supernatural', 'Escudo Ultra', 'ultra');
+    // Played today, 2 and 4 days ago: missed yesterday and 3 days ago.
+    for (const u of [free, plus, ultra]) await seed(u, [0, 2, 4]);
+    const daily = async (u: TestUser) => (await http.get('/v1/universes/supernatural/games/me').set(bearer(u.token)).expect(200)).body.daily;
+    expect(await daily(free)).toMatchObject({ streak: 1, shieldsPerWeek: 0, shieldsUsed: 0 });
+    expect(await daily(plus)).toMatchObject({ streak: 2, shieldsPerWeek: 1, shieldsUsed: 1 });
+    expect(await daily(ultra)).toMatchObject({ streak: 3, shieldsPerWeek: 2, shieldsUsed: 2 });
+  });
 });
+
