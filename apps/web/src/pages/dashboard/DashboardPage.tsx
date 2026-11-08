@@ -222,6 +222,7 @@ function VerifyEmailBanner() {
     <Alert variant="warning" className="mb-6 flex-wrap items-center">
       <MailWarning className="size-5 shrink-0" />
       <span className="flex-1">{t('dashboard.emailNotVerified')}</span>
+      <Button asChild size="sm" variant="gold"><Link to="/confirm-email">{t('verify.howTo')}</Link></Button>
       {resend.isSuccess ? (
         <span className="text-xs">{t('dashboard.verificationSent')}</span>
       ) : (
@@ -251,7 +252,10 @@ export default function DashboardPage() {
       ) : dashboard.isError ? (
         <ErrorState error={dashboard.error} title={t('dashboard.error')} onRetry={() => void dashboard.refetch()} />
       ) : !dashboard.data.profile.onboardingCompleted ? (
-        <OnboardingForm />
+        <>
+          {!dashboard.data.profile.emailVerified && <VerifyEmailBanner />}
+          <OnboardingForm />
+        </>
       ) : (
         <>
           {!dashboard.data.profile.emailVerified && <VerifyEmailBanner />}

@@ -26,3 +26,7 @@ export type ForumListInput = z.infer<typeof forumListSchema>;
 
 export const resolveReportSchema = z.object({ action: z.enum(['hide', 'dismiss']), note: z.string().trim().max(500).optional() });
 export type ResolveReportInput = z.infer<typeof resolveReportSchema>;
+
+/** Personal reading shelf: null removes the book from the shelf. */
+export const shelfUpdateSchema = z.object({ status: z.enum(['want', 'reading', 'read']).nullable() });
+export type ShelfUpdateInput = z.infer<typeof shelfUpdateSchema>;

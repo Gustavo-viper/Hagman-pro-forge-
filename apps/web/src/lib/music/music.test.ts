@@ -3,7 +3,7 @@ import { universeSlugFromPath } from '@/components/UniverseMusic';
 import { midi } from './synth';
 import { DEFAULT_THEME, parseMelody, THEMES, themeFor } from './themes';
 
-const LAUNCH_UNIVERSES = ['harry-potter', 'supernatural', 'marvel', 'dc', 'star-wars', 'greys-anatomy', 'station-19', 'bts'];
+const LAUNCH_UNIVERSES = ['harry-potter', 'supernatural', 'marvel', 'dc', 'star-wars', 'greys-anatomy', 'station-19', 'bts', 'animes', 'games'];
 
 describe('original soundtracks', () => {
   it('parses note names', () => {

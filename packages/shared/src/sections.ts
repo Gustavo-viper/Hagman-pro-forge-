@@ -7,14 +7,14 @@ export type SectionEngine = 'identity' | 'quizzes' | 'ranking' | 'archive' | 'fo
 export const FEATURE_ENGINE: Record<string, SectionEngine> = {
   // identity systems
   house_sorting: 'identity', hunter_identity: 'identity', faction_identity: 'identity',
-  specialty_identity: 'identity', station_role: 'identity', fandom_role: 'identity',
+  specialty_identity: 'identity', station_role: 'identity', fandom_role: 'identity', anime_style: 'identity', gamer_class: 'identity',
   // games
   quizzes: 'quizzes', rankings: 'ranking', hunter_ranking: 'ranking', house_cup: 'house_cup',
   // knowledge archive
   library: 'archive', creatures: 'archive', spells: 'archive', bestiary: 'archive', creature_archive: 'archive',
   character_archive: 'archive', timelines: 'archive', multiverse_guide: 'archive', galaxy_atlas: 'archive',
   starship_archive: 'archive', species_archive: 'archive', episode_guide: 'archive', medical_cases: 'archive',
-  discography: 'archive',
+  discography: 'archive', books: 'archive', anime_guide: 'archive', games_guide: 'archive',
   // community forum
   discussions: 'forum', theories: 'forum', discussion_groups: 'forum', common_rooms: 'forum',
   fan_projects: 'forum', translations: 'forum', fan_art: 'forum', investigations: 'forum', vip_lounge: 'forum',
@@ -30,6 +30,11 @@ export const MISSION_SECTIONS = Object.keys(FEATURE_ENGINE).filter((k) => FEATUR
 
 /** Forum categories restricted to members sharing the same identity (e.g. a house). */
 export const IDENTITY_SCOPED_CATEGORIES = ['common_rooms'];
+
+/** Archive section holding real books, with a personal reading shelf. */
+export const BOOK_SECTION = 'books';
+export const SHELF_STATUSES = ['want', 'reading', 'read'] as const;
+export type ShelfStatus = (typeof SHELF_STATUSES)[number];
 
 export const MISSION_OBJECTIVES = [
   'quiz_complete', 'quiz_perfect', 'forum_topic', 'forum_reply', 'identity_set', 'event_join',

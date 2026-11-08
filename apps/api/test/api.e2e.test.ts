@@ -53,7 +53,7 @@ describe.runIf(enabled)('Fandom API (PostgreSQL + Redis)', () => {
   describe('public catalog', () => {
     it('lists active universes with theme tokens', async () => {
       const res = await http.get('/v1/universes').expect(200);
-      expect(res.body.items.map((u: { slug: string }) => u.slug)).toEqual(['harry-potter', 'supernatural', 'marvel', 'dc', 'star-wars', 'greys-anatomy', 'station-19', 'bts']);
+      expect(res.body.items.map((u: { slug: string }) => u.slug)).toEqual(['harry-potter', 'supernatural', 'marvel', 'dc', 'star-wars', 'greys-anatomy', 'station-19', 'bts', 'animes', 'games']);
       expect(res.body.items[0].theme.primary).toMatch(/^#/);
     });
 

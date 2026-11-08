@@ -98,6 +98,15 @@ Cada funcionalidade em `universe_settings.features` é ligada a um motor (`packa
 | Eventos | `GET /v1/universes/:slug/events` · `GET …/events/mine` · `POST/DELETE /v1/events/:id/registration` | membro; capacidade com bloqueio de linha; eventos Premium checados no servidor (`premium_required`) |
 | Disputa | `GET /v1/universes/:slug/standings` | XP somado por identidade (taça das casas) |
 
+### Biblioteca de livros e estante pessoal
+
+Todo universo tem a seção de arquivo `books` (`GET /v1/universes/:slug/archive/books`): livros reais com título, autor e ano no subtítulo, resumo original e uma etiqueta de tipo (`oficial`, `hq`, `manga`, `romance`, `bastidores`, `recomendado`, `inspiracao`). Não vendemos nem distribuímos os livros.
+
+| Rota | Regras |
+|---|---|
+| `GET /v1/universes/:slug/books/shelf` | usuário autenticado; `{ items: [{ entryId, status }], counts: { want, reading, read } }` só daquele universo |
+| `PUT /v1/books/:entryId/shelf { status: want\|reading\|read\|null }` | só entradas da seção `books` (`book_not_found`); `null` remove da estante |
+
 ### Jogos dos universos
 
 Todos os jogos são conferidos no servidor: respostas e palavras secretas nunca saem da API antes da hora, o XP entra pelo livro-razão (`source = 'game'`) uma única vez por partida e há limites diários (dia no fuso America/Sao_Paulo).

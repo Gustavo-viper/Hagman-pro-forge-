@@ -8,7 +8,7 @@ Legenda: ✅ concluído e validado · 🟡 parcial (fundação pronta) · ⏳ pr
 | 2 | Banco de dados e autenticação | 🟡 núcleo pronto (users, profiles, consents, roles, audit, XP, assinaturas). Faltam tabelas sociais/jogos/loja e fluxos de conta (exclusão, exportação) |
 | 3 | Design system e interface | 🟡 identidade, tokens, componentes base, partículas, transições. Faltam componentes de feed, modais, toasts, tema por assinante |
 | 4 | Perfis e usuários | ⏳ perfil público, avatar/capa (armazenamento de objetos — Railway Volume ou bucket S3 compatível), bio, seguidores, amigos, bloqueios, privacidade, histórico, exclusão de conta |
-| 5 | Motor multiuniverso | ✅ 8 universos, todas as funcionalidades listadas ligadas a 5 motores (arquivo, comunidade, missões, eventos, disputa) + quizzes, identidade e ranking. Falta editor de conteúdo no admin |
+| 5 | Motor multiuniverso | ✅ 10 universos (incluindo Animes e Games), biblioteca de livros com estante pessoal em todos, todas as funcionalidades listadas ligadas a 5 motores (arquivo, comunidade, missões, eventos, disputa) + quizzes, identidade e ranking. Falta editor de conteúdo no admin |
 | 6 | Feed e rede social | ⏳ posts, imagens, enquetes, reações, comentários aninhados, compartilhar, salvar, denúncias, paginação por cursor |
 | 7 | Grupos e comunidades | 🟡 fóruns por universo e categoria, salões comunais por identidade, denúncias e moderação. Faltam grupos privados criados por usuários |
 | 8 | Mensagens e notificações | ⏳ WebSocket (gateway NestJS + Redis adapter), DMs, grupos, notificações em tempo real |

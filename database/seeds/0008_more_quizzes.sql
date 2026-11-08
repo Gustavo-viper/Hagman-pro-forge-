@@ -366,7 +366,7 @@ SELECT id, 'rebeliao', 'trivia', '{"pt-BR": "Rebelião", "en": "Rebellion"}', '{
   FROM public.universes WHERE slug = 'star-wars'
 ON CONFLICT (universe_id, slug) DO NOTHING;
 INSERT INTO public.questions (quiz_id, position, prompt, options, correct_key, explanation)
-SELECT q.id, 1, '{"pt-BR": "Quem é o pai de Luke Skywalker?", "en": "Who is Luke Skywalker''s father?"}', '[{"key": "a", "text": {"pt-BR": "Obi-Wan Kenobi", "en": "Obi-Wan Kenobi"}}, {"key": "b", "text": {"pt-BR": "Owen Lars", "en": "Owen Lars"}}, {"key": "c", "text": {"pt-BR": "Anakin Skywalker", "en": "Anakin Skywalker"}}, {"key": "d", "text": {"pt-BR": "Palpatine", "en": "Palpatine"}}]', 'c', NULL
+SELECT q.id, 1, '{"pt-BR": "Quem treina Rey em \"Os Últimos Jedi\"?", "en": "Who trains Rey in \"The Last Jedi\"?"}', '[{"key": "a", "text": {"pt-BR": "Leia Organa", "en": "Leia Organa"}}, {"key": "b", "text": {"pt-BR": "Maz Kanata", "en": "Maz Kanata"}}, {"key": "c", "text": {"pt-BR": "Luke Skywalker", "en": "Luke Skywalker"}}, {"key": "d", "text": {"pt-BR": "Han Solo", "en": "Han Solo"}}]', 'c', NULL
   FROM public.quizzes q JOIN public.universes u ON u.id = q.universe_id
  WHERE u.slug = 'star-wars' AND q.slug = 'rebeliao'
 ON CONFLICT (quiz_id, position) DO NOTHING;

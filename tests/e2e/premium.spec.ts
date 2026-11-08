@@ -13,6 +13,10 @@ test('subscribe to Fandom Plus through the checkout and manage the subscription'
   await page.getByLabel('Senha', { exact: true }).fill(PASSWORD);
   await page.getByLabel('Confirmar senha').fill(PASSWORD);
   await page.getByRole('button', { name: 'Criar conta' }).last().click();
+  // Sign-up lands on the email confirmation guide, then continues to the dashboard.
+  await expect(page).toHaveURL(/\/confirm-email\?welcome=1$/);
+  await expect(page.getByRole('heading', { name: 'Confirme seu e-mail em 3 passos' })).toBeVisible();
+  await page.getByRole('link', { name: 'Continuar e completar meu perfil' }).click();
   await expect(page).toHaveURL(/\/dashboard$/);
 
   // Fixture: mark the email verified (no SMTP in E2E) and complete onboarding through the API.

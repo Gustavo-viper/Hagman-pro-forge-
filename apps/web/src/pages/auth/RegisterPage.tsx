@@ -5,6 +5,8 @@ import { useTranslation } from 'react-i18next';
 import { Link, Navigate, useNavigate } from 'react-router';
 import { useAuth } from '@/auth/AuthProvider';
 import { AuthLayout, FormField } from '@/components/AuthLayout';
+import { VERIFICATION_LINK_HOURS } from '@/components/EmailVerificationGuide';
+import { MailCheck } from 'lucide-react';
 import { useZodForm } from '@/hooks/useZodForm';
 import { errorMessage } from '@/lib/errors';
 
@@ -16,17 +18,18 @@ export default function RegisterPage() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<unknown>(null);
 
-  if (session) return <Navigate to="/dashboard" replace />;
+  if (session && !submitting) return <Navigate to="/dashboard" replace />;
 
   const onSubmit = handleSubmit(async (data) => {
     setSubmitting(true);
     setError(null);
     try {
       await signUp(data.email, data.password);
-      void navigate('/dashboard', { replace: true });
+      // Keep `submitting` on: the page stays mounted during the exit transition, and the
+      // signed-in redirect above must not override the confirmation guide.
+      void navigate('/confirm-email?welcome=1', { replace: true });
     } catch (err) {
       setError(err);
-    } finally {
       setSubmitting(false);
     }
   });
@@ -58,6 +61,14 @@ export default function RegisterPage() {
           {t('auth.register.submit')}
         </Button>
       </form>
+      <div className="mt-6 rounded-2xl border border-mystic-400/25 bg-mystic-500/10 p-4 text-sm">
+        <p className="flex items-center gap-2 font-semibold text-mystic-100"><MailCheck className="size-4" /> {t('verify.registerHint.title')}</p>
+        <ol className="mt-2 list-decimal space-y-1 pl-5 text-mist/70">
+          <li>{t('verify.registerHint.one')}</li>
+          <li>{t('verify.registerHint.two', { hours: VERIFICATION_LINK_HOURS })}</li>
+          <li>{t('verify.registerHint.three')}</li>
+        </ol>
+      </div>
     </AuthLayout>
   );
 }

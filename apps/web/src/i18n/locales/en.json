@@ -265,7 +265,12 @@
       "fan_projects": "Fan projects",
       "translations": "Translations",
       "fan_art": "Fan art",
-      "vip_lounge": "VIP lounge"
+      "vip_lounge": "VIP lounge",
+      "books": "Books",
+      "anime_guide": "Anime guide",
+      "games_guide": "Classics guide",
+      "anime_style": "Anime style",
+      "gamer_class": "Player class"
     },
     "tabs": {
       "overview": "Overview",
@@ -379,7 +384,8 @@
     "game_not_found": "Game not found.",
     "no_questions": "This universe has no questions for this game yet.",
     "no_words": "This universe has no hangman words yet.",
-    "trial_unavailable": "The free trial isn't available for this account."
+    "trial_unavailable": "The free trial isn't available for this account.",
+    "book_not_found": "Book not found."
   },
   "premium": {
     "title": "Unlock your Premium side",
@@ -901,6 +907,77 @@
       "speed": "Speed best",
       "survival": "Survival best",
       "hangman": "Hangman wins"
+    }
+  },
+  "verify": {
+    "welcome": "Account created! Welcome to Fandom Universe.",
+    "pageTitle": "Confirm your email",
+    "why": "Confirming protects your account, lets you recover your password and unlocks posting in the community and subscribing to Premium.",
+    "title": "Confirm your email in 3 steps",
+    "subtitle": "We sent a confirmation link to {{email}}.",
+    "steps": {
+      "open": {
+        "title": "Open your email",
+        "text": "Go to the inbox of {{email}} and look for “Confirm your email — Fandom Universe”."
+      },
+      "click": {
+        "title": "Click “Confirm email”",
+        "text": "Tap the button in the message. The link is valid for {{hours}} hours and works only once."
+      },
+      "back": {
+        "title": "Done!",
+        "text": "Come back to this page: it notices the confirmation by itself within seconds."
+      }
+    },
+    "openInbox": "Open {{name}}",
+    "resend": "Resend email",
+    "resendIn": "Resend in {{seconds}} s",
+    "resent": "We sent a new link. Always use the most recent email.",
+    "autoCheck": "This page checks the confirmation automatically.",
+    "done": "Email confirmed! Your account is secure and every feature is unlocked.",
+    "notFound": {
+      "title": "Can't find the email?",
+      "spam": "Check the Spam or Junk folders. If it's there, mark it as “Not spam” to receive future notices.",
+      "tabs": "In Gmail, also check the Promotions and Updates tabs.",
+      "search": "Search your mailbox for “Fandom Universe”.",
+      "wait": "Wait a few minutes: sometimes the email takes a little while to arrive.",
+      "latest": "Asked for another link? Only the most recent email works — older ones stop working.",
+      "typo": "Check that the address is right: {{email}}. If it's wrong, create a new account with the correct email."
+    },
+    "continueProfile": "Continue and complete my profile",
+    "backToDashboard": "Back to dashboard",
+    "canContinue": "You can keep using the site while you confirm.",
+    "howTo": "How to confirm",
+    "registerHint": {
+      "title": "How email confirmation works",
+      "one": "Create your account with an email you can access.",
+      "two": "We immediately send a confirmation link (valid for {{hours}} hours).",
+      "three": "Open the email and click “Confirm email”. If it doesn't show up, check Spam or the Promotions tab."
+    }
+  },
+  "books": {
+    "progress": "You've read {{read}} of {{total}} books",
+    "counts": "{{want}} on the list · {{reading}} reading",
+    "filter": "Filter books",
+    "all": "All",
+    "mine": "My shelf",
+    "emptyShelf": "Your shelf is empty. Mark books as “Want to read”, “Reading” or “Read”.",
+    "shelfFor": "Shelf: {{title}}",
+    "signIn": "Sign in to build your shelf",
+    "note": "Real titles, authors and years; community-written summaries without major spoilers. We don't sell or distribute the books.",
+    "status": {
+      "want": "Want to read",
+      "reading": "Reading",
+      "read": "Read"
+    },
+    "kinds": {
+      "oficial": "Official",
+      "hq": "Comic",
+      "manga": "Manga",
+      "romance": "Novel",
+      "bastidores": "Behind the scenes",
+      "recomendado": "Recommended read",
+      "inspiracao": "Inspiration"
     }
   }
 }

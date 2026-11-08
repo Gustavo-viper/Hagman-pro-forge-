@@ -245,6 +245,50 @@ export const THEMES: Record<string, Theme> = {
   },
 };
 
+THEMES.animes = {
+  // Anime-opening energy in E major (IV–V–iii–vi): driving band, bright plucks and a soaring lead.
+  title: T('Céu de festival', 'Festival sky'),
+  bpm: 138,
+  stepsPerBar: 16,
+  reverb: 0.3,
+  chords: [['A1', 'A3', 'C#4', 'E4'], ['B1', 'B3', 'D#4', 'F#4'], ['G#1', 'G#3', 'B3', 'D#4'], ['C#2', 'C#4', 'E4', 'G#4'],
+           ['A1', 'A3', 'C#4', 'E4'], ['B1', 'B3', 'D#4', 'F#4'], ['G#1', 'G#3', 'B3', 'D#4'], ['C#2', 'C#4', 'E4', 'G#4']],
+  melody: 'E5:4 F#5:2 G#5:2 A5:4 G#5:4 | F#5:6 D#5:2 B4:8 | B4:4 D#5:4 G#5:4 F#5:4 | E5:12 _:4 | C#6:4 B5:2 A5:2 G#5:4 E5:4 | F#5:4 G#5:4 A5:4 B5:4 | G#5:6 F#5:2 D#5:8 | C#5:8 E5:4 G#5:4',
+  play(b, s) {
+    const c = s.chord;
+    if (s.step === 0) b.pad(c, s.t, s.sd * 16, { gain: 0.03, cutoff: 2400, attack: 0.2 });
+    if (s.step % 2 === 0) b.bass(s.bass + 12, s.t, s.sd * 1.5, { gain: 0.11, wave: 'sawtooth', cutoff: 700 });
+    b.pluck(c[[0, 1, 2, 1][s.step % 4]!]! + 12, s.t, { gain: 0.025, decay: 0.14, wave: 'square', cutoff: 3600 });
+    if (s.step === 0 || s.step === 10) b.guitar(c.map((m) => m - 12), s.t, s.sd * 3, { gain: 0.03 });
+    if (s.cycle === 0 && s.bar < 2) return;
+    if (s.step === 0 || s.step === 8 || s.step === 11) b.kick(s.t, 0.42);
+    if (s.step === 4 || s.step === 12) b.snare(s.t, 0.14);
+    if (s.step % 2 === 0) b.hat(s.t, s.step % 4 === 2, 0.03);
+    if (s.note && sing(s)) b.lead(s.note.m, s.t, s.note.steps * s.sd * 0.92, { wave: 'sawtooth', cutoff: 3200, gain: 0.045 });
+  },
+};
+
+THEMES.games = {
+  // Chiptune adventure in A minor: square-wave arpeggios, triangle bass and noise drums.
+  title: T('Pixel em fuga', 'Pixel getaway'),
+  bpm: 140,
+  stepsPerBar: 16,
+  reverb: 0.12,
+  chords: [['A1', 'A3', 'C4', 'E4'], ['F1', 'F3', 'A3', 'C4'], ['C2', 'C4', 'E4', 'G4'], ['G1', 'G3', 'B3', 'D4'],
+           ['A1', 'A3', 'C4', 'E4'], ['F1', 'F3', 'A3', 'C4'], ['C2', 'C4', 'E4', 'G4'], ['G1', 'G3', 'B3', 'D4']],
+  melody: 'A4:2 C5:2 E5:2 A5:2 G5:4 E5:4 | F5:4 E5:2 C5:2 A4:8 | G4:2 C5:2 E5:2 G5:2 E5:4 C5:4 | D5:6 B4:2 G4:8 | E5:2 E5:2 A5:4 G5:2 E5:2 C5:4 | F5:2 A5:2 C6:4 A5:4 F5:4 | E5:4 G5:4 C6:4 G5:4 | B5:8 D6:4 B5:4',
+  play(b, s) {
+    const c = s.chord;
+    b.pluck(c[[0, 1, 2, 1][s.step % 4]!]! + 12, s.t, { gain: 0.028, decay: 0.09, wave: 'square', cutoff: 5000, wet: 0.1 });
+    if (s.step % 2 === 0) b.bass(s.bass + (s.step % 4 === 2 ? 24 : 12), s.t, s.sd * 1.6, { gain: 0.12, wave: 'triangle', cutoff: 1200 });
+    if (s.cycle === 0 && s.bar < 2) return;
+    if (s.step === 0 || s.step === 6 || s.step === 8) b.kick(s.t, 0.35);
+    if (s.step === 4 || s.step === 12) b.snare(s.t, 0.12);
+    if (s.step % 2 === 1) b.hat(s.t, false, 0.025);
+    if (s.note && sing(s)) b.lead(s.note.m, s.t, s.note.steps * s.sd * 0.85, { wave: 'square', cutoff: 4000, gain: 0.035, wet: 0.15 });
+  },
+};
+
 /** Calm generic theme for universes added later without their own soundtrack. */
 export const DEFAULT_THEME: Theme = {
   title: T('Multiverso', 'Multiverse'),

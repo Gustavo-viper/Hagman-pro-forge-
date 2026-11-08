@@ -265,7 +265,12 @@
       "fan_projects": "Projetos de fãs",
       "translations": "Traduções",
       "fan_art": "Fan arts",
-      "vip_lounge": "Sala VIP"
+      "vip_lounge": "Sala VIP",
+      "books": "Livros",
+      "anime_guide": "Guia de animes",
+      "games_guide": "Guia de clássicos",
+      "anime_style": "Estilo de anime",
+      "gamer_class": "Classe de jogador"
     },
     "tabs": {
       "overview": "Visão geral",
@@ -379,7 +384,8 @@
     "game_not_found": "Partida não encontrada.",
     "no_questions": "Este universo ainda não tem perguntas para este jogo.",
     "no_words": "Este universo ainda não tem palavras para a forca.",
-    "trial_unavailable": "O teste grátis não está disponível para esta conta."
+    "trial_unavailable": "O teste grátis não está disponível para esta conta.",
+    "book_not_found": "Livro não encontrado."
   },
   "premium": {
     "title": "Desbloqueie o seu lado Premium",
@@ -901,6 +907,77 @@
       "speed": "Recorde relógio",
       "survival": "Recorde sobrevivência",
       "hangman": "Vitórias na forca"
+    }
+  },
+  "verify": {
+    "welcome": "Conta criada! Bem-vindo ao Fandom Universe.",
+    "pageTitle": "Confirme seu e-mail",
+    "why": "A confirmação protege sua conta, permite recuperar a senha e libera publicar na comunidade e assinar o Premium.",
+    "title": "Confirme seu e-mail em 3 passos",
+    "subtitle": "Enviamos um link de confirmação para {{email}}.",
+    "steps": {
+      "open": {
+        "title": "Abra seu e-mail",
+        "text": "Entre na caixa de entrada de {{email}} e procure a mensagem “Confirme seu e-mail — Fandom Universe”."
+      },
+      "click": {
+        "title": "Clique em “Confirmar e-mail”",
+        "text": "Toque no botão da mensagem. O link vale por {{hours}} horas e só pode ser usado uma vez."
+      },
+      "back": {
+        "title": "Pronto!",
+        "text": "Pode voltar para esta página: ela percebe a confirmação sozinha em poucos segundos."
+      }
+    },
+    "openInbox": "Abrir o {{name}}",
+    "resend": "Reenviar e-mail",
+    "resendIn": "Reenviar em {{seconds}} s",
+    "resent": "Enviamos um novo link. Use sempre o e-mail mais recente.",
+    "autoCheck": "Esta página verifica a confirmação automaticamente.",
+    "done": "E-mail confirmado! Sua conta está protegida e todos os recursos estão liberados.",
+    "notFound": {
+      "title": "Não encontrou o e-mail?",
+      "spam": "Confira as pastas Spam ou Lixo eletrônico. Se estiver lá, marque como “Não é spam” para receber os próximos avisos.",
+      "tabs": "No Gmail, veja também as abas Promoções e Atualizações.",
+      "search": "Pesquise por “Fandom Universe” na sua caixa de e-mail.",
+      "wait": "Aguarde alguns minutos: às vezes o e-mail demora um pouco para chegar.",
+      "latest": "Pediu outro link? Só o e-mail mais recente funciona — os anteriores deixam de valer.",
+      "typo": "Confira se o endereço está certo: {{email}}. Se estiver errado, crie uma nova conta com o e-mail correto."
+    },
+    "continueProfile": "Continuar e completar meu perfil",
+    "backToDashboard": "Voltar ao painel",
+    "canContinue": "Você pode continuar usando o site enquanto confirma.",
+    "howTo": "Como confirmar",
+    "registerHint": {
+      "title": "Como funciona a confirmação de e-mail",
+      "one": "Crie sua conta com um e-mail que você acessa.",
+      "two": "Enviamos na hora um link de confirmação (vale por {{hours}} horas).",
+      "three": "Abra o e-mail e clique em “Confirmar e-mail”. Se não aparecer, veja o Spam ou a aba Promoções."
+    }
+  },
+  "books": {
+    "progress": "Você leu {{read}} de {{total}} livros",
+    "counts": "{{want}} na lista · {{reading}} lendo",
+    "filter": "Filtrar livros",
+    "all": "Todos",
+    "mine": "Minha estante",
+    "emptyShelf": "Sua estante está vazia. Marque livros como “Quero ler”, “Lendo” ou “Lido”.",
+    "shelfFor": "Estante: {{title}}",
+    "signIn": "Entre para montar sua estante",
+    "note": "Títulos, autores e anos reais; resumos escritos pela comunidade, sem spoilers pesados. Não vendemos nem distribuímos os livros.",
+    "status": {
+      "want": "Quero ler",
+      "reading": "Lendo",
+      "read": "Lido"
+    },
+    "kinds": {
+      "oficial": "Oficial",
+      "hq": "HQ",
+      "manga": "Mangá",
+      "romance": "Romance",
+      "bastidores": "Bastidores",
+      "recomendado": "Leitura recomendada",
+      "inspiracao": "Inspiração"
     }
   }
 }

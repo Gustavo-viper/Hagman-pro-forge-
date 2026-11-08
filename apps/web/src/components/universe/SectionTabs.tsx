@@ -1,4 +1,4 @@
-import { FEATURE_ENGINE, PLAN_RANK, PREMIUM_CATEGORIES } from '@fandom/shared';
+import { BOOK_SECTION, FEATURE_ENGINE, PLAN_RANK, PREMIUM_CATEGORIES } from '@fandom/shared';
 import type { IdentityStanding, LoreEntry, MissionProgress, MissionSummary, UniverseEvent } from '@fandom/types';
 import { Badge, Button, cn, Progress, Skeleton } from '@fandom/ui';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -14,6 +14,7 @@ import { errorMessage } from '@/lib/errors';
 import { formatNumber, localized } from '@/lib/format';
 import { currentLocale } from '@/lib/i18n';
 import { PlanBadge, useMyPlan, XpReward } from '@/components/premium';
+import { BooksView } from './BooksView';
 
 export function featuresOf(universe: UniverseDetail, engine: string): string[] {
   return universe.features.filter((f) => FEATURE_ENGINE[f] === engine);
@@ -64,6 +65,8 @@ export function ArchiveTab({ universe, section, onSection }: { universe: Univers
         <ErrorState error={entries.error} onRetry={() => void entries.refetch()} />
       ) : entries.data.length === 0 ? (
         <EmptyState>{t('sections.archiveEmpty')}</EmptyState>
+      ) : current === BOOK_SECTION ? (
+        <BooksView universe={universe} books={entries.data} />
       ) : (
         <div className="grid gap-4 md:grid-cols-2">
           {entries.data.map((e, i) => (
@@ -77,7 +80,7 @@ export function ArchiveTab({ universe, section, onSection }: { universe: Univers
           ))}
         </div>
       )}
-      <p className="mt-6 text-xs text-mist/45">{t('sections.archiveNote')}</p>
+      {current !== BOOK_SECTION && <p className="mt-6 text-xs text-mist/45">{t('sections.archiveNote')}</p>}
     </div>
   );
 }

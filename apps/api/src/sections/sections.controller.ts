@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, HttpCode, Param, ParseUUIDPipe, Post, Query } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, Param, ParseUUIDPipe, Post, Put, Query } from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
 import {
   createReplySchema,
@@ -6,13 +6,15 @@ import {
   forumListSchema,
   reportSchema,
   sectionKeySchema,
+  shelfUpdateSchema,
   universeSlugSchema,
   type CreateReplyInput,
   type CreateTopicInput,
   type ForumListInput,
   type ReportInput,
+  type ShelfUpdateInput,
 } from '@fandom/schemas';
-import type { CursorPage, ForumTopicDetail, ForumTopicSummary, IdentityStanding, LoreEntry, MissionProgress, MissionSummary, UniverseEvent } from '@fandom/types';
+import type { BookShelf, CursorPage, ForumTopicDetail, ForumTopicSummary, IdentityStanding, LoreEntry, MissionProgress, MissionSummary, UniverseEvent } from '@fandom/types';
 import type { AuthenticatedUser } from '../auth/auth.types.js';
 import { CurrentUser, OptionalAuth, OptionalUser, Public } from '../common/decorators.js';
 import { ZodPipe } from '../common/zod.pipe.js';
@@ -35,6 +37,18 @@ export class SectionsController {
   @Get('universes/:slug/archive/:section')
   async archive(@Param('slug', slugPipe) slug: string, @Param('section', sectionPipe) section: string): Promise<{ items: LoreEntry[] }> {
     return { items: await this.sections.archive(slug, section) };
+  }
+
+  // book shelf (personal reading list)
+  @Get('universes/:slug/books/shelf')
+  shelf(@CurrentUser() user: AuthenticatedUser, @Param('slug', slugPipe) slug: string): Promise<BookShelf> {
+    return this.sections.shelf(user, slug);
+  }
+
+  @Throttle({ default: { limit: () => Number(process.env.FORUM_RATE_LIMIT_MAX ?? 60), ttl: 60_000 } })
+  @Put('books/:entryId/shelf')
+  setShelf(@CurrentUser() user: AuthenticatedUser, @Param('entryId', ParseUUIDPipe) entryId: string, @Body(new ZodPipe(shelfUpdateSchema)) body: ShelfUpdateInput) {
+    return this.sections.setShelf(user, entryId, body.status);
   }
 
   // missions

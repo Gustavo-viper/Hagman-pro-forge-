@@ -562,3 +562,9 @@ export interface PlayerStats {
     hangmanWins: number;
   }[];
 }
+
+// ---------------------------------------------------------------- book shelf
+
+export type ShelfStatus = 'want' | 'reading' | 'read';
+export interface ShelfItem { entryId: string; status: ShelfStatus }
+export interface BookShelf { items: ShelfItem[]; counts: Record<ShelfStatus, number> }

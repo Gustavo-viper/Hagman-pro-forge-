@@ -1,6 +1,6 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
-import { FEATURE_ENGINE, PLAN_RANK, type MissionObjective, type SectionEngine } from '@fandom/shared';
-import type { IdentityStanding, LoreEntry, MissionProgress, MissionSummary, UniverseEvent } from '@fandom/types';
+import { BOOK_SECTION, FEATURE_ENGINE, PLAN_RANK, type MissionObjective, type SectionEngine, type ShelfStatus } from '@fandom/shared';
+import type { BookShelf, IdentityStanding, LoreEntry, MissionProgress, MissionSummary, ShelfItem, UniverseEvent } from '@fandom/types';
 import type { AuthenticatedUser } from '../auth/auth.types.js';
 import { AppError } from '../common/app-error.js';
 import { DatabaseService, type Queryable } from '../database/database.service.js';
@@ -95,6 +95,35 @@ export class SectionsService {
       );
       return rows.map((r) => ({ ...r }));
     });
+  }
+
+  // ---------------------------------------------------------------- book shelf
+
+  async shelf(user: AuthenticatedUser, slug: string): Promise<BookShelf> {
+    const universe = await this.universeWith(slug, BOOK_SECTION, 'archive');
+    const { rows } = await this.db.query<{ entry_id: string; status: ShelfStatus }>(
+      `SELECT b.entry_id, b.status FROM book_shelf b JOIN lore_entries l ON l.id = b.entry_id
+        WHERE b.user_id = $1 AND l.universe_id = $2 AND l.section = $3 AND l.status = 'published'`,
+      [user.id, universe.id, BOOK_SECTION],
+    );
+    const counts: BookShelf['counts'] = { want: 0, reading: 0, read: 0 };
+    for (const r of rows) counts[r.status]++;
+    return { items: rows.map((r) => ({ entryId: r.entry_id, status: r.status })), counts };
+  }
+
+  async setShelf(user: AuthenticatedUser, entryId: string, status: ShelfStatus | null): Promise<ShelfItem | { entryId: string; status: null }> {
+    const book = await this.db.one('SELECT 1 FROM lore_entries WHERE id = $1 AND section = $2 AND status = \'published\'', [entryId, BOOK_SECTION]);
+    if (!book) throw AppError.notFound('book_not_found', 'Book not found');
+    if (status === null) {
+      await this.db.query('DELETE FROM book_shelf WHERE user_id = $1 AND entry_id = $2', [user.id, entryId]);
+      return { entryId, status: null };
+    }
+    await this.db.query(
+      `INSERT INTO book_shelf (user_id, entry_id, status) VALUES ($1, $2, $3)
+       ON CONFLICT (user_id, entry_id) DO UPDATE SET status = EXCLUDED.status, updated_at = now()`,
+      [user.id, entryId, status],
+    );
+    return { entryId, status };
   }
 
   // ---------------------------------------------------------------- missions

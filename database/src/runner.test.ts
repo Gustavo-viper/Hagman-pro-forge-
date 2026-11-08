@@ -41,9 +41,9 @@ describe.runIf(Boolean(url))('runner against PostgreSQL', () => {
     await seed(client, join(root, 'seeds'), silent);
     await seed(client, join(root, 'seeds'), silent);
     const u = await client.query('SELECT slug FROM universes ORDER BY sort_order');
-    expect(u.rows.map((r) => r.slug)).toEqual(['harry-potter', 'supernatural', 'marvel', 'dc', 'star-wars', 'greys-anatomy', 'station-19', 'bts']);
+    expect(u.rows.map((r) => r.slug)).toEqual(['harry-potter', 'supernatural', 'marvel', 'dc', 'star-wars', 'greys-anatomy', 'station-19', 'bts', 'animes', 'games']);
     const s = await client.query('SELECT count(*)::int AS n FROM universe_settings');
-    expect(s.rows[0].n).toBe(8);
+    expect(s.rows[0].n).toBe(10);
     const p = await client.query(
       "SELECT plan_code, billing_interval, amount_minor FROM plan_prices WHERE currency='BRL' ORDER BY plan_code, billing_interval",
     );

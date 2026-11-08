@@ -203,13 +203,18 @@ describe.runIf(enabled)('Universe mini-games: daily challenge, speed round, hang
   });
 
   it('every universe has a hangman bank, a daily pool and game missions', async () => {
-    for (const slug of ['harry-potter', 'supernatural', 'marvel', 'dc', 'star-wars', 'greys-anatomy', 'station-19', 'bts']) {
+    for (const slug of ['harry-potter', 'supernatural', 'marvel', 'dc', 'star-wars', 'greys-anatomy', 'station-19', 'bts', 'animes', 'games']) {
       const words = await db.one<{ n: number }>('SELECT count(*)::int AS n FROM game_words w JOIN universes u ON u.id = w.universe_id WHERE u.slug = $1', [slug]);
       expect(words!.n, slug).toBeGreaterThanOrEqual(15);
       const quizzes = (await http.get(`/v1/universes/${slug}/quizzes`).expect(200)).body.items;
       expect(quizzes.filter((q: { kind: string }) => q.kind === 'trivia').length, slug).toBeGreaterThanOrEqual(3);
       const missions = (await http.get(`/v1/universes/${slug}/missions`).expect(200)).body.items.map((m: { objectiveType: string }) => m.objectiveType);
       expect(missions, slug).toEqual(expect.arrayContaining(['daily_complete', 'daily_perfect', 'speed_score', 'hangman_win']));
+      // No repeated question inside a universe's pool (the games draw from all its quizzes).
+      const dup = await db.query<{ prompt: string }>(
+        `SELECT x.prompt->>'pt-BR' AS prompt FROM questions x JOIN quizzes q ON q.id = x.quiz_id JOIN universes u ON u.id = q.universe_id
+          WHERE u.slug = $1 AND q.kind = 'trivia' GROUP BY 1 HAVING count(*) > 1`, [slug]);
+      expect(dup.rows, slug).toEqual([]);
     }
   });
 });
