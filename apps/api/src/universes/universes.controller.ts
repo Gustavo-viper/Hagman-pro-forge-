@@ -1,8 +1,8 @@
-import { Controller, Delete, Get, HttpCode, Param, Post } from '@nestjs/common';
-import { universeSlugSchema } from '@fandom/schemas';
+import { Body, Controller, Delete, Get, HttpCode, Param, Post, Put } from '@nestjs/common';
+import { officialThemeSchema, universeSlugSchema, youtubeId, type OfficialThemeInput } from '@fandom/schemas';
 import type { UniverseMembership, UniverseSummary } from '@fandom/types';
 import { AppError } from '../common/app-error.js';
-import { CurrentUser, Public } from '../common/decorators.js';
+import { CurrentUser, Public, Roles } from '../common/decorators.js';
 import { ZodPipe } from '../common/zod.pipe.js';
 import type { AuthenticatedUser } from '../auth/auth.types.js';
 import { DatabaseService } from '../database/database.service.js';
@@ -27,6 +27,14 @@ export class UniversesController {
   @Get(':slug')
   get(@Param('slug', slugPipe) slug: string) {
     return this.universes.getActive(slug);
+  }
+
+  /** Staff: official theme song (YouTube link from the rights holder) or null to remove it. */
+  @Roles('admin', 'editor')
+  @Put(':slug/official-theme')
+  setOfficialTheme(@Param('slug', slugPipe) slug: string, @Body(new ZodPipe(officialThemeSchema)) body: OfficialThemeInput): Promise<UniverseSummary> {
+    const t = body.theme;
+    return this.universes.setOfficialTheme(slug, t ? { youtubeId: youtubeId(t.url)!, title: t.title, artist: t.artist || null } : null);
   }
 
   @Post(':slug/membership')

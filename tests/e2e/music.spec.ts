@@ -45,3 +45,30 @@ test('soundtrack follows the universe: starts on interaction, switches, mutes an
   await page.getByRole('link', { name: 'Universos' }).first().click();
   await expect(page.getByTestId('universe-music')).toHaveCount(0);
 });
+
+test('official theme plays from YouTube (click-to-play) and pauses the background soundtrack', async ({ page }) => {
+  await page.addInitScript(() => localStorage.setItem('fandom.locale', 'pt-BR'));
+  await page.goto('/universes/bts');
+  const widget = page.getByTestId('universe-music');
+  await page.getByRole('heading', { name: 'BTS', level: 1 }).click();
+  await expect(widget).toHaveAttribute('data-state', 'playing');
+  await expect.poll(() => page.evaluate(() => (window as unknown as { __fandomMusic: { source: () => string | null } }).__fandomMusic.source())).toBe('synth');
+  // Nothing is embedded until the fan asks for it.
+  await expect(page.locator('iframe')).toHaveCount(0);
+
+  await widget.getByRole('button', { name: 'Tema oficial' }).click();
+  const dialog = page.getByRole('dialog', { name: 'Tema oficial' });
+  await expect(dialog.getByText('Dynamite')).toBeVisible();
+  await expect(dialog.locator('iframe')).toHaveAttribute('src', /^https:\/\/www\.youtube-nocookie\.com\/embed\/gdZLi9oWNZg\?autoplay=1/);
+  await expect(dialog.getByRole('link', { name: 'YouTube' })).toHaveAttribute('href', 'https://www.youtube.com/watch?v=gdZLi9oWNZg');
+  await expect(widget).toContainText('Trilha de fundo pausada');
+  await expect.poll(() => page.evaluate(() => (window as unknown as { __fandomMusic: { source: () => string | null } }).__fandomMusic.source())).toBeNull();
+
+  await dialog.getByRole('button', { name: 'Fechar o tema oficial' }).click();
+  await expect(page.locator('iframe')).toHaveCount(0);
+  await expect.poll(() => page.evaluate(() => (window as unknown as { __fandomMusic: { source: () => string | null } }).__fandomMusic.source())).toBe('synth');
+
+  // The page's CSP allows only YouTube's privacy-enhanced player as a frame.
+  const csp = (await page.request.get('/')).headers()['content-security-policy'];
+  expect(csp).toContain('frame-src https://www.youtube-nocookie.com');
+});

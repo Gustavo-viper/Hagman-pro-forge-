@@ -33,3 +33,34 @@ export const createUniverseSchema = z.object({
   features: z.array(z.string().regex(/^[a-z_]+$/)).max(50).default([]),
 });
 export type CreateUniverseInput = z.infer<typeof createUniverseSchema>;
+
+/** Extracts the video id from a YouTube link (watch, youtu.be, embed, shorts) or a bare id. */
+export function youtubeId(input: string): string | null {
+  const v = input.trim();
+  if (/^[A-Za-z0-9_-]{11}$/.test(v)) return v;
+  try {
+    const u = new URL(v);
+    const host = u.hostname.replace(/^(www|m|music)\./, '');
+    if (host === 'youtu.be') return /^\/([A-Za-z0-9_-]{11})/.exec(u.pathname)?.[1] ?? null;
+    if (host === 'youtube.com' || host === 'youtube-nocookie.com') {
+      const q = u.searchParams.get('v');
+      if (q && /^[A-Za-z0-9_-]{11}$/.test(q)) return q;
+      return /^\/(?:embed|shorts|live)\/([A-Za-z0-9_-]{11})/.exec(u.pathname)?.[1] ?? null;
+    }
+  } catch {
+    // not a URL
+  }
+  return null;
+}
+
+/** Official theme song: a YouTube link from the rights holder (null removes it). */
+export const officialThemeSchema = z.object({
+  theme: z
+    .object({
+      url: z.string().trim().max(300).refine((v) => youtubeId(v) !== null, 'invalid_youtube_url'),
+      title: z.string().trim().min(1).max(120),
+      artist: z.string().trim().max(120).optional().default(''),
+    })
+    .nullable(),
+});
+export type OfficialThemeInput = z.infer<typeof officialThemeSchema>;

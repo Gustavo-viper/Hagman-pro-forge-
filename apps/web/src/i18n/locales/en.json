@@ -410,7 +410,8 @@
     "slug_taken": "That address is already used by another contest.",
     "contest_locked": "This contest can no longer be changed.",
     "invalid_window": "Dates must be in order: start < end of submissions < end of voting.",
-    "minor": "Available to adults (18+) only."
+    "minor": "Available to adults (18+) only.",
+    "invalid_youtube_url": "Use a YouTube link (youtube.com or youtu.be)."
   },
   "premium": {
     "title": "Unlock your Premium side",
@@ -651,6 +652,16 @@
       "declareWinner": "Declare winner",
       "winnerConfirm": "Declare “{{title}}” the winner? This closes the contest.",
       "allUniverses": "All universes"
+    },
+    "officialThemes": {
+      "title": "Universe official themes",
+      "note": "The song plays through YouTube (official player), with no file on our servers. Prefer links from the artist's, label's or studio's official channel — third-party uploads may be taken down.",
+      "url": "YouTube link",
+      "song": "Song",
+      "artist": "Artist",
+      "save": "Save",
+      "remove": "Remove",
+      "saved": "Saved."
     }
   },
   "quiz": {
@@ -880,7 +891,11 @@
     "volume": "Soundtrack volume",
     "tapToPlay": "Tap anywhere to listen",
     "original": "Fandom Universe original score",
-    "themeSong": "Universe theme song"
+    "themeSong": "Universe theme song",
+    "officialTheme": "Official theme",
+    "closeOfficial": "Close the official theme",
+    "officialNote": "Played by YouTube, straight from the source.",
+    "officialPaused": "Background soundtrack paused"
   },
   "premiumPerks": {
     "bonusBadge": "+{{xp}} XP {{plan}} bonus",

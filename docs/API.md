@@ -75,6 +75,14 @@ Primeiro admin: `BOOTSTRAP_SUPER_ADMIN_EMAILS` (concedido no login ou na verific
 | POST | `/v1/universes/:slug/membership` | autenticado + onboarding | Entra no universo (idempotente) → `UniverseMembership` |
 | DELETE | `/v1/universes/:slug/membership` | autenticado | Sai do universo → `204` (`404 membership_not_found`) |
 
+### Tema oficial do universo
+
+`officialTheme: { youtubeId, title, artist } | null` vem em `GET /v1/universes` e `GET /v1/universes/:slug`. No site, o botão "Tema oficial" na barra de música abre o player do YouTube (`youtube-nocookie.com`, só após o clique) e pausa a trilha original de fundo. Nenhum áudio de terceiros é hospedado pela plataforma; MP3 próprios/licenciados continuam possíveis via `apps/web/public/music` + `src/lib/music/tracks.ts`.
+
+| Método | Rota | Acesso | Descrição |
+|---|---|---|---|
+| PUT | `/v1/universes/:slug/official-theme` | admin/editor | `{ theme: { url, title, artist? } \| null }` — aceita links youtube.com/youtu.be/embed/shorts (`invalid_youtube_url`); `null` remove (o seed não recoloca) |
+
 ## Quizzes, identidade e ranking
 
 | Método | Rota | Acesso | Descrição |

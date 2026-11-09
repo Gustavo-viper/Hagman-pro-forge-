@@ -1,5 +1,5 @@
 import { cn } from '@fandom/ui';
-import { Music2, Volume2, VolumeX } from 'lucide-react';
+import { ExternalLink, Music2, Volume2, VolumeX, X, MonitorPlay } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router';
@@ -63,6 +63,9 @@ export function UniverseMusic() {
   const slug = universeSlugFromPath(pathname);
   const [prefs, setPrefs] = useState<Prefs>(loadPrefs);
   const [unlocked, setUnlocked] = useState(false);
+  // Universe whose official theme (YouTube player) is open; the background soundtrack pauses meanwhile.
+  const [officialFor, setOfficialFor] = useState<string | null>(null);
+  const officialOpen = officialFor !== null && officialFor === slug;
   const universe = useUniverse(slug ?? '');
 
   const save = useCallback((next: Prefs) => {
@@ -96,9 +99,9 @@ export function UniverseMusic() {
 
   useEffect(() => {
     const track = slug ? MP3_TRACKS[slug] : undefined;
-    if (slug && !prefs.muted && unlocked) musicPlayer.play(themeFor(slug), track && trackUrl(slug, track));
+    if (slug && !prefs.muted && unlocked && !officialOpen) musicPlayer.play(themeFor(slug), track && trackUrl(slug, track));
     else musicPlayer.stop();
-  }, [slug, prefs.muted, unlocked]);
+  }, [slug, prefs.muted, unlocked, officialOpen]);
 
   // Leaving the site section (or the app) stops the music; hidden tabs pause it.
   useEffect(() => () => musicPlayer.stop(), []);
@@ -111,6 +114,7 @@ export function UniverseMusic() {
   if (!slug) return null;
   const theme = themeFor(slug);
   const track = MP3_TRACKS[slug];
+  const official = universe.data?.officialTheme ?? null;
   const state = prefs.muted ? 'muted' : unlocked ? 'playing' : 'waiting';
   return (
     <div
@@ -143,8 +147,45 @@ export function UniverseMusic() {
         <p className="flex items-center gap-1.5 truncate text-xs font-semibold text-mist">
           <Music2 className="size-3.5 shrink-0" /> {track ? track.title : localized(theme.title, locale)}
         </p>
-        <p className="truncate text-[11px] text-mist/55">{state === 'waiting' ? t('music.tapToPlay') : track ? (track.credit ?? t('music.themeSong')) : t('music.original')}</p>
+        <p className="truncate text-[11px] text-mist/55">{officialOpen ? t('music.officialPaused') : state === 'waiting' ? t('music.tapToPlay') : track ? (track.credit ?? t('music.themeSong')) : t('music.original')}</p>
       </div>
+      {official && (
+        <button
+          type="button"
+          onClick={() => setOfficialFor(officialOpen ? null : slug)}
+          aria-expanded={officialOpen}
+          aria-controls="official-theme"
+          title={t('music.officialTheme')}
+          className={cn('flex h-9 shrink-0 items-center gap-1.5 rounded-full px-3 text-xs font-semibold transition', officialOpen ? 'bg-red-600 text-white' : 'bg-white/10 text-mist hover:bg-white/15')}
+        >
+          <MonitorPlay className="size-4" /> <span className="hidden sm:inline">{t('music.officialTheme')}</span><span className="sr-only sm:hidden">{t('music.officialTheme')}</span>
+        </button>
+      )}
+      {official && officialOpen && (
+        <div id="official-theme" role="dialog" aria-label={t('music.officialTheme')} className="glass absolute bottom-full right-0 mb-3 w-[min(22rem,calc(100vw-2rem))] overflow-hidden rounded-2xl shadow-2xl">
+          <div className="flex items-start gap-2 p-3">
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-sm font-semibold text-mist">{official.title}</p>
+              {official.artist && <p className="truncate text-xs text-mist/60">{official.artist}</p>}
+            </div>
+            <button type="button" onClick={() => setOfficialFor(null)} aria-label={t('music.closeOfficial')} className="grid size-7 place-items-center rounded-full text-mist/70 hover:bg-white/10"><X className="size-4" /></button>
+          </div>
+          <iframe
+            title={`${official.title} — YouTube`}
+            src={`https://www.youtube-nocookie.com/embed/${official.youtubeId}?autoplay=1&rel=0&loop=1&playlist=${official.youtubeId}`}
+            className="aspect-video w-full bg-black"
+            allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
+            referrerPolicy="strict-origin-when-cross-origin"
+            allowFullScreen
+          />
+          <div className="flex items-center justify-between gap-2 p-3 text-[11px] text-mist/55">
+            <span>{t('music.officialNote')}</span>
+            <a href={`https://www.youtube.com/watch?v=${official.youtubeId}`} target="_blank" rel="noopener noreferrer" className="inline-flex shrink-0 items-center gap-1 text-mystic-300 underline">
+              <ExternalLink className="size-3" /> YouTube
+            </a>
+          </div>
+        </div>
+      )}
       <label className="sr-only" htmlFor="music-volume">{t('music.volume')}</label>
       <input
         id="music-volume"

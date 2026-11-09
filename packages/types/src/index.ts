@@ -61,6 +61,13 @@ export interface UniverseThemeTokens {
   glow: string;
 }
 
+/** Official theme song, played from YouTube (click-to-play embed; nothing hosted by us). */
+export interface OfficialTheme {
+  youtubeId: string;
+  title: string;
+  artist: string | null;
+}
+
 export interface UniverseSummary {
   id: string;
   slug: string;
@@ -72,6 +79,7 @@ export interface UniverseSummary {
   features: string[];
   memberCount: number;
   sortOrder: number;
+  officialTheme: OfficialTheme | null;
 }
 
 export interface UniverseMembership {

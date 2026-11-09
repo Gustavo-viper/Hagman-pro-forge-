@@ -12,6 +12,7 @@ import { currentLocale } from '@/lib/i18n';
 import { EVENT_EDIT_ROLES, EVENT_VIEW_ROLES, MODERATION_ROLES, REPORT_VIEW_ROLES, USER_ADMIN_ROLES, useMe } from '@/hooks/data';
 import { RequireStaff } from './AdminLayout';
 import { EventsSection } from './EventsSection';
+import { OfficialThemesSection } from './OfficialThemesSection';
 import { PrizesAdminSection } from './PrizesAdminSection';
 import { ReportsSection } from './ReportsSection';
 
@@ -173,6 +174,7 @@ function AdminContent() {
       {roles.some((r) => ['super_admin', 'admin', 'editor', 'global_moderator'].includes(r)) && (
         <PrizesAdminSection isAdmin={roles.some((r) => ['super_admin', 'admin'].includes(r))} />
       )}
+      {roles.some((r) => ['super_admin', 'admin', 'editor'].includes(r)) && <OfficialThemesSection />}
       {usersAccess && <UsersTable />}
     </div>
   );

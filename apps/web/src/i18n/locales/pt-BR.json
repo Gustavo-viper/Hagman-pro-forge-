@@ -410,7 +410,8 @@
     "slug_taken": "Esse endereço já é usado por outro concurso.",
     "contest_locked": "Este concurso não pode mais ser alterado.",
     "invalid_window": "As datas precisam estar em ordem: início < fim das inscrições < fim da votação.",
-    "minor": "Disponível apenas para maiores de 18 anos."
+    "minor": "Disponível apenas para maiores de 18 anos.",
+    "invalid_youtube_url": "Use um link do YouTube (youtube.com ou youtu.be)."
   },
   "premium": {
     "title": "Desbloqueie o seu lado Premium",
@@ -651,6 +652,16 @@
       "declareWinner": "Declarar vencedor",
       "winnerConfirm": "Declarar “{{title}}” como vencedor? Isso encerra o concurso.",
       "allUniverses": "Todos os universos"
+    },
+    "officialThemes": {
+      "title": "Temas oficiais dos universos",
+      "note": "A música toca pelo YouTube (player oficial), sem arquivo no nosso servidor. Prefira links do canal oficial do artista, gravadora ou estúdio — vídeos enviados por terceiros podem sair do ar.",
+      "url": "Link do YouTube",
+      "song": "Música",
+      "artist": "Artista",
+      "save": "Salvar",
+      "remove": "Remover",
+      "saved": "Salvo."
     }
   },
   "quiz": {
@@ -880,7 +891,11 @@
     "volume": "Volume da trilha sonora",
     "tapToPlay": "Toque em qualquer lugar para ouvir",
     "original": "Trilha original Fandom Universe",
-    "themeSong": "Tema do universo"
+    "themeSong": "Tema do universo",
+    "officialTheme": "Tema oficial",
+    "closeOfficial": "Fechar o tema oficial",
+    "officialNote": "Tocado pelo YouTube, direto da fonte.",
+    "officialPaused": "Trilha de fundo pausada"
   },
   "premiumPerks": {
     "bonusBadge": "+{{xp}} XP bônus {{plan}}",

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { onboardingSchema, signUpSchema, usernameSchema, universeThemeSchema } from './index.js';
+import { officialThemeSchema, onboardingSchema, signUpSchema, usernameSchema, universeThemeSchema, youtubeId } from './index.js';
 
 describe('usernameSchema', () => {
   it.each(['harry_fan', 'dean.w', 'abc', 'a1b2c3'])('accepts %s', (u) => {
@@ -72,5 +72,19 @@ describe('universeThemeSchema', () => {
       }).success,
     ).toBe(true);
     expect(universeThemeSchema.safeParse({ primary: 'red' }).success).toBe(false);
+  });
+});
+
+describe('youtubeId / officialThemeSchema', () => {
+  it('accepts the common YouTube link formats and bare ids', () => {
+    for (const v of ['https://www.youtube.com/watch?v=gdZLi9oWNZg&t=3', 'https://youtu.be/gdZLi9oWNZg', 'https://www.youtube.com/embed/gdZLi9oWNZg', 'https://m.youtube.com/shorts/gdZLi9oWNZg', 'gdZLi9oWNZg']) {
+      expect(youtubeId(v)).toBe('gdZLi9oWNZg');
+    }
+    expect(youtubeId('_D0ZQPqeJkk')).toBe('_D0ZQPqeJkk');
+  });
+  it('rejects other sites and malformed ids', () => {
+    for (const v of ['https://vimeo.com/123456789', 'https://evil.example/watch?v=gdZLi9oWNZg', 'https://youtube.com/watch?v=short', 'javascript:alert(1)']) expect(youtubeId(v)).toBeNull();
+    expect(officialThemeSchema.safeParse({ theme: { url: 'https://vimeo.com/1', title: 'x' } }).success).toBe(false);
+    expect(officialThemeSchema.parse({ theme: null }).theme).toBeNull();
   });
 });

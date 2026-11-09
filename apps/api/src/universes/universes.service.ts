@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { levelFromXp } from '@fandom/shared';
-import type { UniverseMembership, UniverseSummary } from '@fandom/types';
+import type { OfficialTheme, UniverseMembership, UniverseSummary } from '@fandom/types';
 import { AppError } from '../common/app-error.js';
 import { DatabaseService } from '../database/database.service.js';
 import { RedisService } from '../redis/redis.service.js';
@@ -9,7 +9,7 @@ const LIST_CACHE_KEY = 'universes:active:v1';
 
 const SELECT_UNIVERSE = `
   SELECT u.id, u.slug, u.name, u.tagline, u.description, u.status, u.sort_order, u.member_count,
-         s.theme, s.features
+         s.theme, s.features, s.official_theme
     FROM universes u
     JOIN universe_settings s ON s.universe_id = u.id`;
 
@@ -24,6 +24,7 @@ interface UniverseRow {
   member_count: number;
   theme: UniverseSummary['theme'];
   features: string[];
+  official_theme: { youtubeId?: string; title?: string; artist?: string | null } | null;
 }
 
 const toSummary = (r: UniverseRow): UniverseSummary => ({
@@ -37,6 +38,9 @@ const toSummary = (r: UniverseRow): UniverseSummary => ({
   features: r.features,
   memberCount: r.member_count,
   sortOrder: r.sort_order,
+  officialTheme: r.official_theme?.youtubeId
+    ? { youtubeId: r.official_theme.youtubeId, title: r.official_theme.title ?? '', artist: r.official_theme.artist ?? null }
+    : null,
 });
 
 @Injectable()
@@ -117,5 +121,16 @@ export class UniversesService {
     ]);
     if (!res.rowCount) throw AppError.notFound('membership_not_found', 'Not a member of this universe');
     await this.redis.invalidate(LIST_CACHE_KEY);
+  }
+
+  /** Staff sets (or removes, with null) the official theme song of a universe. */
+  async setOfficialTheme(slug: string, theme: OfficialTheme | null): Promise<UniverseSummary> {
+    const { rowCount } = await this.db.query(
+      'UPDATE universe_settings s SET official_theme = $2 FROM universes u WHERE u.id = s.universe_id AND u.slug = $1',
+      [slug, JSON.stringify(theme ?? {})],
+    );
+    if (!rowCount) throw AppError.notFound('universe_not_found', 'Universe not found');
+    await this.redis.invalidate(LIST_CACHE_KEY);
+    return this.getActive(slug);
   }
 }

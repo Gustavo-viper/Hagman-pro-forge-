@@ -33,6 +33,8 @@ const CSP = [
   `connect-src ${connect}`,
   "manifest-src 'self'",
   "worker-src 'self'",
+  // Official theme songs are played from YouTube (privacy-enhanced embed), never hosted here.
+  "frame-src https://www.youtube-nocookie.com",
   "frame-ancestors 'none'",
   "base-uri 'self'",
   "form-action 'self'",
