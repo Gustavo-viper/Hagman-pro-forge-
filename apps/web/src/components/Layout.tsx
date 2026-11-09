@@ -1,6 +1,6 @@
 import { Button, cn } from '@fandom/ui';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Crown, LayoutDashboard, LogOut, Menu, Orbit, ShieldCheck, X } from 'lucide-react';
+import { Crown, Gift, LayoutDashboard, LogOut, Menu, Orbit, ShieldCheck, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, NavLink, useLocation, useNavigate, useOutlet } from 'react-router';
@@ -27,6 +27,9 @@ function NavItems({ onNavigate }: { onNavigate?: () => void }) {
       </NavLink>
       <NavLink to="/premium" className={linkClass} onClick={onNavigate}>
         <Crown className="size-4" /> {t('nav.premium')}
+      </NavLink>
+      <NavLink to="/premios" className={linkClass} onClick={onNavigate}>
+        <Gift className="size-4" /> {t('nav.prizes')}
       </NavLink>
       {session && (
         <NavLink to="/dashboard" className={linkClass} onClick={onNavigate}>

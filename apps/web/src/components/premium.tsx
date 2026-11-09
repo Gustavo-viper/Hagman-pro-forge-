@@ -2,7 +2,7 @@ import { premiumBonus, PREMIUM_PERKS, PREMIUM_TRIAL, type PlanCode } from '@fand
 import type { PlanBadge as PlanBadgeValue, SubscriptionDetails, TrialStatus } from '@fandom/types';
 import { Alert, Badge, Button, cn } from '@fandom/ui';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Crown, Gift, Sparkles } from 'lucide-react';
+import { Crown, Gem, Gift, Sparkles } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
@@ -80,11 +80,12 @@ export function PlanBadge({ plan, className }: { plan: PlanBadgeValue | undefine
       title={t(`dashboard.planNames.${plan}`)}
       className={cn(
         'inline-flex items-center gap-0.5 rounded-full px-1.5 py-px align-middle text-[10px] font-bold uppercase tracking-wider',
-        plan === 'ultra' ? 'bg-gold-400/20 text-gold-200 ring-1 ring-gold-300/40' : 'bg-arcane-500/25 text-arcane-100 ring-1 ring-arcane-400/40',
+        plan === 'vip' ? 'bg-emerald-400/20 text-emerald-100 ring-1 ring-emerald-300/50' : plan === 'ultra' ? 'bg-gold-400/20 text-gold-200 ring-1 ring-gold-300/40' : 'bg-arcane-500/25 text-arcane-100 ring-1 ring-arcane-400/40',
         className,
       )}
     >
       {plan === 'ultra' && <Crown className="size-2.5" />}
+      {plan === 'vip' && <Gem className="size-2.5" />}
       {plan}
     </span>
   );
@@ -94,7 +95,7 @@ export function PlanBadge({ plan, className }: { plan: PlanBadgeValue | undefine
 export function PlanName({ name, plan, className }: { name: string; plan: PlanBadgeValue | undefined; className?: string }) {
   return (
     <span className={cn('inline-flex min-w-0 items-center gap-1.5', className)}>
-      <span className={cn('truncate', plan === 'ultra' && 'bg-gradient-to-r from-gold-200 via-gold-300 to-gold-200 bg-clip-text font-semibold text-transparent')}>{name}</span>
+      <span className={cn('truncate', plan === 'ultra' && 'bg-gradient-to-r from-gold-200 via-gold-300 to-gold-200 bg-clip-text font-semibold text-transparent', plan === 'vip' && 'bg-gradient-to-r from-emerald-200 via-gold-200 to-emerald-200 bg-clip-text font-semibold text-transparent')}>{name}</span>
       <PlanBadge plan={plan} />
     </span>
   );

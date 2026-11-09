@@ -15,7 +15,7 @@ export const createEventSchema = z
     startsAt: z.iso.datetime({ offset: true }),
     endsAt: z.iso.datetime({ offset: true }),
     capacity: z.coerce.number().int().min(1).max(100000).nullable().default(null),
-    premiumPlan: z.enum(['plus', 'ultra']).nullable().default(null),
+    premiumPlan: z.enum(['plus', 'ultra', 'vip']).nullable().default(null),
     externalUrl: httpsUrl.nullable().default(null),
     quizId: z.uuid().nullable().default(null),
   })
@@ -30,7 +30,7 @@ export const updateEventSchema = z
     startsAt: z.iso.datetime({ offset: true }),
     endsAt: z.iso.datetime({ offset: true }),
     capacity: z.coerce.number().int().min(1).max(100000).nullable(),
-    premiumPlan: z.enum(['plus', 'ultra']).nullable(),
+    premiumPlan: z.enum(['plus', 'ultra', 'vip']).nullable(),
     externalUrl: httpsUrl.nullable(),
     quizId: z.uuid().nullable(),
   })

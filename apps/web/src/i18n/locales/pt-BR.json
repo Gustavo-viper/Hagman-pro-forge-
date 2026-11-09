@@ -24,7 +24,8 @@
     "openMenu": "Abrir menu",
     "closeMenu": "Fechar menu",
     "premium": "Premium",
-    "admin": "Admin"
+    "admin": "Admin",
+    "prizes": "Prêmios"
   },
   "landing": {
     "hero": {
@@ -90,7 +91,8 @@
       "soon": "Assinaturas em breve",
       "popular": "Mais popular",
       "error": "Não foi possível carregar os planos.",
-      "noPrice": "Preço não disponível nesta moeda."
+      "noPrice": "Preço não disponível nesta moeda.",
+      "monthlyOnly": "Disponível só no plano mensal."
     },
     "disclaimer": {
       "title": "Comunidade independente",
@@ -190,7 +192,8 @@
     "planNames": {
       "free": "Free",
       "plus": "Fandom Plus",
-      "ultra": "Fandom Ultra"
+      "ultra": "Fandom Ultra",
+      "vip": "Fandom VIP"
     },
     "statuses": {
       "free": "Gratuito",
@@ -385,7 +388,29 @@
     "no_questions": "Este universo ainda não tem perguntas para este jogo.",
     "no_words": "Este universo ainda não tem palavras para a forca.",
     "trial_unavailable": "O teste grátis não está disponível para esta conta.",
-    "book_not_found": "Livro não encontrado."
+    "book_not_found": "Livro não encontrado.",
+    "authorization_required": "Cadastre o certificado de autorização e o regulamento antes de abrir o sorteio.",
+    "draw_not_closed": "As inscrições ainda estão abertas.",
+    "draw_closed": "As inscrições deste sorteio estão encerradas.",
+    "draw_locked": "Este sorteio não pode mais ser alterado.",
+    "draw_not_found": "Sorteio não encontrado.",
+    "no_entries": "Ninguém se inscreveu neste sorteio.",
+    "contest_not_found": "Concurso não encontrado.",
+    "contest_closed": "As inscrições não estão abertas.",
+    "already_entered": "Você já tem uma inscrição neste concurso.",
+    "image_required": "Anexe a imagem do seu papel de parede.",
+    "image_too_large": "A imagem pode ter até 6 MB.",
+    "image_too_small": "A imagem precisa ter pelo menos 1080×720 pixels.",
+    "invalid_image": "Use uma imagem JPG, PNG ou WebP válida.",
+    "voting_closed": "A votação não está aberta.",
+    "own_entry": "Você não pode votar na própria arte.",
+    "not_judging": "O vencedor é escolhido depois que a votação termina.",
+    "entry_not_found": "Inscrição não encontrada.",
+    "prize_not_found": "Prêmio não encontrado.",
+    "slug_taken": "Esse endereço já é usado por outro concurso.",
+    "contest_locked": "Este concurso não pode mais ser alterado.",
+    "invalid_window": "As datas precisam estar em ordem: início < fim das inscrições < fim da votação.",
+    "minor": "Disponível apenas para maiores de 18 anos."
   },
   "premium": {
     "title": "Desbloqueie o seu lado Premium",
@@ -573,6 +598,59 @@
       "externalHint": "Somente https. Visível apenas para inscritos dentro da sala.",
       "quiz": "Quiz da noite (opcional)",
       "noQuiz": "Sem quiz"
+    },
+    "prizes": {
+      "draws": "Sorteios VIP",
+      "contests": "Concursos culturais",
+      "lockNote": "Sorteios promocionais exigem autorização prévia da Secretaria de Prêmios e Apostas (Lei 5.768/71). O sorteio só abre com o número do certificado e o link do regulamento.",
+      "newDraw": "Novo sorteio",
+      "newContest": "Novo concurso",
+      "title": "Título",
+      "prize": "Prêmio",
+      "description": "Descrição",
+      "count": "Quantidade de prêmios",
+      "closes": "Inscrições até",
+      "certificate": "Nº do certificado de autorização",
+      "regulation": "Link do regulamento (https)",
+      "saveDraft": "Salvar rascunho",
+      "noDraws": "Nenhum sorteio criado.",
+      "noContests": "Nenhum concurso criado.",
+      "status": {
+        "draft": "Rascunho",
+        "open": "Aberto",
+        "closed": "Aguardando apuração",
+        "drawn": "Sorteado",
+        "cancelled": "Cancelado"
+      },
+      "entries_one": "{{count}} participante",
+      "entries_other": "{{count}} participantes",
+      "publicPage": "Página pública",
+      "saveAuth": "Salvar autorização",
+      "open": "Abrir inscrições",
+      "cancel": "Cancelar",
+      "external": "Valor externo (ex.: Loteria Federal, concurso e 1º prêmio)",
+      "run": "Realizar sorteio",
+      "runConfirm": "Realizar o sorteio agora? O resultado é definitivo e a semente será revelada.",
+      "delivered": "Entregue",
+      "deliver": "Entregar",
+      "steamKey": "Chave Steam",
+      "giftCode": "Código do vale",
+      "contestNote": "Concurso cultural: gratuito, por mérito e aberto a todos os adultos com e-mail confirmado (não pode ser exclusivo de assinantes).",
+      "slug": "Endereço (slug)",
+      "rules": "Regulamento",
+      "rulesHint": "Objetivo, quem pode participar, prazos, critérios de avaliação (voto da comunidade + júri), prêmio e entrega, direitos de uso da arte, desclassificação…",
+      "universe": "Universo do concurso",
+      "submissionsOpen": "Inscrições a partir de",
+      "submissionsClose": "Inscrições até",
+      "votingClose": "Votação até",
+      "publish": "Publicar",
+      "pending_one": "{{count}} inscrição aguardando moderação",
+      "pending_other": "{{count}} inscrições aguardando moderação",
+      "approve": "Aprovar",
+      "reject": "Recusar",
+      "declareWinner": "Declarar vencedor",
+      "winnerConfirm": "Declarar “{{title}}” como vencedor? Isso encerra o concurso.",
+      "allUniverses": "Todos os universos"
     }
   },
   "quiz": {
@@ -840,10 +918,13 @@
         "events": "Eventos",
         "badge": "Selo no seu nome",
         "stats": "Estatísticas detalhadas",
-        "shields": "Proteção da sequência diária"
+        "shields": "Proteção da sequência diária",
+        "draws": "Sorteios de chaves Steam (autorizados)"
       },
       "perWeek_one": "{{count}} dia/semana",
-      "perWeek_other": "{{count}} dias/semana"
+      "perWeek_other": "{{count}} dias/semana",
+      "vipEvents": "+ VIP",
+      "drawsVip": "Número da sorte"
     },
     "shieldLimit_one": "Proteção de sequência: {{count}} dia por semana (usada: {{used}})",
     "shieldLimit_other": "Proteção de sequência: {{count}} dias por semana (usada: {{used}})",
@@ -978,6 +1059,112 @@
       "bastidores": "Bastidores",
       "recomendado": "Leitura recomendada",
       "inspiracao": "Inspiração"
+    }
+  },
+  "prizes": {
+    "title": "Prêmios",
+    "subtitle": "Concursos culturais gratuitos para todos e sorteios exclusivos para assinantes VIP.",
+    "phases": {
+      "draft": "Rascunho",
+      "upcoming": "Em breve",
+      "submissions": "Inscrições abertas",
+      "voting": "Votação aberta",
+      "judging": "Em julgamento",
+      "finished": "Encerrado",
+      "cancelled": "Cancelado",
+      "open": "Aberto",
+      "closed": "Inscrições encerradas",
+      "drawn": "Sorteado"
+    },
+    "contests": {
+      "title": "Concursos culturais",
+      "subtitle": "Inscrição gratuita, decidida por mérito: voto da comunidade e decisão final do júri.",
+      "empty": "Nenhum concurso no momento.",
+      "free": "Inscrição grátis"
+    },
+    "draws": {
+      "title": "Sorteios VIP",
+      "subtitle": "Assinantes VIP recebem um número da sorte em cada sorteio autorizado.",
+      "empty": "Nenhum sorteio autorizado no momento. Assim que houver, ele aparece aqui com o certificado e o regulamento.",
+      "vipOnly": "Exclusivo VIP"
+    },
+    "mine": {
+      "title": "Meus prêmios",
+      "empty": "Você ainda não ganhou prêmios. Participe dos concursos e sorteios!",
+      "source": {
+        "draw": "Sorteio",
+        "contest": "Concurso"
+      },
+      "code": "Código do prêmio",
+      "copy": "Copiar",
+      "copied": "Copiado!",
+      "pending": "Prêmio confirmado! O código aparecerá aqui e você receberá um e-mail quando for liberado."
+    },
+    "draw": {
+      "number": "Nº {{number}}",
+      "certificate": "Certificado de Autorização SPA/MF nº {{number}}",
+      "authorized": "Sorteio autorizado",
+      "rules": "Ler o regulamento",
+      "closes_one": "Inscrições até {{date}} · {{count}} participante",
+      "closes_other": "Inscrições até {{date}} · {{count}} participantes",
+      "prize_one": "Prêmio: {{prize}}",
+      "prize_other": "Prêmios: {{count}} × {{prize}}",
+      "yourNumber": "Seu número da sorte",
+      "getNumber": "Pegar meu número da sorte",
+      "becomeVip": "Assinar o VIP",
+      "blocked": {
+        "plan_required": "Os sorteios são exclusivos para assinantes do Fandom VIP.",
+        "minor": "Sorteios são apenas para maiores de 18 anos.",
+        "email_not_verified": "Confirme seu e-mail para participar.",
+        "sign_in": "Entre na sua conta para participar.",
+        "closed": "As inscrições deste sorteio estão encerradas."
+      },
+      "results": "Resultado",
+      "verify": "Como conferir o resultado",
+      "verifyText": "Antes de abrir as inscrições publicamos o hash de uma semente secreta. Na apuração, combinamos a semente com um valor externo (por exemplo, o resultado da Loteria Federal). Com a semente revelada, qualquer pessoa pode refazer o cálculo e confirmar os ganhadores.",
+      "external": "valor externo"
+    },
+    "contest": {
+      "submissionsUntil": "Inscrições até",
+      "votingUntil": "Votação até",
+      "prize": "Prêmio",
+      "brandNote": "Crunchyroll e outras marcas pertencem aos seus donos. O prêmio é comprado pela Forge Studios; não há patrocínio nem parceria oficial.",
+      "rules": "Regulamento",
+      "legal": "Concurso de caráter exclusivamente cultural, com participação gratuita e sem vínculo com compra ou assinatura (Lei 5.768/71, art. 3º, II).",
+      "winner": "Vencedor: “{{title}}”, de {{name}}",
+      "yourEntry": "Sua inscrição",
+      "submitTitle": "Enviar papel de parede",
+      "file": "Imagem (JPG, PNG ou WebP)",
+      "fileHint": "Mínimo 1080×720 px, até 6 MB. A imagem é reprocessada e os metadados (como localização) são removidos.",
+      "entryTitle": "Título",
+      "entryDescription": "Descrição (opcional)",
+      "ownWork": "Declaro que a arte é minha e original, que não usei imagens oficiais ou de terceiros e que aceito o regulamento.",
+      "send": "Enviar inscrição",
+      "preview": "Prévia",
+      "entryStatus": {
+        "pending": "Em análise pela moderação.",
+        "approved": "Aprovada e visível na galeria.",
+        "rejected": "Não aprovada. Você pode enviar outra arte enquanto as inscrições estiverem abertas."
+      },
+      "withdraw": "Retirar inscrição",
+      "withdrawConfirm": "Retirar sua inscrição deste concurso?",
+      "blocked": {
+        "sign_in": "Entre na sua conta para participar.",
+        "onboarding_required": "Complete seu perfil para participar.",
+        "minor": "Este concurso é para maiores de 18 anos.",
+        "email_not_verified": "Confirme seu e-mail para participar.",
+        "already_entered": "Você já tem uma inscrição neste concurso.",
+        "closed": "As inscrições não estão abertas agora."
+      },
+      "gallery_one": "Galeria · {{count}} arte",
+      "gallery_other": "Galeria · {{count}} artes",
+      "voteHint": "Você tem 1 voto e pode trocá-lo até o fim da votação. A contagem aparece quando a votação terminar.",
+      "voteSignIn": "Entre para votar.",
+      "noEntries": "Ainda não há artes aprovadas.",
+      "votes_one": "{{count}} voto",
+      "votes_other": "{{count}} votos",
+      "vote": "Votar",
+      "yourVote": "Seu voto"
     }
   }
 }

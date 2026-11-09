@@ -1,11 +1,11 @@
 import { premiumBonus, PREMIUM_PERKS, type PlanCode } from '@fandom/shared';
 import { cn } from '@fandom/ui';
-import { Check, Crown, Minus } from 'lucide-react';
+import { Check, Crown, Gem, Minus } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { PlanBadge } from './premium';
 
-const PLANS: PlanCode[] = ['free', 'plus', 'ultra'];
+const PLANS: PlanCode[] = ['free', 'plus', 'ultra', 'vip'];
 const yes = <Check className="mx-auto size-4 text-emerald-300" aria-hidden="true" />;
 const no = <Minus className="mx-auto size-4 text-mist/30" aria-hidden="true" />;
 
@@ -14,17 +14,18 @@ export function PremiumComparison() {
   const { t } = useTranslation();
   const P = PREMIUM_PERKS;
   const rows: { key: string; cells: Record<PlanCode, ReactNode>; sr?: Record<PlanCode, string> }[] = [
-    { key: 'universes', cells: { free: yes, plus: yes, ultra: yes } },
-    { key: 'xpBonus', cells: { free: no, plus: `+${P.xpBonusPercent.plus}%`, ultra: `+${P.xpBonusPercent.ultra}%` } },
-    { key: 'speed', cells: { free: `${P.speedDailyXpCap.free} XP`, plus: `${P.speedDailyXpCap.plus} XP`, ultra: `${P.speedDailyXpCap.ultra} XP` } },
-    { key: 'hangman', cells: { free: P.hangmanRewardedWins.free, plus: P.hangmanRewardedWins.plus, ultra: P.hangmanRewardedWins.ultra } },
-    { key: 'survival', cells: { free: no, plus: `${P.survivalDailyXpCap.plus} XP`, ultra: `${P.survivalDailyXpCap.ultra} XP` } },
-    { key: 'vip', cells: { free: no, plus: yes, ultra: yes } },
-    { key: 'stats', cells: { free: no, plus: yes, ultra: yes } },
-    { key: 'shields', cells: { free: no, plus: t('premiumPerks.table.perWeek', { count: P.streakShieldsPerWeek.plus }), ultra: t('premiumPerks.table.perWeek', { count: P.streakShieldsPerWeek.ultra }) } },
-    { key: 'missions', cells: { free: no, plus: t('premiumPerks.table.plusMissions'), ultra: t('premiumPerks.table.allMissions') } },
-    { key: 'events', cells: { free: t('premiumPerks.table.freeEvents'), plus: t('premiumPerks.table.plusEvents'), ultra: t('premiumPerks.table.allEvents') } },
-    { key: 'badge', cells: { free: no, plus: <PlanBadge plan="plus" />, ultra: <PlanBadge plan="ultra" /> } },
+    { key: 'universes', cells: { free: yes, plus: yes, ultra: yes, vip: yes } },
+    { key: 'xpBonus', cells: { free: no, plus: `+${P.xpBonusPercent.plus}%`, ultra: `+${P.xpBonusPercent.ultra}%`, vip: `+${P.xpBonusPercent.vip}%` } },
+    { key: 'speed', cells: { free: `${P.speedDailyXpCap.free} XP`, plus: `${P.speedDailyXpCap.plus} XP`, ultra: `${P.speedDailyXpCap.ultra} XP`, vip: `${P.speedDailyXpCap.vip} XP` } },
+    { key: 'hangman', cells: { free: P.hangmanRewardedWins.free, plus: P.hangmanRewardedWins.plus, ultra: P.hangmanRewardedWins.ultra, vip: P.hangmanRewardedWins.vip } },
+    { key: 'survival', cells: { free: no, plus: `${P.survivalDailyXpCap.plus} XP`, ultra: `${P.survivalDailyXpCap.ultra} XP`, vip: `${P.survivalDailyXpCap.vip} XP` } },
+    { key: 'vip', cells: { free: no, plus: yes, ultra: yes, vip: yes } },
+    { key: 'stats', cells: { free: no, plus: yes, ultra: yes, vip: yes } },
+    { key: 'shields', cells: { free: no, plus: t('premiumPerks.table.perWeek', { count: P.streakShieldsPerWeek.plus }), ultra: t('premiumPerks.table.perWeek', { count: P.streakShieldsPerWeek.ultra }), vip: t('premiumPerks.table.perWeek', { count: P.streakShieldsPerWeek.vip }) } },
+    { key: 'missions', cells: { free: no, plus: t('premiumPerks.table.plusMissions'), ultra: t('premiumPerks.table.allMissions'), vip: t('premiumPerks.table.allMissions') } },
+    { key: 'events', cells: { free: t('premiumPerks.table.freeEvents'), plus: t('premiumPerks.table.plusEvents'), ultra: t('premiumPerks.table.allEvents'), vip: t('premiumPerks.table.vipEvents') } },
+    { key: 'draws', cells: { free: no, plus: no, ultra: no, vip: t('premiumPerks.table.drawsVip') } },
+    { key: 'badge', cells: { free: no, plus: <PlanBadge plan="plus" />, ultra: <PlanBadge plan="ultra" />, vip: <PlanBadge plan="vip" /> } },
   ];
   const quiz = 60;
   return (
@@ -32,13 +33,13 @@ export function PremiumComparison() {
       <h2 id="compare-title" className="text-center font-display text-2xl font-bold tracking-wide">{t('premiumPerks.table.title')}</h2>
       <p className="mt-2 text-center text-sm text-mist/60">{t('premiumPerks.table.subtitle')}</p>
       <div className="glass mt-8 overflow-x-auto rounded-3xl">
-        <table className="w-full min-w-[560px] text-sm">
+        <table className="w-full min-w-[680px] text-sm">
           <thead>
             <tr className="border-b border-white/10 text-left">
               <th scope="col" className="p-4 font-semibold text-mist/70">{t('premiumPerks.table.perk')}</th>
               {PLANS.map((p) => (
-                <th key={p} scope="col" className={cn('p-4 text-center font-display font-bold', p === 'ultra' && 'text-gold-200', p === 'plus' && 'text-arcane-200')}>
-                  {p === 'ultra' && <Crown className="mr-1 inline size-4" />}{t(`dashboard.planNames.${p}`)}
+                <th key={p} scope="col" className={cn('p-4 text-center font-display font-bold', p === 'ultra' && 'text-gold-200', p === 'plus' && 'text-arcane-200', p === 'vip' && 'text-emerald-200')}>
+                  {p === 'ultra' && <Crown className="mr-1 inline size-4" />}{p === 'vip' && <Gem className="mr-1 inline size-4" />}{t(`dashboard.planNames.${p}`)}
                 </th>
               ))}
             </tr>

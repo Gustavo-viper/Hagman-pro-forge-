@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 export const checkoutSchema = z.object({
-  planCode: z.enum(['plus', 'ultra']),
+  planCode: z.enum(['plus', 'ultra', 'vip']),
   interval: z.enum(['month', 'year']),
 });
 export type CheckoutInput = z.infer<typeof checkoutSchema>;

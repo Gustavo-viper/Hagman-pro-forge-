@@ -6,18 +6,20 @@ import type { PlanCode } from './constants.js';
  */
 export const PREMIUM_PERKS = {
   /** Extra XP on quizzes, games and missions, on top of the base reward. */
-  xpBonusPercent: { free: 0, plus: 20, ultra: 50 },
+  xpBonusPercent: { free: 0, plus: 20, ultra: 50, vip: 50 },
   /** Daily XP from speed rounds per universe. */
-  speedDailyXpCap: { free: 60, plus: 120, ultra: 200 },
+  speedDailyXpCap: { free: 60, plus: 120, ultra: 200, vip: 200 },
   /** Hangman wins per universe and day that earn XP. */
-  hangmanRewardedWins: { free: 5, plus: 10, ultra: 20 },
+  hangmanRewardedWins: { free: 5, plus: 10, ultra: 20, vip: 20 },
   /** Survival mode: minimum plan and daily XP per universe. */
   survivalPlan: 'plus',
-  survivalDailyXpCap: { free: 0, plus: 100, ultra: 160 },
+  survivalDailyXpCap: { free: 0, plus: 100, ultra: 160, vip: 160 },
   /** Missed days per 7 days that do not break the daily challenge streak. */
-  streakShieldsPerWeek: { free: 0, plus: 1, ultra: 2 },
+  streakShieldsPerWeek: { free: 0, plus: 1, ultra: 2, vip: 2 },
   /** Detailed statistics on the dashboard: minimum plan. */
   statsPlan: 'plus',
+  /** Prize draws (lucky numbers): minimum plan. */
+  drawsPlan: 'vip',
 } as const satisfies Record<string, unknown>;
 
 /** Free trial: once per account (never subscribed before), adults with a verified email. */

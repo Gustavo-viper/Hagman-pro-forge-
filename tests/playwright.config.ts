@@ -57,6 +57,7 @@ export default defineConfig({
         FORUM_RATE_LIMIT_MAX: '10000',
         GAME_RATE_LIMIT_MAX: '10000',
         GAME_START_RATE_LIMIT_MAX: '10000',
+        UPLOAD_RATE_LIMIT_MAX: '10000',
         WEB_ORIGINS: web,
         RATE_LIMIT_MAX: '10000',
       },

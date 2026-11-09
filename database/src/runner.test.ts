@@ -53,6 +53,7 @@ describe.runIf(Boolean(url))('runner against PostgreSQL', () => {
       { plan_code: 'plus', billing_interval: 'year', amount_minor: 14990 },
       { plan_code: 'ultra', billing_interval: 'month', amount_minor: 2990 },
       { plan_code: 'ultra', billing_interval: 'year', amount_minor: 29990 },
+      { plan_code: 'vip', billing_interval: 'month', amount_minor: 6990 },
     ]);
   });
 

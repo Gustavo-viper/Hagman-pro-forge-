@@ -132,7 +132,7 @@ export class SectionsService {
     const universe = await this.universeWith(slug, null, 'missions');
     const { rows } = await this.db.query<{
       id: string; slug: string; section: string; title: MissionSummary['title']; description: MissionSummary['description'];
-      objective_type: string; objective_count: number; xp_reward: number; ends_at: Date | null; premium_plan: 'plus' | 'ultra' | null;
+      objective_type: string; objective_count: number; xp_reward: number; ends_at: Date | null; premium_plan: 'plus' | 'ultra' | 'vip' | null;
     }>(
       `SELECT id, slug, section, title, description, objective_type, objective_count, xp_reward, ends_at, premium_plan FROM missions
         WHERE universe_id = $1 AND status = 'published' AND (starts_at IS NULL OR starts_at <= now()) AND (ends_at IS NULL OR ends_at > now())
@@ -167,7 +167,7 @@ export class SectionsService {
 
   /** Verifies the objective against real activity, then records completion and XP exactly once. */
   async claimMission(user: AuthenticatedUser, missionId: string): Promise<MissionProgress & { xpAwarded: number; xpBonus: number }> {
-    const m = await this.db.one<{ id: string; universe_id: string; objective_type: MissionObjective; objective_count: number; xp_reward: number; starts_at: Date | null; ends_at: Date | null; premium_plan: 'plus' | 'ultra' | null }>(
+    const m = await this.db.one<{ id: string; universe_id: string; objective_type: MissionObjective; objective_count: number; xp_reward: number; starts_at: Date | null; ends_at: Date | null; premium_plan: 'plus' | 'ultra' | 'vip' | null }>(
       "SELECT id, universe_id, objective_type, objective_count, xp_reward, starts_at, ends_at, premium_plan FROM missions WHERE id = $1 AND status = 'published'",
       [missionId],
     );
@@ -226,7 +226,7 @@ export class SectionsService {
 
   /** Registration: member only, before the end, capacity and Premium plan enforced on the server. */
   async register(user: AuthenticatedUser, eventId: string): Promise<UniverseEvent> {
-    const e = await this.db.one<{ universe_id: string; ends_at: Date; premium_plan: 'plus' | 'ultra' | null; capacity: number | null; status: string; slug: string }>(
+    const e = await this.db.one<{ universe_id: string; ends_at: Date; premium_plan: 'plus' | 'ultra' | 'vip' | null; capacity: number | null; status: string; slug: string }>(
       "SELECT e.universe_id, e.ends_at, e.premium_plan, e.capacity, e.status, u.slug FROM events e JOIN universes u ON u.id = e.universe_id WHERE e.id = $1",
       [eventId],
     );

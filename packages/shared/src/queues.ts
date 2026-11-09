@@ -22,6 +22,8 @@ export const EMAIL_TEMPLATES = [
   'event_reminder',
   'event_cancelled',
   'trial_ending',
+  'prize_won',
+  'prize_delivered',
 ] as const;
 export type EmailTemplate = (typeof EMAIL_TEMPLATES)[number];
 

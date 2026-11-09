@@ -12,6 +12,7 @@ import { currentLocale } from '@/lib/i18n';
 import { EVENT_EDIT_ROLES, EVENT_VIEW_ROLES, MODERATION_ROLES, REPORT_VIEW_ROLES, USER_ADMIN_ROLES, useMe } from '@/hooks/data';
 import { RequireStaff } from './AdminLayout';
 import { EventsSection } from './EventsSection';
+import { PrizesAdminSection } from './PrizesAdminSection';
 import { ReportsSection } from './ReportsSection';
 
 function useDebounced<T>(v: T, ms = 350): T {
@@ -27,7 +28,7 @@ export function PlanBadge({ plan }: { plan: AdminUserRow['plan'] }) {
   const { t } = useTranslation();
   if (plan.planCode === 'free') return <Badge>{t('dashboard.planNames.free')}</Badge>;
   return (
-    <Badge variant={plan.planCode === 'ultra' ? 'gold' : 'arcane'}>
+    <Badge variant={plan.planCode === 'ultra' || plan.planCode === 'vip' ? 'gold' : 'arcane'}>
       <Crown className="size-3" /> {t(`dashboard.planNames.${plan.planCode}`)}
       {plan.provider === 'manual' && ` · ${t('admin.manual')}`}
     </Badge>
@@ -169,6 +170,9 @@ function AdminContent() {
       {usersAccess && <div className="mt-8"><Stats /></div>}
       {roles.some((r) => REPORT_VIEW_ROLES.includes(r)) && <ReportsSection canResolve={roles.some((r) => MODERATION_ROLES.includes(r))} />}
       {roles.some((r) => EVENT_VIEW_ROLES.includes(r)) && <EventsSection canEdit={roles.some((r) => EVENT_EDIT_ROLES.includes(r))} />}
+      {roles.some((r) => ['super_admin', 'admin', 'editor', 'global_moderator'].includes(r)) && (
+        <PrizesAdminSection isAdmin={roles.some((r) => ['super_admin', 'admin'].includes(r))} />
+      )}
       {usersAccess && <UsersTable />}
     </div>
   );

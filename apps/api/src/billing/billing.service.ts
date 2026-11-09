@@ -1,6 +1,6 @@
 import { randomUUID, timingSafeEqual } from 'node:crypto';
 import { HttpStatus, Inject, Injectable, Logger } from '@nestjs/common';
-import { formatMoney, PREMIUM_TRIAL, type BillingInterval, type Locale, type PlanCode } from '@fandom/shared';
+import { formatMoney, PLAN_DISPLAY_NAMES, PREMIUM_TRIAL, type BillingInterval, type Locale, type PlanCode } from '@fandom/shared';
 import type { CheckoutInput, ConfirmPaymentInput } from '@fandom/schemas';
 import type { BillingConfig, CheckoutResponse, ConfirmPaymentResponse, PaymentSummary, SubscriptionDetails, TrialStatus } from '@fandom/types';
 import { AuditService } from '../audit/audit.service.js';
@@ -14,7 +14,7 @@ import { EntitlementsService, entitledPlan } from '../subscriptions/entitlements
 import { InfinitePayClient, PaymentProviderError } from './infinitepay.client.js';
 import { PAYMENT_COLUMNS, toPaymentSummary } from './payments.mapper.js';
 
-const PLAN_NAMES: Record<Exclude<PlanCode, 'free'>, string> = { plus: 'Fandom Plus', ultra: 'Fandom Ultra' };
+const PLAN_NAMES: Record<Exclude<PlanCode, 'free'>, string> = PLAN_DISPLAY_NAMES;
 const INTERVAL_NAMES: Record<Locale, Record<BillingInterval, string>> = {
   'pt-BR': { month: 'mensal', year: 'anual' },
   en: { month: 'monthly', year: 'yearly' },

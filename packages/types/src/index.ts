@@ -301,8 +301,8 @@ export interface ForumAuthor {
   plan: PlanBadge;
 }
 
-/** Plan badge shown next to names ('plus' | 'ultra'), null for Free. */
-export type PlanBadge = 'plus' | 'ultra' | null;
+/** Plan badge shown next to names ('plus' | 'ultra' | 'vip'), null for Free. */
+export type PlanBadge = 'plus' | 'ultra' | 'vip' | null;
 
 export interface ForumTopicSummary {
   id: string;
@@ -342,7 +342,7 @@ export interface MissionSummary {
   xpReward: number;
   endsAt: string | null;
   /** Only subscribers of this plan (or higher) can claim it. */
-  premiumPlan: 'plus' | 'ultra' | null;
+  premiumPlan: 'plus' | 'ultra' | 'vip' | null;
 }
 
 export interface MissionProgress {
@@ -360,7 +360,7 @@ export interface UniverseEvent {
   kind: 'community' | 'tournament' | 'watch_party' | 'challenge';
   startsAt: string;
   endsAt: string;
-  premiumPlan: 'plus' | 'ultra' | null;
+  premiumPlan: 'plus' | 'ultra' | 'vip' | null;
   capacity: number | null;
   participantCount: number;
   hasQuiz: boolean;
@@ -511,7 +511,7 @@ export interface HangmanGame {
 }
 
 export interface GamesOverview {
-  plan: 'free' | 'plus' | 'ultra';
+  plan: 'free' | 'plus' | 'ultra' | 'vip';
   /** Limits of the user's plan (the web shows what higher plans unlock). */
   limits: { speedDailyXp: number; hangmanRewardedWins: number; survivalDailyXp: number; xpBonusPercent: number; streakShieldsPerWeek: number };
   survival: { available: boolean; best: number; weekBest: number; xpLeftToday: number };
@@ -568,3 +568,101 @@ export interface PlayerStats {
 export type ShelfStatus = 'want' | 'reading' | 'read';
 export interface ShelfItem { entryId: string; status: ShelfStatus }
 export interface BookShelf { items: ShelfItem[]; counts: Record<ShelfStatus, number> }
+
+// ---------------------------------------------------------------- prize draws & contests
+
+export interface DrawWinner {
+  position: number;
+  luckyNumber: number;
+  /** Public: display name only (no email). */
+  name: string;
+}
+
+export interface DrawSummary {
+  id: string;
+  title: LocalizedText;
+  description: LocalizedText;
+  prize: LocalizedText;
+  prizeCount: number;
+  requiredPlan: 'plus' | 'ultra' | 'vip';
+  certificateNumber: string | null;
+  regulationUrl: string | null;
+  entriesCloseAt: string;
+  phase: 'open' | 'closed' | 'drawn' | 'cancelled';
+  entryCount: number;
+  /** sha256 of the secret seed, published when the draw opens. */
+  seedHash: string | null;
+  myNumber: number | null;
+  eligible: boolean;
+  /** plan_required, minor, email_not_verified, closed */
+  ineligibleReason: string | null;
+  results: { drawnAt: string; externalValue: string; seed: string; winners: DrawWinner[] } | null;
+}
+
+export interface AdminDraw extends Omit<DrawSummary, 'phase'> {
+  status: 'draft' | 'open' | 'drawn' | 'cancelled';
+  phase: DrawSummary['phase'] | 'draft';
+  winners: (DrawWinner & { userId: string; email: string; prizeId: string; delivered: boolean })[];
+}
+
+export interface PrizeItem {
+  id: string;
+  source: 'draw' | 'contest';
+  title: LocalizedText;
+  description: LocalizedText;
+  position: number;
+  luckyNumber: number | null;
+  /** Only for the winner, once delivered. */
+  code: string | null;
+  deliveredAt: string | null;
+  createdAt: string;
+}
+
+export interface ContestEntryView {
+  id: string;
+  title: string;
+  description: string | null;
+  author: { id: string; username: string | null; displayName: string | null; plan: PlanBadge };
+  width: number;
+  height: number;
+  /** API paths (prefix with the API URL). */
+  imagePath: string;
+  thumbPath: string;
+  /** Hidden while voting is open (no bandwagon effect). */
+  voteCount: number | null;
+  mine: boolean;
+}
+
+export interface ContestSummary {
+  id: string;
+  slug: string;
+  title: LocalizedText;
+  description: LocalizedText;
+  rules: LocalizedText;
+  prize: LocalizedText;
+  universeSlug: string | null;
+  submissionsOpenAt: string;
+  submissionsCloseAt: string;
+  votingCloseAt: string;
+  phase: 'upcoming' | 'submissions' | 'voting' | 'judging' | 'finished' | 'cancelled';
+  entryCount: number;
+  winner: { entryId: string; title: string; name: string } | null;
+}
+
+export interface ContestDetail extends ContestSummary {
+  entries: ContestEntryView[];
+  myEntry: { id: string; title: string; status: 'pending' | 'approved' | 'rejected'; thumbDataUrl: string } | null;
+  myVote: string | null;
+  canSubmit: boolean;
+  /** minor, email_not_verified, closed, already_entered */
+  submitBlockReason: string | null;
+}
+
+export interface AdminContest extends ContestSummary {
+  status: 'draft' | 'published' | 'finished' | 'cancelled';
+  pending: { id: string; title: string; description: string | null; author: string; thumbDataUrl: string; createdAt: string }[];
+  ranking: { id: string; title: string; author: string; voteCount: number }[];
+  prize: LocalizedText;
+  prizeId: string | null;
+  prizeDelivered: boolean;
+}

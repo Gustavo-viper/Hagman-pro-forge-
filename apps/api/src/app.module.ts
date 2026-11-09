@@ -16,6 +16,7 @@ import { MailModule } from './mail/mail.module.js';
 import { MeModule } from './me/me.module.js';
 import { PlansModule } from './plans/plans.module.js';
 import { GamesModule } from './games/games.module.js';
+import { PrizesModule } from './prizes/prizes.module.js';
 import { QuizzesModule } from './quizzes/quizzes.module.js';
 import { RealtimeModule } from './realtime/realtime.module.js';
 import { RedisModule } from './redis/redis.module.js';
@@ -50,6 +51,7 @@ import { XpModule } from './xp/xp.module.js';
     AdminModule,
     QuizzesModule,
     GamesModule,
+    PrizesModule,
     SectionsModule,
   ],
   providers: [

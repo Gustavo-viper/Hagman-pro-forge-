@@ -178,6 +178,46 @@ Respostas com XP trazem `xpBonus`; `GET /v1/universes/:slug/games/me` traz `plan
 - O worker envia um e-mail `trial_ending` 2 dias antes do fim (uma vez), com link para os planos.
 - Auditoria: `billing.trial_started`.
 
+### Fandom VIP (R$ 69,90/mês)
+
+Plano `vip` (rank 3, só mensal): tudo do Ultra + número da sorte nos sorteios VIP autorizados + selo VIP. Vendido pelo mesmo checkout InfinitePay (sem simulação em produção).
+
+## Prêmios: sorteios VIP e concursos culturais
+
+### Sorteios VIP (com trava legal)
+
+Sorteio promocional exige autorização prévia da SPA/MF (Lei 5.768/71). Um rascunho **só abre** com `certificateNumber` e `regulationUrl` (https) — trava no serviço (`409 authorization_required`) e no banco (CHECK).
+
+| Método | Rota | Acesso | Descrição |
+|---|---|---|---|
+| GET | `/v1/draws` · `/v1/draws/:id` | pública (usuário opcional) | Sorteios publicados (nunca rascunhos), certificado, regulamento, `myNumber`, `eligible`/`ineligibleReason` (`sign_in`, `plan_required`, `minor`, `email_not_verified`, `closed`) e resultado |
+| POST | `/v1/draws/:id/entries` | VIP adulto com e-mail verificado | Gera o número da sorte (sequencial, um por pessoa) |
+| GET/POST | `/v1/admin/draws` | admin | Lista / cria rascunho |
+| PATCH | `/v1/admin/draws/:id` | admin | Edita rascunho (certificado, regulamento, datas…) |
+| POST | `/v1/admin/draws/:id/open` · `/cancel` · `/run` | admin | Abre (gera semente e publica `sha256(seed)`), cancela, apura após o fim (`{ externalValue }`) |
+| PUT | `/v1/admin/prizes/:id/code` | admin | Entrega o código (chave Steam / vale) — guardado cifrado (AES-256-GCM), nunca vai por e-mail |
+
+Apuração verificável: ganhador k = `sha256(seed:externalValue:k) mod restantes` sobre os números ordenados; a semente é revelada no resultado.
+
+### Concursos culturais (papel de parede)
+
+Gratuitos, por mérito, para todo adulto com e-mail verificado e perfil completo (Lei 5.768/71, art. 3º, II) — nunca exclusivos de assinantes. Fases: `upcoming → submissions → voting → judging → finished`.
+
+| Método | Rota | Acesso | Descrição |
+|---|---|---|---|
+| GET | `/v1/contests` · `/v1/contests/:slug` | pública | Concursos publicados, regulamento, galeria aprovada (votos ocultos até a votação terminar), `myEntry`, `canSubmit`/`submitBlockReason` |
+| POST | `/v1/contests/:slug/entries` | usuário | multipart `image` (JPG/PNG/WebP ≤ 6 MB, ≥ 1080×720) + `title`, `description`, `ownWork=true`; reprocessada para WebP sem metadados (EXIF/GPS); entra como `pending` |
+| DELETE | `/v1/contests/:slug/entries/mine` | usuário | Retira a inscrição (durante as inscrições) |
+| PUT | `/v1/contests/:slug/vote` | usuário | `{ entryId }` — 1 voto por concurso, pode trocar; não vale na própria arte (`own_entry`) |
+| GET | `/v1/contest-entries/:id/image?size=thumb` | pública | Imagem aprovada (`Cross-Origin-Resource-Policy: cross-origin`) |
+| GET | `/v1/me/prizes` | usuário | Prêmios ganhos e códigos entregues |
+| GET/POST | `/v1/admin/contests` | admin/editor (moderador vê) | Lista / cria |
+| POST | `/v1/admin/contests/:id/publish` · `/cancel` | admin/editor | Publica / cancela |
+| POST | `/v1/admin/contest-entries/:id/review` | admin/editor/moderador global | `{ action: 'approve' \| 'reject' }` |
+| POST | `/v1/admin/contests/:id/winner` | admin | `{ entryId }` após a votação (júri decide; voto da comunidade orienta) |
+
+Prêmio padrão: 1 mês de Crunchyroll (vale-presente comprado pela Forge Studios; sem parceria oficial). E-mails: `prize_won`, `prize_delivered`. Limite de envio: `UPLOAD_RATE_LIMIT_MAX` (padrão 10/h).
+
 ## Usuário autenticado
 
 | Método | Rota | Descrição |

@@ -84,6 +84,42 @@ const COPY: Record<EmailTemplate, Record<Locale, Copy>> = {
       ignore: "If you don't want to renew, do nothing: your account returns to Free when the period ends.",
     },
   },
+  prize_won: {
+    'pt-BR': {
+      subject: 'Você ganhou! — Fandom Universe',
+      heading: 'Parabéns, você ganhou!',
+      body: (d) => `Você foi contemplado(a) em "${d.title}". Prêmio: ${d.plan}. Avisaremos por e-mail assim que o código do prêmio estiver disponível na sua conta.`,
+      cta: 'Ver meus prêmios',
+      expiry: none,
+      ignore: 'Os prêmios são entregues somente pela sua conta no Fandom Universe. Nunca pedimos senha ou pagamento para liberar prêmios.',
+    },
+    en: {
+      subject: 'You won! — Fandom Universe',
+      heading: 'Congratulations, you won!',
+      body: (d) => `You won in "${d.title}". Prize: ${d.plan}. We'll email you as soon as the prize code is available in your account.`,
+      cta: 'See my prizes',
+      expiry: none,
+      ignore: 'Prizes are only delivered through your Fandom Universe account. We never ask for passwords or payments to release prizes.',
+    },
+  },
+  prize_delivered: {
+    'pt-BR': {
+      subject: 'Seu prêmio chegou — Fandom Universe',
+      heading: 'Seu prêmio está disponível',
+      body: (d) => `O código do seu prêmio em "${d.title}" já está na sua conta. Entre em "Meus prêmios" para ver e resgatar.`,
+      cta: 'Resgatar meu prêmio',
+      expiry: none,
+      ignore: 'Por segurança, o código não vai no e-mail: ele só aparece na sua conta.',
+    },
+    en: {
+      subject: 'Your prize is here — Fandom Universe',
+      heading: 'Your prize is available',
+      body: (d) => `The code for your prize in "${d.title}" is now in your account. Open "My prizes" to see and redeem it.`,
+      cta: 'Redeem my prize',
+      expiry: none,
+      ignore: "For security, the code is not in this email: it only shows in your account.",
+    },
+  },
   trial_ending: {
     'pt-BR': {
       subject: 'Seu teste grátis do Fandom Plus termina em breve',

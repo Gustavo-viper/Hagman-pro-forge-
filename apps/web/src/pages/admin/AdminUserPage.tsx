@@ -32,7 +32,7 @@ function useAdminAction(userId: string) {
 function GrantForm({ user }: { user: AdminUserDetails }) {
   const { t } = useTranslation();
   const action = useAdminAction(user.id);
-  const [plan, setPlan] = useState<'plus' | 'ultra'>(user.plan.planCode === 'ultra' ? 'ultra' : 'plus');
+  const [plan, setPlan] = useState<'plus' | 'ultra' | 'vip'>(user.plan.planCode === 'free' ? 'plus' : user.plan.planCode);
   const [duration, setDuration] = useState('30');
   const [custom, setCustom] = useState('');
   const [reason, setReason] = useState('');
@@ -49,9 +49,10 @@ function GrantForm({ user }: { user: AdminUserDetails }) {
       <div className="grid gap-3 sm:grid-cols-2">
         <div className="space-y-1.5">
           <Label htmlFor="g-plan">{t('dashboard.plan')}</Label>
-          <Select id="g-plan" value={plan} onChange={(e) => setPlan(e.target.value as 'plus' | 'ultra')}>
+          <Select id="g-plan" value={plan} onChange={(e) => setPlan(e.target.value as 'plus' | 'ultra' | 'vip')}>
             <option value="plus">Fandom Plus</option>
             <option value="ultra">Fandom Ultra</option>
+            <option value="vip">Fandom VIP</option>
           </Select>
         </div>
         <div className="space-y-1.5">

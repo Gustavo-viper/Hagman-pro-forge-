@@ -24,7 +24,7 @@ interface FormState {
   startsAt: string;
   endsAt: string;
   capacity: string;
-  premiumPlan: '' | 'plus' | 'ultra';
+  premiumPlan: '' | 'plus' | 'ultra' | 'vip';
   externalUrl: string;
   quizId: string;
 }
@@ -144,6 +144,7 @@ function EventForm({ initial, onDone }: { initial: AdminEvent | null; onDone: ()
           <option value="">{t('admin.events.everyone')}</option>
           <option value="plus">Plus</option>
           <option value="ultra">Ultra</option>
+          <option value="vip">VIP</option>
         </Select>
       </div>
       <div>

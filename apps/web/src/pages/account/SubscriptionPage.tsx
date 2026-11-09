@@ -112,7 +112,7 @@ export default function SubscriptionPage() {
                   <p className="relative mt-5 text-sm text-mist/60">{s.trial ? t('trial.note') : isPaid ? (s.cancelAtPeriodEnd ? t('subscription.cancelledNote') : t('subscription.prepaidNote')) : t('subscription.freeNote')}</p>
                   <div className="relative mt-6 flex flex-wrap gap-3">
                     {isPaid && d.renewablePlan && s.interval && !s.cancelAtPeriodEnd && (
-                      <Button loading={checkout.isPending || checkout.isSuccess} disabled={!d.canCheckout} onClick={() => checkout.mutate({ planCode: d.renewablePlan as 'plus' | 'ultra', interval: s.interval! })}>
+                      <Button loading={checkout.isPending || checkout.isSuccess} disabled={!d.canCheckout} onClick={() => checkout.mutate({ planCode: d.renewablePlan as 'plus' | 'ultra' | 'vip', interval: s.interval! })}>
                         {t('premium.renew')}
                       </Button>
                     )}

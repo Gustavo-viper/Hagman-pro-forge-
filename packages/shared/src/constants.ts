@@ -15,11 +15,14 @@ export function isLocale(value: unknown): value is Locale {
   return typeof value === 'string' && (SUPPORTED_LOCALES as readonly string[]).includes(value);
 }
 
-export const PLAN_CODES = ['free', 'plus', 'ultra'] as const;
+export const PLAN_CODES = ['free', 'plus', 'ultra', 'vip'] as const;
 export type PlanCode = (typeof PLAN_CODES)[number];
 
 /** Higher rank includes every benefit of the lower ranks. */
-export const PLAN_RANK: Record<PlanCode, number> = { free: 0, plus: 1, ultra: 2 };
+export const PLAN_RANK: Record<PlanCode, number> = { free: 0, plus: 1, ultra: 2, vip: 3 };
+
+/** Display names (also used in emails and payment descriptions). */
+export const PLAN_DISPLAY_NAMES: Record<Exclude<PlanCode, 'free'>, string> = { plus: 'Fandom Plus', ultra: 'Fandom Ultra', vip: 'Fandom VIP' };
 
 export const BILLING_INTERVALS = ['month', 'year'] as const;
 export type BillingInterval = (typeof BILLING_INTERVALS)[number];

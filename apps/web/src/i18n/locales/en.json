@@ -24,7 +24,8 @@
     "openMenu": "Open menu",
     "closeMenu": "Close menu",
     "premium": "Premium",
-    "admin": "Admin"
+    "admin": "Admin",
+    "prizes": "Prizes"
   },
   "landing": {
     "hero": {
@@ -90,7 +91,8 @@
       "soon": "Subscriptions coming soon",
       "popular": "Most popular",
       "error": "Could not load plans.",
-      "noPrice": "Price not available in this currency."
+      "noPrice": "Price not available in this currency.",
+      "monthlyOnly": "Monthly plan only."
     },
     "disclaimer": {
       "title": "Independent community",
@@ -190,7 +192,8 @@
     "planNames": {
       "free": "Free",
       "plus": "Fandom Plus",
-      "ultra": "Fandom Ultra"
+      "ultra": "Fandom Ultra",
+      "vip": "Fandom VIP"
     },
     "statuses": {
       "free": "Free",
@@ -385,7 +388,29 @@
     "no_questions": "This universe has no questions for this game yet.",
     "no_words": "This universe has no hangman words yet.",
     "trial_unavailable": "The free trial isn't available for this account.",
-    "book_not_found": "Book not found."
+    "book_not_found": "Book not found.",
+    "authorization_required": "Register the authorization certificate and the rules before opening the draw.",
+    "draw_not_closed": "Entries are still open.",
+    "draw_closed": "Entries for this draw are closed.",
+    "draw_locked": "This draw can no longer be changed.",
+    "draw_not_found": "Draw not found.",
+    "no_entries": "Nobody entered this draw.",
+    "contest_not_found": "Contest not found.",
+    "contest_closed": "Submissions aren't open.",
+    "already_entered": "You already have an entry in this contest.",
+    "image_required": "Attach your wallpaper image.",
+    "image_too_large": "Images can be up to 6 MB.",
+    "image_too_small": "The image must be at least 1080×720 pixels.",
+    "invalid_image": "Use a valid JPG, PNG or WebP image.",
+    "voting_closed": "Voting isn't open.",
+    "own_entry": "You can't vote for your own artwork.",
+    "not_judging": "The winner is chosen after voting ends.",
+    "entry_not_found": "Entry not found.",
+    "prize_not_found": "Prize not found.",
+    "slug_taken": "That address is already used by another contest.",
+    "contest_locked": "This contest can no longer be changed.",
+    "invalid_window": "Dates must be in order: start < end of submissions < end of voting.",
+    "minor": "Available to adults (18+) only."
   },
   "premium": {
     "title": "Unlock your Premium side",
@@ -573,6 +598,59 @@
       "externalHint": "https only. Visible only to registered members inside the room.",
       "quiz": "Quiz of the night (optional)",
       "noQuiz": "No quiz"
+    },
+    "prizes": {
+      "draws": "VIP draws",
+      "contests": "Cultural contests",
+      "lockNote": "Promotional draws require prior authorization from Brazil's Secretariat of Prizes and Betting (Law 5.768/71). A draw only opens with the certificate number and the rules link.",
+      "newDraw": "New draw",
+      "newContest": "New contest",
+      "title": "Title",
+      "prize": "Prize",
+      "description": "Description",
+      "count": "Number of prizes",
+      "closes": "Entries until",
+      "certificate": "Authorization certificate no.",
+      "regulation": "Rules link (https)",
+      "saveDraft": "Save draft",
+      "noDraws": "No draws yet.",
+      "noContests": "No contests yet.",
+      "status": {
+        "draft": "Draft",
+        "open": "Open",
+        "closed": "Awaiting draw",
+        "drawn": "Drawn",
+        "cancelled": "Cancelled"
+      },
+      "entries_one": "{{count}} entrant",
+      "entries_other": "{{count}} entrants",
+      "publicPage": "Public page",
+      "saveAuth": "Save authorization",
+      "open": "Open entries",
+      "cancel": "Cancel",
+      "external": "External value (e.g. Loteria Federal draw and 1st prize)",
+      "run": "Run the draw",
+      "runConfirm": "Run the draw now? The result is final and the seed will be revealed.",
+      "delivered": "Delivered",
+      "deliver": "Deliver",
+      "steamKey": "Steam key",
+      "giftCode": "Gift code",
+      "contestNote": "Cultural contest: free, merit-based and open to every adult with a confirmed email (it can't be subscriber-only).",
+      "slug": "Address (slug)",
+      "rules": "Rules",
+      "rulesHint": "Goal, who can enter, deadlines, judging criteria (community vote + jury), prize and delivery, artwork usage rights, disqualification…",
+      "universe": "Contest universe",
+      "submissionsOpen": "Submissions from",
+      "submissionsClose": "Submissions until",
+      "votingClose": "Voting until",
+      "publish": "Publish",
+      "pending_one": "{{count}} entry awaiting moderation",
+      "pending_other": "{{count}} entries awaiting moderation",
+      "approve": "Approve",
+      "reject": "Reject",
+      "declareWinner": "Declare winner",
+      "winnerConfirm": "Declare “{{title}}” the winner? This closes the contest.",
+      "allUniverses": "All universes"
     }
   },
   "quiz": {
@@ -840,10 +918,13 @@
         "events": "Events",
         "badge": "Badge next to your name",
         "stats": "Detailed statistics",
-        "shields": "Daily streak shield"
+        "shields": "Daily streak shield",
+        "draws": "Steam key draws (authorized)"
       },
       "perWeek_one": "{{count}} day/week",
-      "perWeek_other": "{{count}} days/week"
+      "perWeek_other": "{{count}} days/week",
+      "vipEvents": "+ VIP",
+      "drawsVip": "Lucky number"
     },
     "shieldLimit_one": "Streak shield: {{count}} day a week (used: {{used}})",
     "shieldLimit_other": "Streak shield: {{count}} days a week (used: {{used}})",
@@ -978,6 +1059,112 @@
       "bastidores": "Behind the scenes",
       "recomendado": "Recommended read",
       "inspiracao": "Inspiration"
+    }
+  },
+  "prizes": {
+    "title": "Prizes",
+    "subtitle": "Free cultural contests for everyone and prize draws for VIP subscribers.",
+    "phases": {
+      "draft": "Draft",
+      "upcoming": "Coming soon",
+      "submissions": "Submissions open",
+      "voting": "Voting open",
+      "judging": "Judging",
+      "finished": "Finished",
+      "cancelled": "Cancelled",
+      "open": "Open",
+      "closed": "Entries closed",
+      "drawn": "Drawn"
+    },
+    "contests": {
+      "title": "Cultural contests",
+      "subtitle": "Free to enter, judged on merit: community vote and the jury's final decision.",
+      "empty": "No contests right now.",
+      "free": "Free entry"
+    },
+    "draws": {
+      "title": "VIP draws",
+      "subtitle": "VIP subscribers get a lucky number in every authorized draw.",
+      "empty": "No authorized draws right now. When there is one, it shows here with its certificate and rules.",
+      "vipOnly": "VIP only"
+    },
+    "mine": {
+      "title": "My prizes",
+      "empty": "You haven't won anything yet. Join the contests and draws!",
+      "source": {
+        "draw": "Draw",
+        "contest": "Contest"
+      },
+      "code": "Prize code",
+      "copy": "Copy",
+      "copied": "Copied!",
+      "pending": "Prize confirmed! The code will show here and you'll get an email when it's released."
+    },
+    "draw": {
+      "number": "No. {{number}}",
+      "certificate": "SPA/MF authorization certificate no. {{number}}",
+      "authorized": "Authorized draw",
+      "rules": "Read the rules",
+      "closes_one": "Entries until {{date}} · {{count}} entrant",
+      "closes_other": "Entries until {{date}} · {{count}} entrants",
+      "prize_one": "Prize: {{prize}}",
+      "prize_other": "Prizes: {{count}} × {{prize}}",
+      "yourNumber": "Your lucky number",
+      "getNumber": "Get my lucky number",
+      "becomeVip": "Get VIP",
+      "blocked": {
+        "plan_required": "Draws are exclusive to Fandom VIP subscribers.",
+        "minor": "Draws are for adults (18+) only.",
+        "email_not_verified": "Confirm your email to take part.",
+        "sign_in": "Sign in to take part.",
+        "closed": "Entries for this draw are closed."
+      },
+      "results": "Result",
+      "verify": "How to verify the result",
+      "verifyText": "Before entries open we publish the hash of a secret seed. At draw time we combine the seed with an external value (e.g. a Loteria Federal result). With the seed revealed, anyone can redo the math and confirm the winners.",
+      "external": "external value"
+    },
+    "contest": {
+      "submissionsUntil": "Submissions until",
+      "votingUntil": "Voting until",
+      "prize": "Prize",
+      "brandNote": "Crunchyroll and other brands belong to their owners. The prize is bought by Forge Studios; there is no sponsorship or official partnership.",
+      "rules": "Rules",
+      "legal": "A purely cultural contest, free to enter and not linked to any purchase or subscription (Brazilian Law 5.768/71, art. 3, II).",
+      "winner": "Winner: “{{title}}” by {{name}}",
+      "yourEntry": "Your entry",
+      "submitTitle": "Submit a wallpaper",
+      "file": "Image (JPG, PNG or WebP)",
+      "fileHint": "At least 1080×720 px, up to 6 MB. The image is re-processed and metadata (such as location) is removed.",
+      "entryTitle": "Title",
+      "entryDescription": "Description (optional)",
+      "ownWork": "I declare the artwork is mine and original, that I did not use official or third-party images, and I accept the rules.",
+      "send": "Submit entry",
+      "preview": "Preview",
+      "entryStatus": {
+        "pending": "Under moderation review.",
+        "approved": "Approved and visible in the gallery.",
+        "rejected": "Not approved. You can submit another artwork while submissions are open."
+      },
+      "withdraw": "Withdraw entry",
+      "withdrawConfirm": "Withdraw your entry from this contest?",
+      "blocked": {
+        "sign_in": "Sign in to take part.",
+        "onboarding_required": "Complete your profile to take part.",
+        "minor": "This contest is for adults (18+).",
+        "email_not_verified": "Confirm your email to take part.",
+        "already_entered": "You already have an entry in this contest.",
+        "closed": "Submissions aren't open right now."
+      },
+      "gallery_one": "Gallery · {{count}} artwork",
+      "gallery_other": "Gallery · {{count}} artworks",
+      "voteHint": "You have 1 vote and can move it until voting ends. Counts show when voting is over.",
+      "voteSignIn": "Sign in to vote.",
+      "noEntries": "No approved artworks yet.",
+      "votes_one": "{{count}} vote",
+      "votes_other": "{{count}} votes",
+      "vote": "Vote",
+      "yourVote": "Your vote"
     }
   }
 }

@@ -22,7 +22,13 @@ VALUES
    '{"pt-BR":"A experiência máxima do Fandom Universe.","en":"The ultimate Fandom Universe experience."}',
    '{"pt-BR":["Tudo do Fandom Plus","+50% de XP em quizzes, jogos e missões","Proteção de sequência: 2 dias perdidos por semana","200 XP por dia no contra o relógio e 20 vitórias com XP na forca","Missões Ultra lendárias","Eventos exclusivos Ultra","Selo Ultra dourado e nome em destaque"],
      "en":["Everything in Fandom Plus","+50% XP on quizzes, games and missions","Streak shield: 2 missed days a week","200 XP a day in the speed round and 20 XP-earning hangman wins","Legendary Ultra missions","Ultra-exclusive events","Golden Ultra badge and highlighted name"]}',
-   20)
+   20),
+  ('vip',
+   '{"pt-BR":"Fandom VIP","en":"Fandom VIP"}',
+   '{"pt-BR":"Tudo do Ultra e acesso ao clube VIP de sorteios.","en":"Everything in Ultra plus the VIP prize-draw club."}',
+   '{"pt-BR":["Tudo do Fandom Ultra","Número da sorte nos sorteios de chaves Steam (somente sorteios autorizados, com regulamento e certificado publicados)","Selo VIP exclusivo e nome em destaque","Eventos exclusivos VIP"],
+     "en":["Everything in Fandom Ultra","A lucky number in the Steam key prize draws (authorized draws only, with published rules and certificate)","Exclusive VIP badge and highlighted name","VIP-exclusive events"]}',
+   30)
 ON CONFLICT (code) DO NOTHING;
 
 INSERT INTO public.plan_prices (plan_code, billing_interval, currency, amount_minor)
@@ -31,5 +37,6 @@ VALUES
   ('plus',  'month', 'BRL', 1490),
   ('plus',  'year',  'BRL', 14990),
   ('ultra', 'month', 'BRL', 2990),
-  ('ultra', 'year',  'BRL', 29990)
+  ('ultra', 'year',  'BRL', 29990),
+  ('vip',   'month', 'BRL', 6990)
 ON CONFLICT (plan_code, billing_interval, currency) DO NOTHING;

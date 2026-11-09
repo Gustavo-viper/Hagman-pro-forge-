@@ -28,7 +28,7 @@ const CSP = [
   "default-src 'self'",
   "script-src 'self'",
   "style-src 'self' 'unsafe-inline'",
-  "img-src 'self' data: blob: https:",
+  `img-src 'self' data: blob: https: ${api}`,
   "font-src 'self' data:",
   `connect-src ${connect}`,
   "manifest-src 'self'",

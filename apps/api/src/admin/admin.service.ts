@@ -1,5 +1,6 @@
 import { HttpStatus, Inject, Injectable, Logger } from '@nestjs/common';
 import type { BillingInterval, Locale, PlanCode, SubscriptionStatus } from '@fandom/shared';
+import { PLAN_DISPLAY_NAMES } from '@fandom/shared';
 import type { AdminUserListInput, GrantPlanInput } from '@fandom/schemas';
 import type { AdminReport, AdminStats, AdminUserDetails, AdminUserRow, CursorPage } from '@fandom/types';
 import { AuditService } from '../audit/audit.service.js';
@@ -12,7 +13,7 @@ import type { Env } from '../config/env.js';
 import { DatabaseService } from '../database/database.service.js';
 import { MailService } from '../mail/mail.service.js';
 
-const PLAN_NAMES: Record<string, string> = { plus: 'Fandom Plus', ultra: 'Fandom Ultra' };
+const PLAN_NAMES: Record<string, string> = PLAN_DISPLAY_NAMES;
 
 /**
  * Effective plan in SQL. MUST mirror `entitledPlan` in subscriptions/entitlements.service.ts

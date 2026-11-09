@@ -1,7 +1,8 @@
 import type pg from 'pg';
 import { formatMoney, type EmailJobData, type Locale } from '@fandom/shared';
+import { PLAN_DISPLAY_NAMES } from '@fandom/shared';
 
-const PLAN_NAMES: Record<string, string> = { plus: 'Fandom Plus', ultra: 'Fandom Ultra' };
+const PLAN_NAMES: Record<string, string> = PLAN_DISPLAY_NAMES;
 
 /**
  * InfinitePay has no recurring billing, so periods are prepaid. Users with an active (not

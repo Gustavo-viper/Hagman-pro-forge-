@@ -47,7 +47,7 @@ test('admin creates an event; registered fan chats live, plays the quiz night an
   // 1. Admin creates an event starting in 10 minutes (the room opens 30 minutes before).
   await admin.goto('/admin');
   await admin.getByRole('button', { name: 'Novo evento' }).click();
-  await admin.getByLabel('Universo').selectOption('supernatural');
+  await admin.getByLabel('Universo', { exact: true }).selectOption('supernatural');
   await admin.getByLabel('Tipo').selectOption('tournament');
   await admin.getByLabel('Título (português)').fill(title);
   await admin.getByLabel('Descrição (português)').fill('Quiz ao vivo entre caçadores.');
