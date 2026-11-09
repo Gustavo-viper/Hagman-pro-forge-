@@ -1,4 +1,4 @@
-import { HttpStatus, Injectable } from '@nestjs/common';
+import { HttpStatus, Injectable, Logger, type OnApplicationBootstrap } from '@nestjs/common';
 import type { ContestCreateInput, ContestEntryFields, ContestUpdateInput } from '@fandom/schemas';
 import type { AdminContest, ContestDetail, ContestEntryView, ContestSummary, LocalizedText } from '@fandom/types';
 import { AuditService } from '../audit/audit.service.js';
@@ -61,12 +61,22 @@ export async function processWallpaper(input: Buffer): Promise<{ image: Buffer; 
 }
 
 @Injectable()
-export class ContestsService {
+export class ContestsService implements OnApplicationBootstrap {
+  private readonly logger = new Logger('ContestsService');
+
   constructor(
     private readonly db: DatabaseService,
     private readonly audit: AuditService,
     private readonly draws: DrawsService,
   ) {}
+
+  /** Non-fatal probe: reports in the boot log whether wallpaper processing (sharp) works on this host. */
+  onApplicationBootstrap(): void {
+    void import('sharp')
+      .then(({ default: sharp }) => sharp({ create: { width: 4, height: 4, channels: 3, background: '#000' } }).webp().toBuffer())
+      .then(() => this.logger.log('wallpaper image processing ready'))
+      .catch((e: unknown) => this.logger.error(`wallpaper image processing unavailable: ${String(e)}`));
+  }
 
   private phase(c: ContestRow, now = new Date()): ContestSummary['phase'] {
     if (c.status === 'cancelled') return 'cancelled';

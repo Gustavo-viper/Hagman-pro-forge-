@@ -63,7 +63,8 @@ function masterChain(ctx: BaseAudioContext): { input: GainNode; output: GainNode
 interface Playing {
   theme: Theme;
   out: GainNode;
-  timer: ReturnType<typeof setInterval>;
+  timer: ReturnType<typeof setInterval> | null;
+  audio: HTMLAudioElement | null;
 }
 
 /**
@@ -102,7 +103,11 @@ export class MusicPlayer {
     if (this.ctx && this.master) this.master.output.gain.setTargetAtTime(this.volume, this.ctx.currentTime, 0.05);
   }
 
-  play(theme: Theme): void {
+  /**
+   * Plays a universe theme. With `src` (an MP3 theme song) it streams the file in a loop and
+   * falls back to the synthesized soundtrack if the file can't be loaded.
+   */
+  play(theme: Theme, src?: string): void {
     if (!this.ctx || !this.master) return;
     if (this.suspendTimer) {
       clearTimeout(this.suspendTimer);
@@ -116,12 +121,44 @@ export class MusicPlayer {
     out.gain.setValueAtTime(0.0001, ctx.currentTime);
     out.gain.exponentialRampToValueAtTime(1, ctx.currentTime + FADE_IN);
     out.connect(this.master.input);
+    const playing: Playing = { theme, out, timer: null, audio: null };
+    this.current = playing;
+    if (!src) {
+      playing.timer = this.startSynth(theme, out);
+      return;
+    }
+    const audio = new Audio();
+    audio.loop = true;
+    audio.preload = 'auto';
+    audio.src = src;
+    ctx.createMediaElementSource(audio).connect(out);
+    playing.audio = audio;
+    const fallback = () => {
+      if (this.current !== playing || playing.timer) return;
+      audio.removeAttribute('src');
+      playing.audio = null;
+      playing.timer = this.startSynth(theme, out);
+    };
+    audio.addEventListener('error', fallback, { once: true });
+    audio.play().catch((e: unknown) => {
+      // NotAllowedError means "no gesture yet" (the next unlock resumes); anything else: fall back.
+      if (!(e instanceof DOMException && (e.name === 'NotAllowedError' || e.name === 'AbortError'))) fallback();
+    });
+  }
+
+  /** Name of what is playing now: an MP3 theme song or the synthesized soundtrack. */
+  get source(): 'mp3' | 'synth' | null {
+    return this.current ? (this.current.audio ? 'mp3' : 'synth') : null;
+  }
+
+  private startSynth(theme: Theme, out: GainNode): ReturnType<typeof setInterval> {
+    const ctx = this.ctx!;
     const band = new Band(ctx, out, theme.reverb);
     const c = compile(theme);
     const sd = stepSeconds(theme);
     let i = 0;
     let next = ctx.currentTime + 0.1;
-    const timer = setInterval(() => {
+    return setInterval(() => {
       // After a throttled background period, skip ahead instead of bursting old notes.
       if (next < ctx.currentTime - 0.3) {
         const skipped = Math.ceil((ctx.currentTime - next) / sd);
@@ -134,7 +171,6 @@ export class MusicPlayer {
         next += sd;
       }
     }, TICK_MS);
-    this.current = { theme, out, timer };
   }
 
   /** Fades the current theme out; the context sleeps afterwards to save battery. */
@@ -151,23 +187,36 @@ export class MusicPlayer {
 
   /** Pauses/resumes everything (e.g. when the tab is hidden). */
   pause(): void {
+    this.current?.audio?.pause();
     if (this.ctx?.state === 'running') void this.ctx.suspend();
   }
 
   resume(): void {
-    if (this.current && this.ctx?.state === 'suspended') void this.ctx.resume();
+    if (!this.current) return;
+    if (this.ctx?.state === 'suspended') void this.ctx.resume();
+    void this.current.audio?.play().catch(() => undefined);
+  }
+
+  /** Retries an MP3 that the browser refused to start before the first gesture. */
+  kick(): void {
+    const audio = this.current?.audio;
+    if (audio?.paused) void audio.play().catch(() => undefined);
   }
 
   private fadeOut(): void {
     const cur = this.current;
     if (!cur || !this.ctx) return;
     this.current = null;
-    clearInterval(cur.timer);
+    if (cur.timer) clearInterval(cur.timer);
     const now = this.ctx.currentTime;
     cur.out.gain.cancelScheduledValues(now);
     cur.out.gain.setValueAtTime(Math.max(cur.out.gain.value, 0.0001), now);
     cur.out.gain.exponentialRampToValueAtTime(0.0001, now + FADE_OUT);
-    setTimeout(() => cur.out.disconnect(), (FADE_OUT + 3) * 1000);
+    setTimeout(() => {
+      cur.audio?.pause();
+      cur.audio?.removeAttribute('src');
+      cur.out.disconnect();
+    }, (FADE_OUT + 0.3) * 1000);
   }
 }
 

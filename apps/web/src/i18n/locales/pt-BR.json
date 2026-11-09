@@ -879,7 +879,8 @@
     "mute": "Silenciar trilha sonora",
     "volume": "Volume da trilha sonora",
     "tapToPlay": "Toque em qualquer lugar para ouvir",
-    "original": "Trilha original Fandom Universe"
+    "original": "Trilha original Fandom Universe",
+    "themeSong": "Tema do universo"
   },
   "premiumPerks": {
     "bonusBadge": "+{{xp}} XP bônus {{plan}}",

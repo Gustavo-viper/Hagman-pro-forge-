@@ -9,6 +9,7 @@ import { localized } from '@/lib/format';
 import { currentLocale } from '@/lib/i18n';
 import { musicPlayer, renderTheme } from '@/lib/music/player';
 import { THEMES, themeFor } from '@/lib/music/themes';
+import { MP3_TRACKS, trackUrl } from '@/lib/music/tracks';
 
 const PREFS_KEY = 'fandom.music';
 
@@ -32,6 +33,7 @@ export function universeSlugFromPath(path: string): string | null {
 if (import.meta.env.VITE_MUSIC_DEBUG === '1') {
   (window as unknown as Record<string, unknown>).__fandomMusic = {
     slugs: Object.keys(THEMES),
+    source: () => musicPlayer.source,
     async render(slug: string, seconds: number) {
       const buf = await renderTheme(themeFor(slug), seconds);
       let peak = 0;
@@ -76,6 +78,7 @@ export function UniverseMusic() {
   useEffect(() => {
     const unlock = () => {
       musicPlayer.unlock();
+      musicPlayer.kick();
       if (musicPlayer.unlocked) {
         setUnlocked(true);
         for (const e of ['pointerdown', 'keydown', 'touchstart'] as const) window.removeEventListener(e, unlock, true);
@@ -92,7 +95,8 @@ export function UniverseMusic() {
   }, [prefs.volume]);
 
   useEffect(() => {
-    if (slug && !prefs.muted && unlocked) musicPlayer.play(themeFor(slug));
+    const track = slug ? MP3_TRACKS[slug] : undefined;
+    if (slug && !prefs.muted && unlocked) musicPlayer.play(themeFor(slug), track && trackUrl(slug, track));
     else musicPlayer.stop();
   }, [slug, prefs.muted, unlocked]);
 
@@ -106,6 +110,7 @@ export function UniverseMusic() {
 
   if (!slug) return null;
   const theme = themeFor(slug);
+  const track = MP3_TRACKS[slug];
   const state = prefs.muted ? 'muted' : unlocked ? 'playing' : 'waiting';
   return (
     <div
@@ -113,6 +118,7 @@ export function UniverseMusic() {
       className="glass fixed bottom-4 right-4 z-40 flex items-center gap-3 rounded-full py-2 pl-2 pr-4 shadow-xl"
       data-testid="universe-music"
       data-state={state}
+      data-source={track ? "mp3" : "synth"}
       role="region"
       aria-label={t('music.region')}
     >
@@ -135,9 +141,9 @@ export function UniverseMusic() {
       </button>
       <div className="hidden min-w-0 sm:block">
         <p className="flex items-center gap-1.5 truncate text-xs font-semibold text-mist">
-          <Music2 className="size-3.5 shrink-0" /> {localized(theme.title, locale)}
+          <Music2 className="size-3.5 shrink-0" /> {track ? track.title : localized(theme.title, locale)}
         </p>
-        <p className="truncate text-[11px] text-mist/55">{state === 'waiting' ? t('music.tapToPlay') : t('music.original')}</p>
+        <p className="truncate text-[11px] text-mist/55">{state === 'waiting' ? t('music.tapToPlay') : track ? (track.credit ?? t('music.themeSong')) : t('music.original')}</p>
       </div>
       <label className="sr-only" htmlFor="music-volume">{t('music.volume')}</label>
       <input

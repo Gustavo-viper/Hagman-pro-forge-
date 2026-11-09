@@ -879,7 +879,8 @@
     "mute": "Mute soundtrack",
     "volume": "Soundtrack volume",
     "tapToPlay": "Tap anywhere to listen",
-    "original": "Fandom Universe original score"
+    "original": "Fandom Universe original score",
+    "themeSong": "Universe theme song"
   },
   "premiumPerks": {
     "bonusBadge": "+{{xp}} XP {{plan}} bonus",
