@@ -15,6 +15,8 @@ export const universeThemeSchema = z.object({
   accent: hexColor,
   background: hexColor,
   glow: hexColor,
+  coverImage: z.string().url().startsWith('https://').max(500).optional(),
+  coverCredit: z.string().max(200).optional(),
 });
 export type UniverseTheme = z.infer<typeof universeThemeSchema>;
 

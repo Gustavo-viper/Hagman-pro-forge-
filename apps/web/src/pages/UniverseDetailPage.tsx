@@ -3,12 +3,13 @@ import { Badge, Button, cn, Skeleton } from '@fandom/ui';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import { FEATURE_ENGINE } from '@fandom/shared';
-import { ArrowLeft, BookOpen, Brain, CalendarDays, Check, Medal, MessagesSquare, Play, Sparkles, Target, Trophy, Users, Wand2 } from 'lucide-react';
+import { ArrowLeft, BookOpen, Brain, CalendarDays, Check, Medal, MessagesSquare, Play, ShoppingBag, Sparkles, Target, Trophy, Users, Wand2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Link, useParams, useSearchParams } from 'react-router';
 import { useAuth } from '@/auth/AuthProvider';
 import { EmptyState, ErrorState } from '@/components/states';
-import { UniverseSigil, universeStyle } from '@/components/UniverseCard';
+import { UniverseCover, universeStyle } from '@/components/UniverseCard';
+import { StoreTab } from '@/components/universe/StoreTab';
 import { useDashboard, useQuizProgress, useRanking, useUniverse, useUniverseQuizzes, type UniverseDetail } from '@/hooks/data';
 import { useMembershipMutations } from '@/hooks/useMembership';
 import { api, ApiError } from '@/lib/api';
@@ -21,18 +22,18 @@ import { GamesPanel } from '@/components/universe/GamesPanel';
 import NotFoundPage from './NotFoundPage';
 import { PlanName } from '@/components/premium';
 
-type Tab = 'overview' | 'quizzes' | 'archive' | 'community' | 'missions' | 'events' | 'ranking';
+type Tab = 'overview' | 'quizzes' | 'archive' | 'community' | 'missions' | 'events' | 'ranking' | 'store';
 
 /** Engine → tab. Identity lives in the overview; house cup inside the ranking tab. */
 const ENGINE_TAB: Record<string, Tab> = {
   identity: 'overview', quizzes: 'quizzes', archive: 'archive', forum: 'community', missions: 'missions',
   events: 'events', ranking: 'ranking', house_cup: 'ranking',
 };
-const TAB_ORDER: Tab[] = ['overview', 'quizzes', 'archive', 'community', 'missions', 'events', 'ranking'];
-const TAB_ICONS = { overview: Sparkles, quizzes: Brain, archive: BookOpen, community: MessagesSquare, missions: Target, events: CalendarDays, ranking: Trophy };
+const TAB_ORDER: Tab[] = ['overview', 'quizzes', 'archive', 'community', 'missions', 'events', 'ranking', 'store'];
+const TAB_ICONS = { overview: Sparkles, quizzes: Brain, archive: BookOpen, community: MessagesSquare, missions: Target, events: CalendarDays, ranking: Trophy, store: ShoppingBag };
 
 function tabsFor(features: string[]): Tab[] {
-  const set = new Set<Tab>(['overview', 'ranking']);
+  const set = new Set<Tab>(['overview', 'ranking', 'store']);
   for (const f of features) {
     const engine = FEATURE_ENGINE[f];
     if (engine) set.add(ENGINE_TAB[engine]!);
@@ -300,19 +301,23 @@ export default function UniverseDetailPage() {
           <motion.section
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="relative mt-8 overflow-hidden rounded-3xl border border-white/10 bg-[linear-gradient(140deg,color-mix(in_oklab,var(--u-primary)_55%,transparent),color-mix(in_oklab,var(--u-bg)_95%,transparent)_60%,color-mix(in_oklab,var(--u-secondary)_50%,transparent))] p-8 sm:p-12"
+            className="relative mt-8 min-h-[26rem] overflow-hidden rounded-3xl border border-white/15 shadow-[0_40px_120px_-40px_var(--u-primary)] sm:min-h-[30rem]"
           >
-            <UniverseSigil slug={universe.data.slug} className="absolute -right-16 -top-16 size-80 opacity-30 animate-spin-slow" />
-            <Badge className="relative bg-black/30 text-[color:var(--u-glow)]">
-              <Users className="size-3" /> {t('landing.universes.members', { count: universe.data.memberCount })}
-            </Badge>
-            <h1 className="relative mt-6 font-display text-4xl font-bold tracking-wide text-white sm:text-6xl">{localized(universe.data.name, locale)}</h1>
-            <p className="relative mt-3 text-lg text-[color:var(--u-glow)]">{localized(universe.data.tagline, locale)}</p>
-            <p className="relative mt-5 max-w-2xl text-mist/75">{localized(universe.data.description, locale)}</p>
-            <div className="relative mt-8"><MembershipAction slug={universe.data.slug} /></div>
+            <UniverseCover universe={universe.data} imgClassName="animate-ken-burns" />
+            <div className="relative flex min-h-[26rem] flex-col justify-end p-4 sm:min-h-[30rem] sm:p-8">
+              <div className="glass-strong max-w-3xl rounded-3xl p-6 sm:p-8">
+                <Badge className="bg-black/30 text-[color:var(--u-glow)]">
+                  <Users className="size-3" /> {t('landing.universes.members', { count: universe.data.memberCount })}
+                </Badge>
+                <h1 className="mt-4 font-display text-4xl font-bold tracking-wide text-white sm:text-6xl">{localized(universe.data.name, locale)}</h1>
+                <p className="mt-3 text-lg text-[color:var(--u-glow)]">{localized(universe.data.tagline, locale)}</p>
+                <p className="mt-4 max-w-2xl text-mist/80">{localized(universe.data.description, locale)}</p>
+                <div className="mt-7"><MembershipAction slug={universe.data.slug} /></div>
+              </div>
+            </div>
           </motion.section>
 
-          <nav role="tablist" aria-label={t('universe.sections')} className="sticky top-16 z-30 -mx-4 mt-8 flex gap-1 overflow-x-auto bg-void/80 px-4 py-2 backdrop-blur-xl sm:mx-0 sm:rounded-2xl">
+          <nav role="tablist" aria-label={t('universe.sections')} className="glass-strong sticky top-16 z-30 -mx-4 mt-8 flex gap-1 overflow-x-auto px-4 py-2 sm:mx-0 sm:rounded-2xl">
             {tabs.map((k) => {
               const Icon = TAB_ICONS[k];
               return (
@@ -365,6 +370,7 @@ export default function UniverseDetailPage() {
             {tab === 'community' && <CommunityTab universe={universe.data} category={section} onCategory={(sec) => go('community', sec)} isMember={Boolean(member)} />}
             {tab === 'missions' && <MissionsTab universe={universe.data} isMember={Boolean(member)} />}
             {tab === 'events' && <EventsTab universe={universe.data} isMember={Boolean(member)} />}
+            {tab === 'store' && <StoreTab universe={universe.data} />}
             {tab === 'ranking' && (
               <>
                 {universe.data.features.includes('house_cup') && <StandingsCard universe={universe.data} />}

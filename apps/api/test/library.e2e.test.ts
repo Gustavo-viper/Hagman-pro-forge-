@@ -47,6 +47,26 @@ describe.runIf(enabled)('Book libraries and the Anime / Video Games universes', 
     await http.get('/v1/universes/harry-potter/archive/library').expect(404);
   });
 
+  it('every universe has a chronological watch order and a cover photo', async () => {
+    for (const slug of ALL) {
+      const u = (await http.get(`/v1/universes/${slug}`).expect(200)).body;
+      expect(u.features, slug).toContain('watch_order');
+      expect(u.theme.coverImage, slug).toMatch(/^https:\/\/commons\.wikimedia\.org\//);
+      expect(u.theme.coverCredit, slug).toBeTruthy();
+      const items = (await http.get(`/v1/universes/${slug}/archive/watch_order`).expect(200)).body.items;
+      expect(items.length, slug).toBeGreaterThanOrEqual(5);
+    }
+    // Fantastic Beasts comes first in the wizarding-world chronology; its screenplays are books.
+    const hp = (await http.get('/v1/universes/harry-potter/archive/watch_order').expect(200)).body.items.map((e: { slug: string }) => e.slug);
+    expect(hp.slice(0, 4)).toEqual(['aft-1', 'aft-2', 'aft-3', 'hp-1']);
+    expect((await books('harry-potter')).map((b) => b.slug)).toEqual(expect.arrayContaining(['roteiro-animais-fantasticos', 'roteiro-segredos-de-dumbledore']));
+    // Anime: most watched and upcoming releases.
+    expect((await http.get('/v1/universes/animes/archive/anime_popular').expect(200)).body.items.length).toBeGreaterThanOrEqual(10);
+    const upcoming = (await http.get('/v1/universes/animes/archive/anime_upcoming').expect(200)).body.items;
+    expect(upcoming.length).toBeGreaterThanOrEqual(5);
+    expect(upcoming.every((e: { tags: string[] }) => e.tags.includes('em-breve'))).toBe(true);
+  });
+
   it('keeps a personal reading shelf per user', async () => {
     const u = await fan();
     const [first, second, third] = await books('star-wars');

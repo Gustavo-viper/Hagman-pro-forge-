@@ -273,7 +273,10 @@
       "anime_guide": "Anime guide",
       "games_guide": "Classics guide",
       "anime_style": "Anime style",
-      "gamer_class": "Player class"
+      "gamer_class": "Player class",
+      "watch_order": "Watch order",
+      "anime_popular": "Most watched",
+      "anime_upcoming": "Upcoming releases"
     },
     "tabs": {
       "overview": "Overview",
@@ -282,7 +285,8 @@
       "archive": "Archive",
       "community": "Community",
       "missions": "Missions",
-      "events": "Events"
+      "events": "Events",
+      "store": "Store"
     },
     "sections": "Universe sections",
     "retakeSorting": "Retake the test",
@@ -755,7 +759,9 @@
       "personal_data": "Personal data",
       "spoiler": "Unmarked spoiler",
       "other": "Other"
-    }
+    },
+    "upcoming": "Coming soon",
+    "watchOrderHelp": "Films and series in story chronological order — perfect for a marathon."
   },
   "eventRoom": {
     "backToEvents": "Back to events",
@@ -839,7 +845,7 @@
       "title": "Universe hangman",
       "short": "Hangman",
       "description": "Uncover the hidden name letter by letter.",
-      "rules": "Pick letters on screen or with your keyboard. Accents don't matter. You have 6 lives.",
+      "rules": "Pick letters on the on-screen or physical keyboard. Accents do not matter. You have 6 lives and can ask for scene clues at any time.",
       "new": "New game",
       "resume": "Resume game",
       "hint": "Hint",
@@ -861,7 +867,10 @@
       "wins_zero": "no wins yet",
       "rewardsLeft_zero": "Wins earn no more XP today (limit of 5 a day).",
       "lives_zero": "0 lives left",
-      "unit_zero": "0 wins"
+      "unit_zero": "0 wins",
+      "clues": "Scene clues: {{shown}} of {{total}}",
+      "moreClue": "One more clue",
+      "cluesHelp": "Stuck? Ask for clues about scenes and what the character did — they cost no lives."
     },
     "survival": {
       "title": "Survival mode",
@@ -1181,6 +1190,24 @@
       "votes_other": "{{count}} votes",
       "vote": "Vote",
       "yourVote": "Your vote"
+    }
+  },
+  "store": {
+    "badge": "Store in development",
+    "title": "{{universe}} store — coming soon",
+    "subtitle": "We're building an online store with items for {{universe}} fans. Soon you'll be able to shop right here!",
+    "preview": "What's coming",
+    "soon": "Soon",
+    "note": "The store does not sell anything yet: no payments are accepted in this section for now.",
+    "categories": {
+      "apparel": "T-shirts and hoodies",
+      "mugs": "Mugs and cups",
+      "posters": "Posters and prints",
+      "collectibles": "Collectibles",
+      "digital": "Digital profile items",
+      "boxes": "Themed boxes",
+      "events": "Event tickets",
+      "accessories": "Accessories and gifts"
     }
   }
 }

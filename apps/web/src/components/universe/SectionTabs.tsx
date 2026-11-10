@@ -3,7 +3,7 @@ import type { IdentityStanding, LoreEntry, MissionProgress, MissionSummary, Univ
 import { Badge, Button, cn, Progress, Skeleton } from '@fandom/ui';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
-import { Brain, CalendarDays, Check, Crown, DoorOpen, Lock, Radio, Target, Trophy, Users, Video } from 'lucide-react';
+import { Brain, CalendarDays, Check, Clapperboard, Crown, DoorOpen, Film, Hourglass, Lock, Radio, Target, Trophy, Tv, Users, Video } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 import { useAuth } from '@/auth/AuthProvider';
@@ -67,13 +67,18 @@ export function ArchiveTab({ universe, section, onSection }: { universe: Univers
         <EmptyState>{t('sections.archiveEmpty')}</EmptyState>
       ) : current === BOOK_SECTION ? (
         <BooksView universe={universe} books={entries.data} />
+      ) : current === 'watch_order' ? (
+        <WatchOrderView entries={entries.data} />
       ) : (
         <div className="grid gap-4 md:grid-cols-2">
           {entries.data.map((e, i) => (
             <motion.article key={e.id} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.04 }} className="glass rounded-2xl p-5">
               <div className="flex items-start justify-between gap-3">
                 <h3 className="font-display text-lg font-bold">{localized(e.title, locale)}</h3>
-                {e.subtitle && <Badge className="shrink-0">{localized(e.subtitle, locale)}</Badge>}
+                <div className="flex shrink-0 flex-col items-end gap-1.5">
+                  {e.subtitle && <Badge className="shrink-0">{localized(e.subtitle, locale)}</Badge>}
+                  {e.tags.includes('em-breve') && <Badge variant="gold"><Hourglass className="size-3" /> {t('sections.upcoming')}</Badge>}
+                </div>
               </div>
               <p className="mt-2 text-sm leading-relaxed text-mist/70">{localized(e.summary, locale)}</p>
             </motion.article>
@@ -81,6 +86,47 @@ export function ArchiveTab({ universe, section, onSection }: { universe: Univers
         </div>
       )}
       {current !== BOOK_SECTION && <p className="mt-6 text-xs text-mist/45">{t('sections.archiveNote')}</p>}
+    </div>
+  );
+}
+
+/** Chronological watch order (films, series, specials) as a numbered timeline. */
+function WatchOrderView({ entries }: { entries: LoreEntry[] }) {
+  const { t } = useTranslation();
+  const locale = currentLocale();
+  return (
+    <div>
+      <p className="mb-6 flex items-center gap-2 text-sm text-mist/65"><Clapperboard className="size-4 text-[color:var(--u-glow)]" /> {t('sections.watchOrderHelp')}</p>
+      <ol className="relative space-y-4 border-l border-white/15 pl-6 sm:pl-8" data-testid="watch-order">
+        {entries.map((e, i) => {
+          const upcoming = e.tags.includes('em-breve');
+          const Icon = /^(Filme|Film)\b/.test(e.subtitle?.en ?? '') ? Film : Tv;
+          return (
+            <motion.li
+              key={e.id}
+              initial={{ opacity: 0, x: -12 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: Math.min(i * 0.03, 0.6) }}
+              className="relative"
+            >
+              <span className={cn(
+                'absolute -left-[2.35rem] top-4 grid size-8 place-items-center rounded-full text-xs font-bold ring-4 ring-void sm:-left-[2.85rem]',
+                upcoming ? 'bg-gold-400/30 text-gold-100' : 'bg-[color:var(--u-primary)] text-white',
+              )}>{i + 1}</span>
+              <article className={cn('glass glass-sheen rounded-2xl p-5', upcoming && 'border-dashed border-gold-300/40')}>
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <h3 className="flex items-center gap-2 font-display text-lg font-bold"><Icon className="size-4 shrink-0 text-[color:var(--u-glow)]" /> {localized(e.title, locale)}</h3>
+                  <div className="flex flex-wrap gap-1.5">
+                    {e.subtitle && <Badge>{localized(e.subtitle, locale)}</Badge>}
+                    {upcoming && <Badge variant="gold"><Hourglass className="size-3" /> {t('sections.upcoming')}</Badge>}
+                  </div>
+                </div>
+                <p className="mt-2 text-sm leading-relaxed text-mist/70">{localized(e.summary, locale)}</p>
+              </article>
+            </motion.li>
+          );
+        })}
+      </ol>
     </div>
   );
 }

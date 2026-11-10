@@ -15,6 +15,7 @@ export const FEATURE_ENGINE: Record<string, SectionEngine> = {
   character_archive: 'archive', timelines: 'archive', multiverse_guide: 'archive', galaxy_atlas: 'archive',
   starship_archive: 'archive', species_archive: 'archive', episode_guide: 'archive', medical_cases: 'archive',
   discography: 'archive', books: 'archive', anime_guide: 'archive', games_guide: 'archive',
+  watch_order: 'archive', anime_popular: 'archive', anime_upcoming: 'archive',
   // community forum
   discussions: 'forum', theories: 'forum', discussion_groups: 'forum', common_rooms: 'forum',
   fan_projects: 'forum', translations: 'forum', fan_art: 'forum', investigations: 'forum', vip_lounge: 'forum',

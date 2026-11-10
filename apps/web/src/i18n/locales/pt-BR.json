@@ -273,7 +273,10 @@
       "anime_guide": "Guia de animes",
       "games_guide": "Guia de clássicos",
       "anime_style": "Estilo de anime",
-      "gamer_class": "Classe de jogador"
+      "gamer_class": "Classe de jogador",
+      "watch_order": "Ordem cronológica",
+      "anime_popular": "Mais assistidos",
+      "anime_upcoming": "Próximos lançamentos"
     },
     "tabs": {
       "overview": "Visão geral",
@@ -282,7 +285,8 @@
       "archive": "Arquivo",
       "community": "Comunidade",
       "missions": "Missões",
-      "events": "Eventos"
+      "events": "Eventos",
+      "store": "Loja"
     },
     "sections": "Seções do universo",
     "retakeSorting": "Refazer o teste",
@@ -755,7 +759,9 @@
       "personal_data": "Dados pessoais",
       "spoiler": "Spoiler sem aviso",
       "other": "Outro"
-    }
+    },
+    "upcoming": "Em breve",
+    "watchOrderHelp": "Filmes e séries na ordem cronológica da história — perfeito para maratonar."
   },
   "eventRoom": {
     "backToEvents": "Voltar aos eventos",
@@ -839,7 +845,7 @@
       "title": "Forca do universo",
       "short": "Forca",
       "description": "Descubra o nome escondido letra por letra.",
-      "rules": "Escolha letras no teclado da tela ou do computador. Acentos não importam. Você tem 6 vidas.",
+      "rules": "Escolha letras no teclado da tela ou do computador. Acentos não importam. Você tem 6 vidas e pode pedir dicas de cenas a qualquer momento.",
       "new": "Nova partida",
       "resume": "Continuar partida",
       "hint": "Dica",
@@ -861,7 +867,10 @@
       "wins_zero": "nenhuma vitória ainda",
       "unit_zero": "0 vitórias",
       "lives_zero": "0 vidas restantes",
-      "rewardsLeft_zero": "Hoje as vitórias não valem mais XP (limite de 5 por dia)."
+      "rewardsLeft_zero": "Hoje as vitórias não valem mais XP (limite de 5 por dia).",
+      "clues": "Dicas de cena: {{shown}} de {{total}}",
+      "moreClue": "Mais uma dica",
+      "cluesHelp": "Travou? Peça dicas sobre cenas e o que o personagem fez — elas não custam vidas."
     },
     "survival": {
       "title": "Modo Sobrevivência",
@@ -1181,6 +1190,24 @@
       "votes_other": "{{count}} votos",
       "vote": "Votar",
       "yourVote": "Seu voto"
+    }
+  },
+  "store": {
+    "badge": "Loja em desenvolvimento",
+    "title": "Loja {{universe}} — em breve",
+    "subtitle": "Estamos preparando uma loja virtual com itens para fãs de {{universe}}. Em breve você poderá comprar por aqui!",
+    "preview": "O que vem por aí",
+    "soon": "Em breve",
+    "note": "A loja ainda não vende nada: nenhum pagamento é aceito nesta seção por enquanto.",
+    "categories": {
+      "apparel": "Camisetas e moletons",
+      "mugs": "Canecas e copos",
+      "posters": "Pôsteres e quadros",
+      "collectibles": "Colecionáveis",
+      "digital": "Itens digitais do perfil",
+      "boxes": "Caixas temáticas",
+      "events": "Ingressos para eventos",
+      "accessories": "Acessórios e presentes"
     }
   }
 }

@@ -111,4 +111,11 @@ export class GamesController {
   guess(@CurrentUser() user: AuthenticatedUser, @Param('id', ParseUUIDPipe) id: string, @Body(new ZodPipe(hangmanGuessSchema)) body: HangmanGuessInput): Promise<HangmanGame> {
     return this.games.guess(user, id, body.letter);
   }
+
+  @Throttle(playLimit)
+  @Post('games/hangman/:id/clues')
+  @HttpCode(200)
+  revealClue(@CurrentUser() user: AuthenticatedUser, @Param('id', ParseUUIDPipe) id: string): Promise<HangmanGame> {
+    return this.games.revealClue(user, id);
+  }
 }

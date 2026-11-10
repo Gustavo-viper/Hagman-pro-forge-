@@ -65,7 +65,7 @@ interface SessionRow {
 
 interface SpeedState { order: string[]; index: number; deadline: string; last?: SpeedRound['last'] }
 interface SurvivalState { order: string[]; index: number; questionDeadline: string; last?: SurvivalRound['last'] }
-interface HangmanState { wordId: string; word: string; hint: LocalizedText; guessed: string[] }
+interface HangmanState { wordId: string; word: string; hint: LocalizedText; guessed: string[]; clues?: LocalizedText[]; revealed?: number }
 
 const publicQuestion = (q: PoolQuestion): GameQuestion => ({
   id: q.id,
@@ -395,6 +395,8 @@ export class GamesService {
       status: s.status === 'won' ? 'won' : s.status === 'active' ? 'active' : 'lost',
       mask: done ? [...st.word] : hangmanMask(st.word, st.guessed),
       hint: st.hint,
+      clues: (st.clues ?? []).slice(0, done ? (st.clues ?? []).length : (st.revealed ?? 0)),
+      cluesTotal: (st.clues ?? []).length,
       guessed: st.guessed,
       wrong,
       livesLeft: Math.max(0, HANGMAN_LIVES - wrong.length),
@@ -421,15 +423,15 @@ export class GamesService {
       );
       const avoid = recent.rows.map((r) => r.word_id).filter(Boolean);
       const pick = async (exclude: string[]) =>
-        (await tx.query<{ id: string; word: string; hint: LocalizedText }>(
-          `SELECT id, word, hint FROM game_words WHERE universe_id = $1 AND status = 'published' AND NOT (id = ANY($2::uuid[])) ORDER BY random() LIMIT 1`,
+        (await tx.query<{ id: string; word: string; hint: LocalizedText; clues: LocalizedText[] }>(
+          `SELECT id, word, hint, clues FROM game_words WHERE universe_id = $1 AND status = 'published' AND NOT (id = ANY($2::uuid[])) ORDER BY random() LIMIT 1`,
           [universe.id, exclude],
         )).rows[0];
       const word = (await pick(avoid)) ?? (await pick([]));
       if (!word) throw AppError.notFound('no_words', 'No words in this universe yet');
       const { rows } = await tx.query<SessionRow>(
         "INSERT INTO game_sessions (user_id, universe_id, game, state, total) VALUES ($1, $2, 'hangman', $3, $4) RETURNING *",
-        [user.id, universe.id, JSON.stringify({ wordId: word.id, word: word.word, hint: word.hint, guessed: [] } satisfies HangmanState), HANGMAN_LIVES],
+        [user.id, universe.id, JSON.stringify({ wordId: word.id, word: word.word, hint: word.hint, guessed: [], clues: word.clues ?? [], revealed: 0 } satisfies HangmanState), HANGMAN_LIVES],
       );
       return rows[0]!;
     });
@@ -470,6 +472,24 @@ export class GamesService {
       return { ...rows[0]!, xp_bonus: bonus };
     });
     if (session.status !== 'active') await this.invalidateRankings(session.universe_id);
+    return this.hangmanView(session);
+  }
+
+  /** Reveals the next scene/trivia clue of the hidden word (free; the word itself stays hidden). */
+  async revealClue(user: AuthenticatedUser, id: string): Promise<HangmanGame> {
+    const session = await this.db.transaction(async (tx) => {
+      const s = await this.lockSession(tx, user, id, 'hangman');
+      if (s.status !== 'active') throw AppError.conflict('game_finished', 'This game is over');
+      const st = s.state as unknown as HangmanState;
+      const total = (st.clues ?? []).length;
+      const revealed = st.revealed ?? 0;
+      if (revealed >= total) return s;
+      const { rows } = await tx.query<SessionRow>('UPDATE game_sessions SET state = $2 WHERE id = $1 RETURNING *', [
+        s.id,
+        JSON.stringify({ ...st, revealed: revealed + 1 }),
+      ]);
+      return rows[0]!;
+    });
     return this.hangmanView(session);
   }
 

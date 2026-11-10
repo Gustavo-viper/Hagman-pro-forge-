@@ -1,7 +1,7 @@
 import type { HangmanGame } from '@fandom/types';
 import { Badge, Button, Card, cn, Skeleton } from '@fandom/ui';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { Heart, PartyPopper, RotateCcw, Skull } from 'lucide-react';
+import { Clapperboard, Heart, Lightbulb, PartyPopper, RotateCcw, Skull } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useParams } from 'react-router';
@@ -61,6 +61,10 @@ export default function HangmanPage() {
   });
   const resume = useMutation({
     mutationFn: (id: string) => api<HangmanGame>(`/v1/games/hangman/${id}`),
+    onSuccess: (g) => setGame(g),
+  });
+  const clue = useMutation({
+    mutationFn: (id: string) => api<HangmanGame>(`/v1/games/hangman/${id}/clues`, { method: 'POST' }),
     onSuccess: (g) => setGame(g),
   });
   const guess = useMutation({
@@ -123,7 +127,7 @@ export default function HangmanPage() {
     return () => window.removeEventListener('keydown', onKey);
   }, []);
 
-  const error = overview.error ?? start.error ?? resume.error ?? guess.error;
+  const error = overview.error ?? start.error ?? resume.error ?? guess.error ?? clue.error;
   const loading = overview.isPending || resume.isPending;
 
   return (
@@ -147,6 +151,32 @@ export default function HangmanPage() {
                   ))}
                 </span>
               </div>
+              {game.cluesTotal > 0 && (
+                <div className="mt-5 rounded-2xl border border-white/10 bg-white/[0.04] p-4 backdrop-blur-md" data-testid="hangman-clues">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <p className="flex items-center gap-2 text-sm font-semibold text-[color:var(--u-glow)]">
+                      <Clapperboard className="size-4" /> {t('games.hangman.clues', { shown: game.clues.length, total: game.cluesTotal })}
+                    </p>
+                    {game.status === 'active' && game.clues.length < game.cluesTotal && (
+                      <Button size="sm" variant="glass" loading={clue.isPending} onClick={() => clue.mutate(game.id)}>
+                        <Lightbulb /> {t('games.hangman.moreClue')}
+                      </Button>
+                    )}
+                  </div>
+                  {game.clues.length === 0 ? (
+                    <p className="mt-2 text-sm text-mist/55">{t('games.hangman.cluesHelp')}</p>
+                  ) : (
+                    <ol className="mt-3 space-y-2">
+                      {game.clues.map((c, i) => (
+                        <li key={i} className="flex gap-3 text-sm text-mist/85">
+                          <span className="grid size-6 shrink-0 place-items-center rounded-full bg-[color:var(--u-primary)]/50 text-xs font-bold text-white">{i + 1}</span>
+                          <span>{localized(c, locale)}</span>
+                        </li>
+                      ))}
+                    </ol>
+                  )}
+                </div>
+              )}
               <div className="mt-6 flex flex-col items-center gap-6 sm:flex-row sm:items-end sm:justify-center">
                 <Gallows wrong={game.maxLives - game.livesLeft} />
                 <p className="flex max-w-md flex-wrap justify-center gap-x-1.5 gap-y-3" aria-label={t('games.hangman.word')} data-testid="hangman-word">

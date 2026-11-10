@@ -202,10 +202,32 @@ describe.runIf(enabled)('Universe mini-games: daily challenge, speed round, hang
     await http.get('/v1/universes/supernatural/games/leaderboard?game=nope').expect(422);
   });
 
+  it('hangman: scene clues are revealed one at a time and never leak the word', async () => {
+    const u = await fan('harry-potter');
+    const game = (await http.post('/v1/universes/harry-potter/games/hangman').set(bearer(u.token)).expect(201)).body;
+    expect(game.clues).toEqual([]);
+    expect(game.cluesTotal).toBeGreaterThanOrEqual(2);
+    const other = await fan('harry-potter');
+    await http.post(`/v1/games/hangman/${game.id}/clues`).set(bearer(other.token)).expect(404);
+    let s = game;
+    for (let i = 1; i <= game.cluesTotal; i++) {
+      s = (await http.post(`/v1/games/hangman/${game.id}/clues`).set(bearer(u.token)).expect(200)).body;
+      expect(s.clues).toHaveLength(i);
+      expect(s.clues[i - 1]).toMatchObject({ 'pt-BR': expect.any(String), en: expect.any(String) });
+    }
+    // Asking past the last clue is a no-op; lives are never spent on clues.
+    s = (await http.post(`/v1/games/hangman/${game.id}/clues`).set(bearer(u.token)).expect(200)).body;
+    expect(s).toMatchObject({ clues: expect.any(Array), livesLeft: 6, status: 'active', word: null });
+    expect(s.clues).toHaveLength(game.cluesTotal);
+    expect((await http.get(`/v1/games/hangman/${game.id}`).set(bearer(u.token)).expect(200)).body.clues).toHaveLength(game.cluesTotal);
+  });
+
   it('every universe has a hangman bank, a daily pool and game missions', async () => {
     for (const slug of ['harry-potter', 'supernatural', 'marvel', 'dc', 'star-wars', 'greys-anatomy', 'station-19', 'bts', 'animes', 'games']) {
       const words = await db.one<{ n: number }>('SELECT count(*)::int AS n FROM game_words w JOIN universes u ON u.id = w.universe_id WHERE u.slug = $1', [slug]);
       expect(words!.n, slug).toBeGreaterThanOrEqual(15);
+      const noClues = await db.one<{ n: number }>("SELECT count(*)::int AS n FROM game_words w JOIN universes u ON u.id = w.universe_id WHERE u.slug = $1 AND jsonb_array_length(w.clues) < 2", [slug]);
+      expect(noClues!.n, slug).toBe(0);
       const quizzes = (await http.get(`/v1/universes/${slug}/quizzes`).expect(200)).body.items;
       expect(quizzes.filter((q: { kind: string }) => q.kind === 'trivia').length, slug).toBeGreaterThanOrEqual(3);
       const missions = (await http.get(`/v1/universes/${slug}/missions`).expect(200)).body.items.map((m: { objectiveType: string }) => m.objectiveType);

@@ -85,7 +85,7 @@ export function Navbar() {
   }, [location.pathname]);
 
   return (
-    <header className="sticky top-0 z-40 border-b border-white/5 bg-void/70 backdrop-blur-xl">
+    <header className="sticky top-0 z-40 border-b border-white/10 bg-void/45 shadow-[0_10px_40px_-20px_rgb(0_0_0/0.8)] backdrop-blur-2xl backdrop-saturate-150">
       <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6" aria-label="Main">
         <Link to="/" className="rounded-lg" aria-label="Fandom Universe">
           <Logo />
@@ -135,7 +135,7 @@ export function Navbar() {
 export function Footer() {
   const { t } = useTranslation();
   return (
-    <footer className="mt-24 border-t border-white/5">
+    <footer className="mt-24 border-t border-white/10 bg-white/[0.03] backdrop-blur-xl">
       <div className="mx-auto flex max-w-7xl flex-col gap-6 px-4 py-10 sm:px-6 md:flex-row md:items-center md:justify-between">
         <div className="space-y-2">
           <Logo />
@@ -173,7 +173,8 @@ export function AppLayout() {
     window.scrollTo({ top: 0 });
   }, [location.pathname]);
   return (
-    <div className="flex min-h-dvh flex-col">
+    <div className="relative isolate flex min-h-dvh flex-col">
+      <div className="aurora" aria-hidden="true"><span /><span /><span /></div>
       <a href="#main" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-arcane-600 focus:px-4 focus:py-2">
         {t('common.skipToContent')}
       </a>

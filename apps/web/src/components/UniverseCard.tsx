@@ -2,7 +2,7 @@ import { Badge, cn } from '@fandom/ui';
 import type { UniverseSummary } from '@fandom/types';
 import { motion } from 'framer-motion';
 import { ArrowRight, Users } from 'lucide-react';
-import type { CSSProperties, MouseEvent, ReactNode } from 'react';
+import { useState, type CSSProperties, type MouseEvent, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 import { formatNumber, localized } from '@/lib/format';
@@ -38,6 +38,40 @@ export function UniverseSigil({ slug, className }: { slug: string; className?: s
   );
 }
 
+/**
+ * Real cover photo of a universe (freely licensed, credited). Falls back to the abstract
+ * gradient + sigil when the universe has no cover or the image cannot be loaded.
+ */
+export function UniverseCover({ universe, className, imgClassName, showCredit = true }: { universe: UniverseSummary; className?: string; imgClassName?: string; showCredit?: boolean }) {
+  const [failed, setFailed] = useState(false);
+  const src = universe.theme.coverImage;
+  const name = localized(universe.name, currentLocale());
+  return (
+    <div className={cn('absolute inset-0 overflow-hidden', className)}>
+      <div className="absolute inset-0 bg-[linear-gradient(150deg,color-mix(in_oklab,var(--u-primary)_70%,transparent),color-mix(in_oklab,var(--u-bg)_90%,transparent)_60%,color-mix(in_oklab,var(--u-secondary)_65%,transparent))]" />
+      {src && !failed ? (
+        <img
+          src={src}
+          alt={name}
+          loading="lazy"
+          decoding="async"
+          referrerPolicy="no-referrer"
+          onError={() => setFailed(true)}
+          className={cn('absolute inset-0 size-full object-cover', imgClassName)}
+        />
+      ) : (
+        <UniverseSigil slug={universe.slug} className="absolute -right-8 -top-8 size-44 opacity-50" />
+      )}
+      {/* Tint the photo with the universe palette so every cover matches its identity. */}
+      <div className="absolute inset-0 bg-[linear-gradient(180deg,transparent_25%,color-mix(in_oklab,var(--u-bg)_85%,transparent)_100%)]" />
+      <div className="absolute inset-0 mix-blend-soft-light" style={{ background: 'linear-gradient(135deg, var(--u-primary), transparent 60%, var(--u-glow))' }} />
+      {showCredit && src && !failed && universe.theme.coverCredit && (
+        <span className="absolute bottom-1.5 right-2 max-w-[90%] truncate text-[9px] text-white/45" title={universe.theme.coverCredit}>{universe.theme.coverCredit}</span>
+      )}
+    </div>
+  );
+}
+
 export function UniverseCard({ universe, footer, className }: { universe: UniverseSummary; footer?: ReactNode; className?: string }) {
   const { t } = useTranslation();
   const locale = currentLocale();
@@ -54,35 +88,33 @@ export function UniverseCard({ universe, footer, className }: { universe: Univer
       onMouseMove={onMove}
       whileHover={{ y: -6 }}
       transition={{ type: 'spring', stiffness: 260, damping: 22 }}
-      className={cn(
-        'group relative flex flex-col overflow-hidden rounded-3xl border border-white/10 p-7',
-        'bg-[linear-gradient(150deg,color-mix(in_oklab,var(--u-primary)_45%,transparent),color-mix(in_oklab,var(--u-bg)_92%,transparent)_55%,color-mix(in_oklab,var(--u-secondary)_40%,transparent))]',
-        className,
-      )}
+      className={cn('glass glass-sheen group flex flex-col rounded-3xl', className)}
     >
-      {/* Cursor-following light */}
-      <div
-        className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
-        style={{ background: 'radial-gradient(380px circle at var(--mx) var(--my), color-mix(in oklab, var(--u-glow) 22%, transparent), transparent 60%)' }}
-      />
-      <UniverseSigil slug={universe.slug} className="absolute -right-8 -top-8 size-44 opacity-40 transition-transform duration-700 group-hover:rotate-45" />
-      <div className="relative flex items-center gap-2">
-        <Badge className="bg-black/30 text-[color:var(--u-glow)] ring-1 ring-[color:var(--u-accent)]/40">
+      <div className="relative h-48 shrink-0 overflow-hidden rounded-t-3xl">
+        <UniverseCover universe={universe} imgClassName="transition-transform duration-[1.2s] ease-out group-hover:scale-110" />
+        <Badge className="absolute left-4 top-4 bg-black/40 text-[color:var(--u-glow)] ring-1 ring-white/15 backdrop-blur-md">
           <Users className="size-3" /> {t('landing.universes.members', { count: universe.memberCount, formatted: formatNumber(universe.memberCount, locale) })}
         </Badge>
+        <h3 className="absolute inset-x-5 bottom-4 font-display text-3xl font-bold tracking-wide text-white drop-shadow-[0_2px_12px_rgb(0_0_0/0.8)]">{localized(universe.name, locale)}</h3>
       </div>
-      <h3 className="relative mt-10 font-display text-3xl font-bold tracking-wide text-white">{localized(universe.name, locale)}</h3>
-      <p className="relative mt-2 text-[color:var(--u-glow)]">{localized(universe.tagline, locale)}</p>
-      <p className="relative mt-4 line-clamp-3 text-sm text-mist/70">{localized(universe.description, locale)}</p>
-      <div className="relative mt-8 flex flex-wrap items-center gap-3">
-        {footer ?? (
-          <Link
-            to={`/universes/${universe.slug}`}
-            className="inline-flex items-center gap-2 rounded-xl bg-black/30 px-4 py-2.5 text-sm font-semibold text-white ring-1 ring-white/15 transition hover:bg-black/45 hover:ring-[color:var(--u-accent)]"
-          >
-            {t('landing.universes.enter')} <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
-          </Link>
-        )}
+      {/* Cursor-following light */}
+      <div
+        className="pointer-events-none absolute inset-0 rounded-3xl opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+        style={{ background: 'radial-gradient(380px circle at var(--mx) var(--my), color-mix(in oklab, var(--u-glow) 18%, transparent), transparent 60%)' }}
+      />
+      <div className="relative flex flex-1 flex-col p-6">
+        <p className="text-[color:var(--u-glow)]">{localized(universe.tagline, locale)}</p>
+        <p className="mt-3 line-clamp-3 flex-1 text-sm text-mist/70">{localized(universe.description, locale)}</p>
+        <div className="mt-6 flex flex-wrap items-center gap-3">
+          {footer ?? (
+            <Link
+              to={`/universes/${universe.slug}`}
+              className="inline-flex items-center gap-2 rounded-xl bg-white/10 px-4 py-2.5 text-sm font-semibold text-white ring-1 ring-white/20 backdrop-blur-md transition hover:bg-white/20 hover:ring-[color:var(--u-accent)]"
+            >
+              {t('landing.universes.enter')} <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
+            </Link>
+          )}
+        </div>
       </div>
     </motion.article>
   );

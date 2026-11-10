@@ -59,6 +59,9 @@ export interface UniverseThemeTokens {
   accent: string;
   background: string;
   glow: string;
+  /** Cover photo (freely licensed, e.g. Wikimedia Commons) and its attribution line. */
+  coverImage?: string;
+  coverCredit?: string;
 }
 
 /** Official theme song, played from YouTube (click-to-play embed; nothing hosted by us). */
@@ -508,6 +511,9 @@ export interface HangmanGame {
   /** One entry per character: the character when revealed (or not a letter), null when hidden. */
   mask: (string | null)[];
   hint: LocalizedText;
+  /** Scene/trivia clues revealed so far (all of them once the game ends). */
+  clues: LocalizedText[];
+  cluesTotal: number;
   guessed: string[];
   wrong: string[];
   livesLeft: number;
