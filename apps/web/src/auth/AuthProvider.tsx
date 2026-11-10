@@ -10,7 +10,7 @@ interface AuthState {
   /** Kept for API compatibility: the session is read synchronously from storage. */
   loading: boolean;
   signIn: (email: string, password: string) => Promise<void>;
-  signUp: (email: string, password: string) => Promise<void>;
+  signUp: (email: string, password: string, referralCode?: string | null) => Promise<void>;
   signOut: () => Promise<void>;
 }
 
@@ -38,9 +38,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     sessionStore.setFromResponse(await authRequest<AuthSessionResponse>('login', { email, password }));
   }, []);
 
-  const signUp = useCallback(async (email: string, password: string) => {
+  const signUp = useCallback(async (email: string, password: string, referralCode?: string | null) => {
     // The UI language localizes the verification email.
-    const res = await authRequest<AuthSessionResponse>('register', { email, password }, undefined, { 'Accept-Language': i18n.language });
+    const body = referralCode ? { email, password, referralCode } : { email, password };
+    const res = await authRequest<AuthSessionResponse>('register', body, undefined, { 'Accept-Language': i18n.language });
     sessionStore.setFromResponse(res);
   }, []);
 

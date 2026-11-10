@@ -680,3 +680,34 @@ export interface AdminContest extends ContestSummary {
   prizeId: string | null;
   prizeDelivered: boolean;
 }
+
+/** Invite-a-friend program (GET /v1/me/referrals). */
+export interface ReferralFriend {
+  id: string;
+  name: string;
+  joinedAt: string;
+  /** pending: account created but email not verified / no universe joined yet. */
+  status: 'pending' | 'qualified' | 'revoked';
+}
+
+export interface ReferralSummary {
+  code: string;
+  link: string;
+  qualified: number;
+  pending: number;
+  discountPercent: number;
+  nextTier: { min: number; percent: number } | null;
+  tiers: { min: number; percent: number }[];
+  friends: ReferralFriend[];
+}
+
+/** Staff view of a user's referrals (admin user page). */
+export interface AdminReferral {
+  id: string;
+  referredId: string;
+  referredEmail: string;
+  referredName: string | null;
+  createdAt: string;
+  status: 'pending' | 'qualified' | 'revoked';
+  revokedReason: string | null;
+}

@@ -31,6 +31,7 @@ const SubscriptionPage = lazy(() => import('@/pages/account/SubscriptionPage'));
 const AdminPage = lazy(() => import('@/pages/admin/AdminPage'));
 const AdminUserPage = lazy(() => import('@/pages/admin/AdminUserPage'));
 const NotFoundPage = lazy(() => import('@/pages/NotFoundPage'));
+const InvitePage = lazy(() => import('@/pages/InvitePage'));
 
 const s = (el: React.ReactNode) => <Suspense fallback={<FullPageLoader />}>{el}</Suspense>;
 
@@ -41,6 +42,7 @@ export const routes = [
       { path: '/', element: <LandingPage /> },
       { path: '/login', element: s(<LoginPage />) },
       { path: '/register', element: s(<RegisterPage />) },
+      { path: '/convite/:code', element: s(<InvitePage />) },
       { path: '/forgot-password', element: s(<ForgotPasswordPage />) },
       { path: '/reset-password', element: s(<ResetPasswordPage />) },
       { path: '/verify-email', element: s(<VerifyEmailPage />) },

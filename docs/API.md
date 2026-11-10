@@ -126,6 +126,7 @@ Todos os jogos são conferidos no servidor: respostas e palavras secretas nunca 
 | `GET /v1/universes/:slug/games/daily` · `POST …/games/daily { answers }` | 5 perguntas sorteadas de forma determinística por dia (iguais para todos) do banco de perguntas de trivia do universo; 1 envio por dia (`daily_already_played`); 8 XP por acerto + 10 XP se gabaritar |
 | `POST /v1/universes/:slug/games/speed` · `POST /v1/games/speed/:id/answers { questionId, key }` · `POST /v1/games/speed/:id/finish` | 60 s com prazo controlado pelo servidor (tolerância de 3 s); uma pergunta por vez (`wrong_question`); 3 XP por acerto, máx. 60 XP/dia; iniciar uma nova rodada encerra a anterior |
 | `POST /v1/universes/:slug/games/hangman` · `GET /v1/games/hangman/:id` · `POST /v1/games/hangman/:id/guesses { letter }` | palavra sorteada (evita as 15 últimas); letras A–Z sem diferenciar acento/maiúscula; 6 vidas; 15 XP por vitória nas 5 primeiras vitórias do dia; letra repetida não custa vida |
+| `POST /v1/games/hangman/:id/clues` | revela a próxima dica de cena/curiosidade da palavra (3 por palavra); não custa vida; a palavra continua oculta |
 
 Jogar exige ser membro do universo (`membership_required`). Novos objetivos de missões: `daily_complete`, `daily_perfect`, `speed_score` (melhor rodada) e `hangman_win`.
 
@@ -154,6 +155,19 @@ Moderação: `GET /v1/admin/reports?status=open` (admin, suporte, moderador glob
 |---|---|---|---|
 | GET | `/v1/subscription-plans?currency=BRL` | pública | Planos ativos com preços **somente** na moeda pedida (sem conversão) |
 
+
+Preços oficiais (BRL): **Plus R$ 29,90/mês ou R$ 299,00/ano · Ultra R$ 59,90/mês ou R$ 599,00/ano · VIP R$ 79,90/mês** (migração `0022` atualiza bancos existentes só se o preço ainda for o anterior).
+
+### Convide amigos (desconto por indicação)
+
+| Método | Rota | Acesso | Descrição |
+|---|---|---|---|
+| GET | `/v1/me/referrals` | autenticado | código e link pessoal (`/convite/CÓDIGO`), amigos confirmados/aguardando, desconto atual e próximo nível |
+| POST | `/v1/auth/register { …, referralCode? }` | pública | vincula a nova conta a quem convidou (códigos desconhecidos são ignorados; cada pessoa só pode ser indicada uma vez) |
+| GET | `/v1/admin/users/:id/referrals` | admin, support | indicações do usuário (com e-mail dos convidados) |
+| POST | `/v1/admin/referrals/:id/revoke { reason }` | admin | cancela indicação fraudulenta (auditado); deixa de contar na hora |
+
+Um amigo **conta** quando confirmou o e-mail e entrou em pelo menos um universo (calculado na leitura). Níveis: **3 amigos = 5% · 5 = 10% · 10 = 20% · 20 = 30%** (`REFERRAL_TIERS` em `packages/shared`). O desconto é aplicado pelo servidor no checkout dos planos pagos enquanto o usuário mantiver os convites; `payment_transactions` guarda `list_amount_minor` e `discount_percent`, e a confirmação do pagamento compara com o valor com desconto.
 
 ### Vantagens do Fandom Premium
 
@@ -186,7 +200,7 @@ Respostas com XP trazem `xpBonus`; `GET /v1/universes/:slug/games/me` traz `plan
 - O worker envia um e-mail `trial_ending` 2 dias antes do fim (uma vez), com link para os planos.
 - Auditoria: `billing.trial_started`.
 
-### Fandom VIP (R$ 69,90/mês)
+### Fandom VIP (R$ 79,90/mês)
 
 Plano `vip` (rank 3, só mensal): tudo do Ultra + número da sorte nos sorteios VIP autorizados + selo VIP. Vendido pelo mesmo checkout InfinitePay (sem simulação em produção).
 

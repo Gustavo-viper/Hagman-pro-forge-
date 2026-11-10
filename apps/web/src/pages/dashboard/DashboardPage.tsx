@@ -16,6 +16,7 @@ import { currentLocale } from '@/lib/i18n';
 import { OnboardingForm } from './OnboardingForm';
 import { StatsSection } from '@/components/dashboard/StatsSection';
 import { TrialOffer } from '@/components/premium';
+import { ReferralCard } from '@/components/referrals/ReferralCard';
 
 function LevelOrb({ level, progress }: { level: number; progress: number }) {
   const r = 52;
@@ -185,6 +186,7 @@ function Universes({ data }: { data: DashboardResponse }) {
         </div>
       </section>
       <TrialOffer className="mt-12" />
+      <ReferralCard className="mt-12" />
       <StatsSection />
       {others.length > 0 && (
         <section className="mt-12" aria-labelledby="discover-universes">

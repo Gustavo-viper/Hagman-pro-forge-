@@ -4,6 +4,7 @@ import type pg from 'pg';
 import type { Locale } from '@fandom/shared';
 import type { ConfirmPasswordResetInput, LoginInput, RegisterInput } from '@fandom/schemas';
 import type { AuthSessionResponse } from '@fandom/types';
+import { ReferralsService } from '../referrals/referrals.service.js';
 import { AuditService } from '../audit/audit.service.js';
 import { AppError } from '../common/app-error.js';
 import { ENV } from '../config/config.module.js';
@@ -38,6 +39,7 @@ export class AuthService {
     private readonly users: UsersService,
     private readonly mail: MailService,
     private readonly audit: AuditService,
+    private readonly referrals: ReferralsService,
     @Inject(ENV) private readonly env: Env,
   ) {}
 
@@ -133,6 +135,7 @@ export class AuthService {
       await tx.query('INSERT INTO profiles (user_id, locale) VALUES ($1, $2)', [user.id, locale]);
       await tx.query('INSERT INTO auth_credentials (user_id, password_hash) VALUES ($1, $2)', [user.id, passwordHash]);
       token = await this.issueToken(tx, user.id, 'email_verification', verificationTtl);
+      await this.referrals.attach(tx, user.id, input.referralCode);
       await this.audit.log(tx, {
         actorUserId: user.id, action: 'user.registered', targetType: 'user', targetId: user.id,
         ipAddress: meta.ip, requestId: meta.requestId,

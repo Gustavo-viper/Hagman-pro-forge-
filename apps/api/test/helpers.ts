@@ -50,8 +50,12 @@ export interface TestUser {
   refreshToken: string;
 }
 
-export async function register(app: INestApplication, email = `user-${randomUUID().slice(0, 8)}@example.test`): Promise<TestUser> {
-  const res = await request(app.getHttpServer()).post('/v1/auth/register').send({ email, password: PASSWORD });
+export async function register(
+  app: INestApplication,
+  email = `user-${randomUUID().slice(0, 8)}@example.test`,
+  extra: Record<string, unknown> = {},
+): Promise<TestUser> {
+  const res = await request(app.getHttpServer()).post('/v1/auth/register').send({ email, password: PASSWORD, ...extra });
   if (res.status !== 201) throw new Error(`register failed: ${res.status} ${JSON.stringify(res.body)}`);
   return { id: res.body.user.id, email, token: res.body.accessToken, refreshToken: res.body.refreshToken };
 }

@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { applyDiscount, nextReferralTier, referralDiscountPercent } from './referrals.js';
 import {
   ageFromBirthdate,
   formatMoney,
@@ -62,5 +63,20 @@ describe('text', () => {
   it('computes age', () => {
     expect(ageFromBirthdate('2010-11-08', new Date('2026-11-07T12:00:00Z'))).toBe(15);
     expect(ageFromBirthdate('2010-11-07', new Date('2026-11-07T12:00:00Z'))).toBe(16);
+  });
+});
+
+describe('referral discounts', () => {
+  it('unlocks 5/10/20/30% at 3/5/10/20 qualified friends', () => {
+    expect([0, 2, 3, 4, 5, 9, 10, 19, 20, 50].map(referralDiscountPercent)).toEqual([0, 0, 5, 5, 10, 10, 20, 20, 30, 30]);
+    expect(nextReferralTier(0)).toEqual({ min: 3, percent: 5 });
+    expect(nextReferralTier(10)).toEqual({ min: 20, percent: 30 });
+    expect(nextReferralTier(20)).toBeNull();
+  });
+  it('applies the discount to the cent', () => {
+    expect(applyDiscount(2990, 0)).toBe(2990);
+    expect(applyDiscount(2990, 20)).toBe(2392);
+    expect(applyDiscount(7990, 30)).toBe(5593);
+    expect(applyDiscount(0, 30)).toBe(0);
   });
 });

@@ -1,4 +1,4 @@
-import { monthlyEquivalent, yearlySavingsPercent, type BillingInterval, type PlanCode } from '@fandom/shared';
+import { applyDiscount, monthlyEquivalent, yearlySavingsPercent, type BillingInterval, type PlanCode } from '@fandom/shared';
 import type { SubscriptionPlanSummary } from '@fandom/types';
 import { Badge, Button, cn } from '@fandom/ui';
 import { motion } from 'framer-motion';
@@ -7,7 +7,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 import { useAuth } from '@/auth/AuthProvider';
-import { useBillingConfig, useSubscriptionDetails } from '@/hooks/data';
+import { useBillingConfig, useReferrals, useSubscriptionDetails } from '@/hooks/data';
 import { useCheckout } from '@/hooks/useCheckout';
 import { errorMessage } from '@/lib/errors';
 import { localized, money } from '@/lib/format';
@@ -74,6 +74,8 @@ export function PlanCards({ plans }: { plans: SubscriptionPlanSummary[] }) {
   const { session } = useAuth();
   const locale = currentLocale();
   const [interval, setInterval] = useState<BillingInterval>('month');
+  const referrals = useReferrals();
+  const discount = session ? (referrals.data?.discountPercent ?? 0) : 0;
 
   return (
     <div>
@@ -95,6 +97,11 @@ export function PlanCards({ plans }: { plans: SubscriptionPlanSummary[] }) {
           ))}
         </div>
       </div>
+      {!session || discount === 0 ? (
+        <p className="mx-auto -mt-4 mb-8 max-w-xl text-center text-sm text-mist/65">
+          <Link to={session ? '/dashboard#convites' : '/register'} className="font-semibold text-gold-200 hover:underline">{t('referrals.plansHint')}</Link>
+        </p>
+      ) : null}
       <div className={cn('grid gap-6 lg:grid-cols-3', plans.length > 3 && 'md:grid-cols-2 xl:grid-cols-4')}>
         {plans.map((plan, i) => {
           const Icon = ICONS[plan.code];
@@ -133,8 +140,14 @@ export function PlanCards({ plans }: { plans: SubscriptionPlanSummary[] }) {
               <div className="mt-6">
                 {price ? (
                   <>
+                    {discount > 0 && plan.code !== 'free' && (
+                      <p className="mb-1 flex items-center gap-2 text-sm">
+                        <span className="text-mist/50 line-through">{money(price.amountMinor, price.currency, locale)}</span>
+                        <Badge variant="gold">{t('referrals.planDiscount', { percent: discount })}</Badge>
+                      </p>
+                    )}
                     <p className="flex items-baseline gap-1">
-                      <span className="font-display text-4xl font-bold">{money(price.amountMinor, price.currency, locale)}</span>
+                      <span className="font-display text-4xl font-bold">{money(plan.code === 'free' ? price.amountMinor : applyDiscount(price.amountMinor, discount), price.currency, locale)}</span>
                       {plan.code !== 'free' && (
                         <span className="text-sm text-mist/55">{effectiveInterval === 'month' ? t('landing.plans.perMonth') : t('landing.plans.perYear')}</span>
                       )}
@@ -142,7 +155,7 @@ export function PlanCards({ plans }: { plans: SubscriptionPlanSummary[] }) {
                     {monthlyOnly && <p className="mt-1 text-xs text-mist/55">{t('landing.plans.monthlyOnly')}</p>}
                     {plan.code !== 'free' && effectiveInterval === 'year' && monthly && (
                       <p className="mt-1 text-xs text-gold-200">
-                        {t('landing.plans.equivalent', { price: money(monthlyEquivalent(price.amountMinor), price.currency, locale) })} ·{' '}
+                        {t('landing.plans.equivalent', { price: money(monthlyEquivalent(applyDiscount(price.amountMinor, discount)), price.currency, locale) })} ·{' '}
                         {t('landing.plans.save', { percent: yearlySavingsPercent(monthly.amountMinor, price.amountMinor) })}
                       </p>
                     )}

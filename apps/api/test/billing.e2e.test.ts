@@ -69,7 +69,7 @@ describe.runIf(enabled)('Billing (InfinitePay)', () => {
     const res = await http.post('/v1/billing/checkout').set(bearer(u.token)).send({ planCode: 'plus', interval: 'year' }).expect(201);
     expect(res.body.checkoutUrl).toMatch(/^https:\/\/checkout\.infinitepay\.io\/fandomtest\/fu_/);
     const arg = createLink.mock.calls[0]![0] as import('../src/billing/infinitepay.client.js').CreateLinkInput;
-    expect(arg).toMatchObject({ amountMinor: 14990, description: 'Fandom Plus — anual', redirectUrl: 'https://fandom.test/account/subscription', customer: { email: u.email } });
+    expect(arg).toMatchObject({ amountMinor: 29900, description: 'Fandom Plus — anual', redirectUrl: 'https://fandom.test/account/subscription', customer: { email: u.email } });
     expect(arg.webhookUrl).toBe(`https://api.fandom.test${WEBHOOK}`);
     expect(arg.validUntil.getTime()).toBeGreaterThan(Date.now() + 23 * 3_600_000);
     const again = await http.post('/v1/billing/checkout').set(bearer(u.token)).send({ planCode: 'plus', interval: 'year' }).expect(201);
@@ -85,7 +85,7 @@ describe.runIf(enabled)('Billing (InfinitePay)', () => {
     const pending = await http.post('/v1/billing/confirm').set(bearer(u.token)).send(ret).expect(200);
     expect(pending.body).toMatchObject({ status: 'pending', subscription: { planCode: 'free' } });
 
-    paid(1490);
+    paid(2990);
     const ok = await http.post('/v1/billing/confirm').set(bearer(u.token)).send(ret).expect(200);
     expect(ok.body.status).toBe('paid');
     expect(ok.body.subscription).toMatchObject({ planCode: 'plus', status: 'active', interval: 'month', cancelAtPeriodEnd: false });
@@ -96,7 +96,7 @@ describe.runIf(enabled)('Billing (InfinitePay)', () => {
 
     // Idempotent: confirm again + webhook replay do not extend the period twice.
     await http.post('/v1/billing/confirm').set(bearer(u.token)).send(ret).expect(200);
-    const hook = await http.post(WEBHOOK).send({ order_nsu: orderNsu, transaction_nsu: 'tx-1', invoice_slug: 'inv-1', amount: 1490 }).expect(200);
+    const hook = await http.post(WEBHOOK).send({ order_nsu: orderNsu, transaction_nsu: 'tx-1', invoice_slug: 'inv-1', amount: 2990 }).expect(200);
     expect(hook.body.outcome).toBe('already_paid');
     const subs = await db.query('SELECT current_period_end FROM subscriptions WHERE user_id = $1', [u.id]);
     expect(subs.rows).toHaveLength(1);
@@ -112,8 +112,8 @@ describe.runIf(enabled)('Billing (InfinitePay)', () => {
   it('processes verified webhooks, renews by extending the paid period, and ignores junk', async () => {
     const u = await customer();
     const o1 = (await http.post('/v1/billing/checkout').set(bearer(u.token)).send({ planCode: 'ultra', interval: 'month' })).body.orderNsu;
-    paid(2990);
-    expect((await http.post(WEBHOOK).send({ order_nsu: o1, transaction_nsu: 'tx-a', invoice_slug: 'inv-a', amount: 2990, receipt_url: 'https://r.test/a' }).expect(200)).body.outcome).toBe('paid');
+    paid(5990);
+    expect((await http.post(WEBHOOK).send({ order_nsu: o1, transaction_nsu: 'tx-a', invoice_slug: 'inv-a', amount: 5990, receipt_url: 'https://r.test/a' }).expect(200)).body.outcome).toBe('paid');
     const end1 = (await db.one<{ e: Date }>('SELECT current_period_end AS e FROM subscriptions WHERE user_id = $1', [u.id]))!.e;
 
     const o2 = (await http.post('/v1/billing/checkout').set(bearer(u.token)).send({ planCode: 'ultra', interval: 'month' })).body.orderNsu;
@@ -154,7 +154,7 @@ describe.runIf(enabled)('Billing (InfinitePay)', () => {
   it('blocks plan changes mid-period, cancels keeping benefits and reactivates', async () => {
     const u = await customer();
     const o = (await http.post('/v1/billing/checkout').set(bearer(u.token)).send({ planCode: 'plus', interval: 'month' })).body.orderNsu;
-    paid(1490);
+    paid(2990);
     await http.post('/v1/billing/confirm').set(bearer(u.token)).send({ orderNsu: o, transactionNsu: 't', slug: 's' }).expect(200);
     expect((await http.post('/v1/billing/checkout').set(bearer(u.token)).send({ planCode: 'ultra', interval: 'month' }).expect(409)).body.code).toBe('plan_change_unavailable');
 
@@ -210,7 +210,7 @@ describe.runIf(enabled)('Billing (InfinitePay)', () => {
       const u = await customer();
       await http.post('/v1/billing/trial').set(bearer(u.token)).expect(200);
       const { orderNsu } = (await http.post('/v1/billing/checkout').set(bearer(u.token)).send({ planCode: 'plus', interval: 'month' }).expect(201)).body;
-      paid(1490);
+      paid(2990);
       const ok = (await http.post('/v1/billing/confirm').set(bearer(u.token)).send({ orderNsu, transactionNsu: 'tx-trial', slug: 'inv-trial' }).expect(200)).body;
       expect(ok.subscription).toMatchObject({ planCode: 'plus', status: 'active', trial: false, cancelAtPeriodEnd: false });
       const days = (new Date(ok.subscription.currentPeriodEnd).getTime() - Date.now()) / 86_400_000;
@@ -223,7 +223,7 @@ describe.runIf(enabled)('Billing (InfinitePay)', () => {
       const u = await customer();
       await http.post('/v1/billing/trial').set(bearer(u.token)).expect(200);
       const { orderNsu } = (await http.post('/v1/billing/checkout').set(bearer(u.token)).send({ planCode: 'ultra', interval: 'month' }).expect(201)).body;
-      paid(2990);
+      paid(5990);
       const ok = (await http.post('/v1/billing/confirm').set(bearer(u.token)).send({ orderNsu, transactionNsu: 'tx-u', slug: 'inv-u' }).expect(200)).body;
       expect(ok.subscription).toMatchObject({ planCode: 'ultra', status: 'active', trial: false });
       const subs = await db.query<{ provider: string; status: string }>('SELECT provider, status FROM subscriptions WHERE user_id = $1 ORDER BY created_at', [u.id]);

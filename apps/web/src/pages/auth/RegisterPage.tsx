@@ -6,7 +6,8 @@ import { Link, Navigate, useNavigate } from 'react-router';
 import { useAuth } from '@/auth/AuthProvider';
 import { AuthLayout, FormField } from '@/components/AuthLayout';
 import { VERIFICATION_LINK_HOURS } from '@/components/EmailVerificationGuide';
-import { MailCheck } from 'lucide-react';
+import { Gift, MailCheck } from 'lucide-react';
+import { clearReferralCode, readReferralCode } from '@/lib/referral';
 import { useZodForm } from '@/hooks/useZodForm';
 import { errorMessage } from '@/lib/errors';
 
@@ -17,6 +18,7 @@ export default function RegisterPage() {
   const { values, errors, set, handleSubmit } = useZodForm(signUpSchema, { email: '', password: '', confirmPassword: '' });
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<unknown>(null);
+  const [referralCode] = useState(readReferralCode);
 
   if (session && !submitting) return <Navigate to="/dashboard" replace />;
 
@@ -24,7 +26,8 @@ export default function RegisterPage() {
     setSubmitting(true);
     setError(null);
     try {
-      await signUp(data.email, data.password);
+      await signUp(data.email, data.password, referralCode);
+      clearReferralCode();
       // Keep `submitting` on: the page stays mounted during the exit transition, and the
       // signed-in redirect above must not override the confirmation guide.
       void navigate('/confirm-email?welcome=1', { replace: true });
@@ -48,6 +51,11 @@ export default function RegisterPage() {
     >
       <form onSubmit={onSubmit} noValidate className="space-y-5">
         {error != null && <Alert variant="danger">{errorMessage(error, t)}</Alert>}
+        {referralCode && (
+          <p className="flex items-center gap-2 rounded-xl border border-gold-300/30 bg-gold-400/10 px-4 py-3 text-sm text-gold-100" data-testid="referral-banner">
+            <Gift className="size-4 shrink-0" /> {t('referrals.invitedBy', { code: referralCode })}
+          </p>
+        )}
         <FormField id="email" label={t('auth.email')} error={errors.email}>
           <Input id="email" type="email" autoComplete="email" value={values.email} onChange={(e) => set('email', e.target.value)} aria-invalid={Boolean(errors.email)} />
         </FormField>

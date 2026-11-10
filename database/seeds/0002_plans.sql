@@ -34,9 +34,9 @@ ON CONFLICT (code) DO NOTHING;
 INSERT INTO public.plan_prices (plan_code, billing_interval, currency, amount_minor)
 VALUES
   ('free',  'month', 'BRL', 0),
-  ('plus',  'month', 'BRL', 1490),
-  ('plus',  'year',  'BRL', 14990),
-  ('ultra', 'month', 'BRL', 2990),
-  ('ultra', 'year',  'BRL', 29990),
-  ('vip',   'month', 'BRL', 6990)
+  ('plus',  'month', 'BRL', 2990),
+  ('plus',  'year',  'BRL', 29900),
+  ('ultra', 'month', 'BRL', 5990),
+  ('ultra', 'year',  'BRL', 59900),
+  ('vip',   'month', 'BRL', 7990)
 ON CONFLICT (plan_code, billing_interval, currency) DO NOTHING;

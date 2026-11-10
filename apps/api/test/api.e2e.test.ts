@@ -89,8 +89,8 @@ describe.runIf(enabled)('Fandom API (PostgreSQL + Redis)', () => {
       const res = await http.get('/v1/subscription-plans').expect(200);
       const plus = res.body.items.find((p: { code: string }) => p.code === 'plus');
       expect(plus.prices).toEqual([
-        { interval: 'month', currency: 'BRL', amountMinor: 1490 },
-        { interval: 'year', currency: 'BRL', amountMinor: 14990 },
+        { interval: 'month', currency: 'BRL', amountMinor: 2990 },
+        { interval: 'year', currency: 'BRL', amountMinor: 29900 },
       ]);
       const usd = await http.get('/v1/subscription-plans?currency=usd').expect(200);
       expect(usd.body.items.every((p: { prices: unknown[] }) => p.prices.length === 0)).toBe(true);

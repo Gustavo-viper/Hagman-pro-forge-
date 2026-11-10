@@ -49,11 +49,11 @@ describe.runIf(Boolean(url))('runner against PostgreSQL', () => {
     );
     expect(p.rows).toEqual([
       { plan_code: 'free', billing_interval: 'month', amount_minor: 0 },
-      { plan_code: 'plus', billing_interval: 'month', amount_minor: 1490 },
-      { plan_code: 'plus', billing_interval: 'year', amount_minor: 14990 },
-      { plan_code: 'ultra', billing_interval: 'month', amount_minor: 2990 },
-      { plan_code: 'ultra', billing_interval: 'year', amount_minor: 29990 },
-      { plan_code: 'vip', billing_interval: 'month', amount_minor: 6990 },
+      { plan_code: 'plus', billing_interval: 'month', amount_minor: 2990 },
+      { plan_code: 'plus', billing_interval: 'year', amount_minor: 29900 },
+      { plan_code: 'ultra', billing_interval: 'month', amount_minor: 5990 },
+      { plan_code: 'ultra', billing_interval: 'year', amount_minor: 59900 },
+      { plan_code: 'vip', billing_interval: 'month', amount_minor: 7990 },
     ]);
   });
 

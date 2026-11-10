@@ -121,3 +121,14 @@ export function useQuiz(id: string) {
     queryFn: ({ signal }) => api<import('@fandom/types').QuizDetail>(`/v1/quizzes/${encodeURIComponent(id)}`, { signal, auth: false }),
   });
 }
+
+/** Invite link, progress and unlocked discount of the signed-in user. */
+export function useReferrals() {
+  const { session } = useAuth();
+  return useQuery({
+    queryKey: ['me', 'referrals'],
+    queryFn: ({ signal }) => api<import('@fandom/types').ReferralSummary>('/v1/me/referrals', { signal }),
+    enabled: Boolean(session),
+    staleTime: 60_000,
+  });
+}

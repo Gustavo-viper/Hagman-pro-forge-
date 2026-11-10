@@ -558,7 +558,8 @@
       "auth.password_reset": "Password reset",
       "auth.refresh_token_reused": "Alert: session reused (revoked)",
       "role.bootstrap_super_admin": "Initial super admin",
-      "role.granted_by_operator": "Role granted"
+      "role.granted_by_operator": "Role granted",
+      "admin.referral_revoked": "Referral cancelled"
     },
     "reports": {
       "title": "Reports",
@@ -1208,6 +1209,50 @@
       "boxes": "Themed boxes",
       "events": "Event tickets",
       "accessories": "Accessories and gifts"
+    }
+  },
+  "referrals": {
+    "title": "Invite friends, get a discount",
+    "subtitle": "Share your link with friends and groups. When they sign up, verify their email and join a universe, you get a discount on subscriptions.",
+    "yourDiscount": "your discount",
+    "yourLink": "Your invite link",
+    "copy": "Copy link",
+    "copied": "Copied!",
+    "moreApps": "Other apps",
+    "shareShort": "Join me on Fandom Universe: quizzes, hangman, rankings and fan communities!",
+    "shareMessage": "Join me on Fandom Universe: quizzes, hangman, rankings and fan communities! {{link}}",
+    "qualified_one": "{{count}} confirmed friend",
+    "qualified_other": "{{count}} confirmed friends",
+    "pending_one": "{{count}} pending",
+    "pending_other": "{{count}} pending",
+    "next_one": "{{count}} more friend for {{percent}}% off",
+    "next_other": "{{count}} more friends for {{percent}}% off",
+    "maxed": "You reached the maximum discount!",
+    "progress": "Progress to the next tier",
+    "tierFriends_one": "{{count}} friend",
+    "tierFriends_other": "{{count}} friends",
+    "rules": "Only friends who signed up through your link, verified their email and joined at least one universe count. The discount applies to Plus, Ultra and VIP while you keep the referrals and is applied automatically at checkout. Fake or duplicate accounts are cancelled by the team.",
+    "friends": "Invited friends",
+    "status": {
+      "qualified": "Confirmed",
+      "pending": "Pending",
+      "revoked": "Cancelled"
+    },
+    "invitedBy": "You're joining through a friend's invite ({{code}}).",
+    "planDiscount": "-{{percent}}% from invites",
+    "plansHint": "Invite friends and get up to 30% off the plans →",
+    "invite": {
+      "title": "You've been invited!",
+      "body": "A friend invited you to Fandom Universe: fan communities, quizzes, hangman, rankings and events. Create your free account to accept.",
+      "signedIn": "You already have an account. Invites only count for new accounts, but you can invite your friends from your dashboard!",
+      "cta": "Create free account",
+      "note": "Signing up is free. Your friend gets a discount once you verify your email and join a universe."
+    },
+    "admin": {
+      "title": "Referrals",
+      "discount": "Current discount: {{percent}}%",
+      "revoke": "Cancel",
+      "confirm": "Cancel referral"
     }
   }
 }

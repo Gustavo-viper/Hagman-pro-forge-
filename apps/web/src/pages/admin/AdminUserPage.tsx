@@ -1,4 +1,4 @@
-import type { AdminUserDetails } from '@fandom/types';
+import type { AdminReferral, AdminUserDetails } from '@fandom/types';
 import { Alert, Badge, Button, Card, Input, Label, Select, Skeleton } from '@fandom/ui';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft, Ban, Crown, Gift, RotateCcw, ShieldOff } from 'lucide-react';
@@ -119,6 +119,68 @@ function DangerAction({ user, kind }: { user: AdminUserDetails; kind: 'revoke' |
   );
 }
 
+/** Friends this user invited; staff can cancel fraudulent ones (fake or duplicate accounts). */
+function ReferralsAdmin({ userId, canEdit }: { userId: string; canEdit: boolean }) {
+  const { t } = useTranslation();
+  const locale = currentLocale();
+  const qc = useQueryClient();
+  const q = useQuery({
+    queryKey: ['admin', 'user', userId, 'referrals'],
+    queryFn: ({ signal }) => api<{ discountPercent: number; items: AdminReferral[] }>(`/v1/admin/users/${userId}/referrals`, { signal }),
+  });
+  const [revoking, setRevoking] = useState<string | null>(null);
+  const [reason, setReason] = useState('');
+  const revoke = useMutation({
+    mutationFn: (v: { id: string; reason: string }) => api(`/v1/admin/referrals/${v.id}/revoke`, { method: 'POST', body: { reason: v.reason } }),
+    onSuccess: () => {
+      setRevoking(null);
+      setReason('');
+      void qc.invalidateQueries({ queryKey: ['admin', 'user', userId] });
+    },
+  });
+  if (q.isPending) return <Skeleton className="h-32" />;
+  if (q.isError) return <ErrorState error={q.error} onRetry={() => void q.refetch()} />;
+  return (
+    <Card className="rounded-3xl p-6" data-testid="admin-referrals">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <h3 className="flex items-center gap-2 font-semibold"><Gift className="size-4" /> {t('referrals.admin.title')}</h3>
+        <Badge variant="gold">{t('referrals.admin.discount', { percent: q.data.discountPercent })}</Badge>
+      </div>
+      <ul className="mt-3 space-y-2 text-sm">
+        {q.data.items.length === 0 && <li className="text-mist/50">—</li>}
+        {q.data.items.map((r) => (
+          <li key={r.id} className="border-t border-white/5 pt-2">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <Link to={`/admin/users/${r.referredId}`} className="hover:underline">{r.referredName ?? r.referredEmail} <span className="text-mist/50">· {r.referredEmail}</span></Link>
+              <span className="flex items-center gap-2 text-xs text-mist/55">
+                {formatDate(r.createdAt, locale)}
+                <Badge variant={r.status === 'qualified' ? 'success' : r.status === 'revoked' ? 'danger' : 'default'}>{t(`referrals.status.${r.status}`)}</Badge>
+                {canEdit && r.status !== 'revoked' && (
+                  <Button size="sm" variant="ghost" onClick={() => setRevoking(revoking === r.id ? null : r.id)}>{t('referrals.admin.revoke')}</Button>
+                )}
+              </span>
+            </div>
+            {r.revokedReason && <p className="mt-1 text-xs text-mist/50">“{r.revokedReason}”</p>}
+            {revoking === r.id && (
+              <form
+                className="mt-2 flex gap-2"
+                onSubmit={(e: FormEvent) => {
+                  e.preventDefault();
+                  if (reason.trim().length >= 3) revoke.mutate({ id: r.id, reason: reason.trim() });
+                }}
+              >
+                <Input aria-label={t('admin.reason')} placeholder={t('admin.reason')} value={reason} maxLength={300} onChange={(e) => setReason(e.target.value)} autoFocus />
+                <Button type="submit" size="sm" variant="danger" disabled={reason.trim().length < 3} loading={revoke.isPending}>{t('referrals.admin.confirm')}</Button>
+              </form>
+            )}
+          </li>
+        ))}
+      </ul>
+      {revoke.isError && <p role="alert" className="mt-2 text-xs text-red-300">{errorMessage(revoke.error, t)}</p>}
+    </Card>
+  );
+}
+
 function Details() {
   const { id = '' } = useParams();
   const { t } = useTranslation();
@@ -175,6 +237,8 @@ function Details() {
       ) : (
         <Alert variant="info">{t('admin.readOnly')}</Alert>
       )}
+
+      <ReferralsAdmin userId={u.id} canEdit={canEdit} />
 
       <div className="grid gap-6 lg:grid-cols-2">
         <Card className="rounded-3xl p-6">

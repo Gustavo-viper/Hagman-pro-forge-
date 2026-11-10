@@ -47,7 +47,7 @@ test('subscribe to Fandom Plus through the checkout and manage the subscription'
   await expect(page.getByText('Fandom Plus', { exact: true })).toBeVisible();
   await expect(page.getByText('Válido até')).toBeVisible();
   await expect(page.getByRole('cell', { name: 'Pago' })).toBeVisible();
-  await expect(page.getByRole('cell', { name: /R\$\s14,90 · Pix/ })).toBeVisible();
+  await expect(page.getByRole('cell', { name: /R\$\s29,90 · Pix/ })).toBeVisible();
 
   page.once('dialog', (d) => void d.accept());
   await page.getByRole('button', { name: 'Cancelar assinatura' }).click();

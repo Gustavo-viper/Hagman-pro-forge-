@@ -42,7 +42,12 @@ export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>;
 
 const opaqueToken = z.string().min(20).max(200).regex(/^[A-Za-z0-9_-]+$/, 'invalid_token');
 
-export const registerSchema = z.object({ email: emailSchema, password: passwordSchema });
+export const registerSchema = z.object({
+  email: emailSchema,
+  password: passwordSchema,
+  /** Invite code of the friend who shared the link (unknown codes are ignored). */
+  referralCode: z.string().trim().toUpperCase().regex(/^[A-Z0-9]{6,12}$/, 'invalid_referral_code').optional(),
+});
 export type RegisterInput = z.infer<typeof registerSchema>;
 
 export const loginSchema = signInSchema;

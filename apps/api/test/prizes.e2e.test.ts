@@ -46,10 +46,10 @@ describe.runIf(enabled)('VIP plan, prize draws and cultural contests', () => {
     await app?.close();
   });
 
-  it('VIP is a fourth plan at R$ 69,90 a month, above Ultra, with its own badge', async () => {
+  it('VIP is a fourth plan at R$ 79,90 a month, above Ultra, with its own badge', async () => {
     const plans = (await http.get('/v1/subscription-plans').expect(200)).body.items;
     const vip = plans.find((p: { code: string }) => p.code === 'vip');
-    expect(vip.prices).toEqual([{ interval: 'month', currency: 'BRL', amountMinor: 6990 }]);
+    expect(vip.prices).toEqual([{ interval: 'month', currency: 'BRL', amountMinor: 7990 }]);
     expect(vip.benefits['pt-BR'][0]).toBe('Tudo do Fandom Ultra');
     const u = await person({ plan: 'vip', name: 'Membro VIP' });
     expect((await http.get('/v1/me').set(bearer(u.token))).body.subscription.planCode).toBe('vip');

@@ -20,6 +20,7 @@ import { PrizesModule } from './prizes/prizes.module.js';
 import { QuizzesModule } from './quizzes/quizzes.module.js';
 import { RealtimeModule } from './realtime/realtime.module.js';
 import { RedisModule } from './redis/redis.module.js';
+import { ReferralsModule } from './referrals/referrals.module.js';
 import { SectionsModule } from './sections/sections.module.js';
 import { RedisService } from './redis/redis.service.js';
 import { SubscriptionsModule } from './subscriptions/subscriptions.module.js';
@@ -47,6 +48,7 @@ import { XpModule } from './xp/xp.module.js';
     UniversesModule,
     PlansModule,
     MeModule,
+    ReferralsModule,
     BillingModule,
     AdminModule,
     QuizzesModule,

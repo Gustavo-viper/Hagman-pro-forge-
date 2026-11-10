@@ -558,7 +558,8 @@
       "auth.password_reset": "Senha redefinida",
       "auth.refresh_token_reused": "Alerta: sessão reutilizada (revogada)",
       "role.bootstrap_super_admin": "Super admin inicial",
-      "role.granted_by_operator": "Papel concedido"
+      "role.granted_by_operator": "Papel concedido",
+      "admin.referral_revoked": "Convite cancelado"
     },
     "reports": {
       "title": "Denúncias",
@@ -1208,6 +1209,50 @@
       "boxes": "Caixas temáticas",
       "events": "Ingressos para eventos",
       "accessories": "Acessórios e presentes"
+    }
+  },
+  "referrals": {
+    "title": "Convide amigos e ganhe desconto",
+    "subtitle": "Compartilhe seu link com amigos e grupos. Quando eles criam a conta, confirmam o e-mail e entram em um universo, você ganha desconto nas assinaturas.",
+    "yourDiscount": "seu desconto",
+    "yourLink": "Seu link de convite",
+    "copy": "Copiar link",
+    "copied": "Copiado!",
+    "moreApps": "Outros apps",
+    "shareShort": "Vem pro Fandom Universe comigo: quizzes, forca, rankings e comunidades de fãs!",
+    "shareMessage": "Vem pro Fandom Universe comigo: quizzes, forca, rankings e comunidades de fãs! {{link}}",
+    "qualified_one": "{{count}} amigo confirmado",
+    "qualified_other": "{{count}} amigos confirmados",
+    "pending_one": "{{count}} aguardando",
+    "pending_other": "{{count}} aguardando",
+    "next_one": "Falta {{count}} amigo para {{percent}}% de desconto",
+    "next_other": "Faltam {{count}} amigos para {{percent}}% de desconto",
+    "maxed": "Você chegou ao desconto máximo!",
+    "progress": "Progresso até o próximo nível",
+    "tierFriends_one": "{{count}} amigo",
+    "tierFriends_other": "{{count}} amigos",
+    "rules": "Contam apenas amigos que criaram a conta pelo seu link, confirmaram o e-mail e entraram em pelo menos um universo. O desconto vale para Plus, Ultra e VIP enquanto você mantiver os convites e é aplicado automaticamente no pagamento. Contas falsas ou duplicadas são canceladas pela equipe.",
+    "friends": "Amigos convidados",
+    "status": {
+      "qualified": "Confirmado",
+      "pending": "Aguardando",
+      "revoked": "Cancelado"
+    },
+    "invitedBy": "Você está entrando pelo convite {{code}} de um amigo.",
+    "planDiscount": "-{{percent}}% por convites",
+    "plansHint": "Convide amigos e ganhe até 30% de desconto nos planos →",
+    "invite": {
+      "title": "Você foi convidado(a)!",
+      "body": "Um amigo te chamou para o Fandom Universe: comunidades de fãs, quizzes, forca, rankings e eventos. Crie sua conta grátis para aceitar o convite.",
+      "signedIn": "Você já tem uma conta. Convites valem só para contas novas, mas você pode convidar seus amigos pelo seu painel!",
+      "cta": "Criar conta grátis",
+      "note": "Criar a conta é gratuito. Seu amigo ganha desconto quando você confirma o e-mail e entra em um universo."
+    },
+    "admin": {
+      "title": "Convites",
+      "discount": "Desconto atual: {{percent}}%",
+      "revoke": "Cancelar",
+      "confirm": "Cancelar convite"
     }
   }
 }

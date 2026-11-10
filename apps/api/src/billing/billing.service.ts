@@ -1,6 +1,6 @@
 import { randomUUID, timingSafeEqual } from 'node:crypto';
 import { HttpStatus, Inject, Injectable, Logger } from '@nestjs/common';
-import { formatMoney, PLAN_DISPLAY_NAMES, PREMIUM_TRIAL, type BillingInterval, type Locale, type PlanCode } from '@fandom/shared';
+import { applyDiscount, formatMoney, PLAN_DISPLAY_NAMES, PREMIUM_TRIAL, type BillingInterval, type Locale, type PlanCode } from '@fandom/shared';
 import type { CheckoutInput, ConfirmPaymentInput } from '@fandom/schemas';
 import type { BillingConfig, CheckoutResponse, ConfirmPaymentResponse, PaymentSummary, SubscriptionDetails, TrialStatus } from '@fandom/types';
 import { AuditService } from '../audit/audit.service.js';
@@ -10,6 +10,7 @@ import { ENV } from '../config/config.module.js';
 import type { Env } from '../config/env.js';
 import { DatabaseService, type Queryable } from '../database/database.service.js';
 import { MailService } from '../mail/mail.service.js';
+import { ReferralsService } from '../referrals/referrals.service.js';
 import { EntitlementsService, entitledPlan } from '../subscriptions/entitlements.service.js';
 import { InfinitePayClient, PaymentProviderError } from './infinitepay.client.js';
 import { PAYMENT_COLUMNS, toPaymentSummary } from './payments.mapper.js';
@@ -65,6 +66,7 @@ export class BillingService {
     private readonly entitlements: EntitlementsService,
     private readonly mail: MailService,
     private readonly audit: AuditService,
+    private readonly referrals: ReferralsService,
     @Inject(ENV) private readonly env: Env,
   ) {}
 
@@ -121,13 +123,17 @@ export class BillingService {
       throw AppError.conflict('plan_change_unavailable', 'You can switch plans when the current period ends');
     }
 
-    // Re-use a still-valid pending link for the same plan/interval instead of creating duplicates.
+    // Invite-a-friend discount, computed on the server from qualified referrals.
+    const discountPercent = await this.referrals.discountPercent(user.id);
+    const amountMinor = applyDiscount(price.amount_minor, discountPercent);
+
+    // Re-use a still-valid pending link for the same plan/interval/amount instead of creating duplicates.
     const reusable = await this.db.one<PaymentRow>(
       `SELECT * FROM payment_transactions
-        WHERE user_id = $1 AND plan_code = $2 AND billing_interval = $3 AND status = 'pending'
+        WHERE user_id = $1 AND plan_code = $2 AND billing_interval = $3 AND status = 'pending' AND amount_minor = $4
           AND checkout_url IS NOT NULL AND checkout_expires_at > now() + interval '1 hour'
         ORDER BY created_at DESC LIMIT 1`,
-      [user.id, input.planCode, input.interval],
+      [user.id, input.planCode, input.interval, amountMinor],
     );
     if (reusable?.checkout_url) {
       return { checkoutUrl: reusable.checkout_url, orderNsu: reusable.order_nsu, expiresAt: reusable.checkout_expires_at!.toISOString() };
@@ -144,9 +150,10 @@ export class BillingService {
     const expiresAt = new Date(Date.now() + this.env.CHECKOUT_LINK_TTL_HOURS * 3_600_000);
     const { rows } = await this.db.query<{ id: string }>(
       `INSERT INTO payment_transactions
-         (user_id, provider, plan_code, price_id, billing_interval, amount_minor, currency, order_nsu, checkout_expires_at)
-       VALUES ($1, 'infinitepay', $2, $3, $4, $5, $6, $7, $8) RETURNING id`,
-      [user.id, input.planCode, price.id, input.interval, price.amount_minor, price.currency, orderNsu, expiresAt],
+         (user_id, provider, plan_code, price_id, billing_interval, amount_minor, currency, order_nsu, checkout_expires_at,
+          list_amount_minor, discount_percent)
+       VALUES ($1, 'infinitepay', $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING id`,
+      [user.id, input.planCode, price.id, input.interval, amountMinor, price.currency, orderNsu, expiresAt, price.amount_minor, discountPercent],
     );
     const paymentId = rows[0]!.id;
 
@@ -155,8 +162,8 @@ export class BillingService {
     try {
       const url = await this.client.createLink({
         orderNsu,
-        description: `${PLAN_NAMES[input.planCode]} — ${INTERVAL_NAMES[elig.locale][input.interval]}`,
-        amountMinor: price.amount_minor,
+        description: `${PLAN_NAMES[input.planCode]} — ${INTERVAL_NAMES[elig.locale][input.interval]}${discountPercent ? ` (-${discountPercent}%)` : ''}`,
+        amountMinor,
         redirectUrl: `${app}/account/subscription`,
         webhookUrl: `${api}/v1/billing/webhooks/infinitepay?token=${encodeURIComponent(this.env.INFINITEPAY_WEBHOOK_TOKEN!)}`,
         validUntil: expiresAt,

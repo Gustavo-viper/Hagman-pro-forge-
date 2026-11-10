@@ -13,9 +13,9 @@ test('landing renders universes and plans from the API', async ({ page }) => {
   await expect(page.getByRole('heading', { name: 'Supernatural' })).toBeVisible();
   for (const name of ['Marvel', 'DC', 'Star Wars', "Grey's Anatomy", 'Station 19', 'BTS']) await expect(page.getByRole('heading', { name, exact: true })).toBeVisible();
   await page.locator('#plans').scrollIntoViewIfNeeded();
-  await expect(page.getByText('R$ 14,90')).toBeVisible();
+  await expect(page.getByText('R$ 29,90')).toBeVisible();
   await page.getByRole('radio', { name: 'Anual' }).click();
-  await expect(page.getByText('R$ 149,90')).toBeVisible();
+  await expect(page.getByText('R$ 299,00')).toBeVisible();
   expect(errors).toEqual([]);
 });
 

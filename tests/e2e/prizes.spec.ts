@@ -87,7 +87,7 @@ async function openAdmin(page: Page) {
   await expect(page.getByRole('heading', { name: 'Concursos culturais' })).toBeVisible();
 }
 
-test('VIP plan is sold at R$ 69,90 and VIP draws only open with an authorization certificate', async ({ browser, request }) => {
+test('VIP plan is sold at R$ 79,90 and VIP draws only open with an authorization certificate', async ({ browser, request }) => {
   const admin = await fan(request, 'admin', { admin: true });
   const vip = await fan(request, 'vip');
   const free = await fan(request, 'free');
@@ -96,16 +96,16 @@ test('VIP plan is sold at R$ 69,90 and VIP draws only open with an authorization
   const vipPage = await signIn(browser, vip.email);
   await vipPage.goto('/premium');
   const vipCard = vipPage.locator('div.glass', { has: vipPage.getByRole('heading', { name: 'Fandom VIP', exact: true }) });
-  await expect(vipCard.getByText(/R\$\s69,90/)).toBeVisible();
+  await expect(vipCard.getByText(/R\$\s79,90/)).toBeVisible();
   await expect(vipCard.getByText('Número da sorte nos sorteios de chaves Steam', { exact: false })).toBeVisible();
   await vipPage.getByRole('radio', { name: 'Anual' }).click();
   await expect(vipCard.getByText('Disponível só no plano mensal.')).toBeVisible();
-  await expect(vipCard.getByText(/R\$\s69,90/)).toBeVisible();
+  await expect(vipCard.getByText(/R\$\s79,90/)).toBeVisible();
   await vipCard.getByRole('button', { name: 'Assinar agora' }).click();
   await expect(vipPage).toHaveURL(/\/account\/subscription/);
   await expect(vipPage.getByText('Pagamento confirmado! Seus benefícios já estão liberados.')).toBeVisible();
   await expect(vipPage.getByText('Fandom VIP', { exact: true })).toBeVisible();
-  await expect(vipPage.getByRole('cell', { name: /R\$\s69,90 · Pix/ })).toBeVisible();
+  await expect(vipPage.getByRole('cell', { name: /R\$\s79,90 · Pix/ })).toBeVisible();
 
   // Admin: a draft cannot open without the certificate and the rules.
   const adminPage = await signIn(browser, admin.email);
