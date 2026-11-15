@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Política de Privacidade</title><link rel="icon" href="/icons/icon-192.png">
+<style>body{font:16px/1.6 system-ui,sans-serif;color:#0f172a;max-width:720px;margin:0 auto;padding:24px 20px 60px}h1{font-size:1.6rem;letter-spacing:-.02em}h2{font-size:1.1rem;margin-top:1.6em}.note{background:#fef3c7;border-radius:10px;padding:10px 14px;font-size:.9rem}</style></head>
+<body><h1>Política de Privacidade — <span data-app>o aplicativo</span></h1>
+<p class="note">Modelo inicial. Antes de divulgar, o responsável pelo aplicativo deve revisar este texto e informar quem é o controlador dos dados e o canal de contato (LGPD).</p>
+<h2>1. Dados que coletamos</h2>
+<p>Nome, celular e senha (armazenada de forma criptografada). De motoristas: número da CNH, dados e foto do veículo e chave Pix. Durante o uso: localização do aparelho, endereços de embarque e destino, histórico de corridas e avaliações.</p>
+<h2>2. Para que usamos</h2>
+<p>Para conectar passageiros e motoristas, calcular rotas e preços, mostrar a posição do motorista durante a corrida, garantir a segurança e prevenir fraudes.</p>
+<h2>3. Com quem compartilhamos</h2>
+<p>Durante uma corrida, passageiro e motorista veem nome, avaliação e telefone um do outro; o passageiro vê os dados do veículo. Endereços e coordenadas são enviados a serviços de mapas (OpenStreetMap e parceiros) para busca e cálculo de rota. Não vendemos seus dados.</p>
+<h2>4. Localização</h2>
+<p>A localização do motorista é usada apenas enquanto ele está online ou em corrida. A do passageiro é usada para sugerir o local de embarque.</p>
+<h2>5. Seus direitos</h2>
+<p>Você pode pedir acesso, correção ou exclusão dos seus dados falando com o suporte do aplicativo.</p>
+<h2>6. Guarda dos dados</h2>
+<p>Mantemos os dados enquanto a conta estiver ativa e pelo prazo exigido por lei.</p>
+<p><a href="/">Voltar ao app</a></p>
+<script>fetch('/api/config').then(r=>r.json()).then(c=>document.querySelectorAll('[data-app]').forEach(e=>e.textContent=c.appName)).catch(()=>{})</script>
+</body></html>

@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <meta name="theme-color" content="#0f172a">
+  <meta name="description" content="Peça ou ofereça corridas na sua cidade.">
+  <title>Corridas</title>
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="icon" href="/icons/icon-192.png">
+  <link rel="apple-touch-icon" href="/icons/icon-192.png">
+  <link rel="stylesheet" href="/vendor/leaflet/leaflet.css">
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <!-- Entrada / cadastro -->
+  <section id="auth" class="screen" hidden></section>
+
+  <!-- App principal -->
+  <section id="main" class="screen" hidden>
+    <div id="map"></div>
+    <header class="topbar">
+      <button class="round" data-action="menu" aria-label="Abrir menu">☰</button>
+      <span class="brand-pill" id="brandPill"></span>
+      <button class="round" data-action="locate" aria-label="Centralizar na minha localização">◎</button>
+    </header>
+    <div id="sheet" class="sheet" aria-live="polite"></div>
+  </section>
+
+  <div id="drawer" class="drawer" hidden></div>
+  <div id="page" class="page" hidden></div>
+  <div id="toast" class="toast" role="status" hidden></div>
+
+  <script src="/vendor/leaflet/leaflet.js"></script>
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/app.js"></script>
+</body>
+</html>
