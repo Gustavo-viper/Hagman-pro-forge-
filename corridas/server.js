@@ -13,6 +13,7 @@ const crypto = require('node:crypto');
 const { DatabaseSync } = require('node:sqlite');
 const express = require('express');
 const { Server } = require('socket.io');
+const webpush = require('web-push');
 
 const PORT = Number(process.env.PORT) || 3000;
 const APP_NAME = (process.env.APP_NAME || 'Rota Livre').slice(0, 30);
@@ -20,8 +21,11 @@ const DATA_DIR = process.env.DATA_DIR || path.join(__dirname, 'data');
 const UPLOAD_DIR = path.join(DATA_DIR, 'uploads');
 const GEO_DISABLED = process.env.GEO_DISABLED === '1'; // usado nos testes
 const SEARCH_TIMEOUT_S = Number(process.env.SEARCH_TIMEOUT_S) || 180;
-const PRESENCE_TTL_MS = 90_000;
+// motorista continua "online" por um tempo mesmo com o app em segundo plano (recebe push)
+const ONLINE_TTL_MS = Number(process.env.ONLINE_TTL_MIN || 15) * 60_000;
+const PRIVATE_DIR = path.join(DATA_DIR, 'private'); // documentos (CNH): só o admin acessa
 fs.mkdirSync(UPLOAD_DIR, { recursive: true });
+fs.mkdirSync(PRIVATE_DIR, { recursive: true });
 
 let ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
 if (!ADMIN_PASSWORD) {
@@ -74,7 +78,28 @@ CREATE INDEX IF NOT EXISTS rides_passenger ON rides(passenger_id, id);
 CREATE INDEX IF NOT EXISTS rides_driver ON rides(driver_id, id);
 CREATE INDEX IF NOT EXISTS rides_status ON rides(status);
 CREATE TABLE IF NOT EXISTS settings (key TEXT PRIMARY KEY, value TEXT NOT NULL);
+CREATE TABLE IF NOT EXISTS messages (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  ride_id INTEGER NOT NULL REFERENCES rides(id),
+  sender_id INTEGER NOT NULL REFERENCES users(id),
+  text TEXT NOT NULL,
+  created_at INTEGER NOT NULL
+);
+CREATE INDEX IF NOT EXISTS messages_ride ON messages(ride_id, id);
+CREATE TABLE IF NOT EXISTS push_subs (
+  endpoint TEXT PRIMARY KEY,
+  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  p256dh TEXT NOT NULL,
+  auth TEXT NOT NULL,
+  created_at INTEGER NOT NULL
+);
 `);
+function addColumn(table, col, def) {
+  if (!db.prepare(`PRAGMA table_info(${table})`).all().some((c) => c.name === col)) db.exec(`ALTER TABLE ${table} ADD COLUMN ${col} ${def}`);
+}
+addColumn('users', 'reset_requested_at', 'INTEGER');
+addColumn('users', 'cnh_photo', 'TEXT');
+addColumn('users', 'deleted_at', 'INTEGER');
 
 const ACTIVE = ['searching', 'accepted', 'arrived', 'in_progress'];
 const ACTIVE_SQL = ACTIVE.map((s) => `'${s}'`).join(',');
@@ -102,6 +127,21 @@ function getSettings() {
 function setSetting(key, value) {
   q('INSERT INTO settings(key,value) VALUES(?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value').run(key, String(value));
 }
+
+const settingRaw = (key) => q('SELECT value FROM settings WHERE key = ?').get(key)?.value;
+
+// chaves de notificação push (geradas uma vez e guardadas no banco)
+if (!settingRaw('vapid_public')) {
+  const k = webpush.generateVAPIDKeys();
+  setSetting('vapid_public', k.publicKey);
+  setSetting('vapid_private', k.privateKey);
+}
+const VAPID_PUBLIC = settingRaw('vapid_public');
+webpush.setVapidDetails(
+  process.env.VAPID_SUBJECT || (process.env.RAILWAY_PUBLIC_DOMAIN ? `https://${process.env.RAILWAY_PUBLIC_DOMAIN}` : 'mailto:suporte@rotalivre.app'),
+  VAPID_PUBLIC,
+  settingRaw('vapid_private'),
+);
 
 // usuário interno do painel admin
 if (!q("SELECT id FROM users WHERE role='admin'").get()) {
@@ -166,6 +206,9 @@ function fareCents(distanceM, durationS, s = getSettings()) {
   const raw = s.fare_base + (distanceM / 1000) * s.fare_km + (durationS / 60) * s.fare_min;
   return Math.round(Math.max(raw, s.fare_minimum) * 100);
 }
+const moneyTxt = (c) => `R$ ${(c / 100).toFixed(2).replace('.', ',')}`;
+const kmTxt = (m) => `${(m / 1000).toFixed(1).replace('.', ',')} km`;
+const firstName = (n) => String(n || '').split(' ')[0];
 const rating = (u) => (u.rating_count ? Math.round((u.rating_sum / u.rating_count) * 10) / 10 : null);
 
 // limite simples de tentativas por IP (login/cadastro)
@@ -255,11 +298,22 @@ async function route(a, b) {
 const presence = new Map(); // driverId -> { lat, lng, ts, online }
 function driverLoc(id) {
   const p = presence.get(id);
-  return p && now() - p.ts < PRESENCE_TTL_MS ? { lat: p.lat, lng: p.lng } : null;
+  return p && now() - p.ts < ONLINE_TTL_MS ? { lat: p.lat, lng: p.lng } : null;
 }
 function isAvailable(id) {
   const p = presence.get(id);
-  return !!p && p.online && now() - p.ts < PRESENCE_TTL_MS;
+  return !!p && p.online && now() - p.ts < ONLINE_TTL_MS;
+}
+const busyDrivers = () => new Set(q(`SELECT driver_id FROM rides WHERE driver_id IS NOT NULL AND status IN (${ACTIVE_SQL})`).all().map((x) => x.driver_id));
+// motoristas online, livres e dentro do raio de busca
+function availableDrivers(center) {
+  const radius = getSettings().search_radius_km * 1000;
+  const busy = busyDrivers();
+  const out = [];
+  for (const [id, p] of presence) {
+    if (isAvailable(id) && !busy.has(id) && haversine(p, center) <= radius) out.push(id);
+  }
+  return out;
 }
 const activeRideOf = (u) =>
   q(`SELECT * FROM rides WHERE ${u.role === 'driver' ? 'driver_id' : 'passenger_id'} = ? AND status IN (${ACTIVE_SQL}) ORDER BY id DESC LIMIT 1`).get(u.id);
@@ -339,13 +393,32 @@ function auth(...roles) {
   };
 }
 
-function notifyRide(r) {
+// Envia push só se a pessoa não estiver com o app aberto na tela.
+async function pushTo(userId, payload) {
+  try {
+    const sockets = await io.in(`u:${userId}`).fetchSockets();
+    if (sockets.some((s) => s.data.visible)) return;
+    const subs = q('SELECT * FROM push_subs WHERE user_id = ?').all(userId);
+    await Promise.all(subs.map((s) => webpush.sendNotification(
+      { endpoint: s.endpoint, keys: { p256dh: s.p256dh, auth: s.auth } },
+      JSON.stringify(payload),
+      { TTL: payload.ttl || 300, urgency: 'high' },
+    ).catch((err) => {
+      if (err.statusCode === 404 || err.statusCode === 410) q('DELETE FROM push_subs WHERE endpoint = ?').run(s.endpoint);
+      else console.warn(`[push] falha ao enviar para usuário ${userId}: ${err.statusCode || err.code || err.message}`);
+    })));
+  } catch (err) {
+    console.error('[push]', err.message);
+  }
+}
+function notifyRide(r, push) {
   const p = q('SELECT * FROM users WHERE id = ?').get(r.passenger_id);
   io.to(`u:${p.id}`).emit('ride:update', rideView(r, p));
   if (r.driver_id) {
     const d = q('SELECT * FROM users WHERE id = ?').get(r.driver_id);
     io.to(`u:${d.id}`).emit('ride:update', rideView(r, d));
   }
+  if (push) pushTo(push.to === 'driver' ? r.driver_id : r.passenger_id, { tag: `ride-${r.id}`, ...push });
 }
 const getRide = (id) => q('SELECT * FROM rides WHERE id = ?').get(Number(id));
 function rideFor(req, role) {
@@ -355,21 +428,42 @@ function rideFor(req, role) {
   if (!mine) throw bad('Corrida não encontrada.', 404);
   return r;
 }
-function savePhoto(dataUrl, userId) {
+function savePhoto(dataUrl, userId, label = 'Foto do veículo', isPrivate = false) {
   const m = /^data:image\/jpeg;base64,([A-Za-z0-9+/=]+)$/.exec(String(dataUrl || ''));
-  if (!m) throw bad('Foto do veículo inválida.');
+  if (!m) throw bad(`${label}: imagem inválida.`);
   const buf = Buffer.from(m[1], 'base64');
-  if (buf.length > 600_000 || buf[0] !== 0xff || buf[1] !== 0xd8) throw bad('Foto do veículo inválida ou grande demais.');
-  const name = `${userId}-${crypto.randomBytes(8).toString('hex')}.jpg`;
-  fs.writeFileSync(path.join(UPLOAD_DIR, name), buf);
-  return `/uploads/${name}`;
+  if (buf.length > 600_000 || buf[0] !== 0xff || buf[1] !== 0xd8) throw bad(`${label}: imagem inválida ou grande demais.`);
+  const name = `${userId}-${crypto.randomBytes(12).toString('hex')}.jpg`;
+  fs.writeFileSync(path.join(isPrivate ? PRIVATE_DIR : UPLOAD_DIR, name), buf);
+  return isPrivate ? name : `/uploads/${name}`;
+}
+function removeFile(stored) {
+  if (!stored) return;
+  const file = stored.startsWith('/uploads/') ? path.join(UPLOAD_DIR, path.basename(stored)) : path.join(PRIVATE_DIR, path.basename(stored));
+  fs.rm(file, { force: true }, () => {});
+}
+// valida os dados do veículo e do motorista (cadastro e "quero ser motorista")
+function parseCar(b) {
+  const year = Number(b.car_year);
+  if (!Number.isInteger(year) || year < 1950 || year > new Date().getFullYear() + 1) throw bad('Ano do veículo inválido.');
+  const plate = String(b.car_plate || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+  if (!/^[A-Z]{3}\d[A-Z0-9]\d{2}$/.test(plate)) throw bad('Placa inválida. Use o formato ABC1234 ou ABC1D23.');
+  const cnh = String(b.cnh || '').replace(/\D/g, '');
+  if (cnh.length < 9 || cnh.length > 11) throw bad('Número da CNH inválido.');
+  if (b.car_ok !== true) throw bad('Confirme que o veículo está em bom estado de conservação.');
+  return { brand: str(b.car_brand, 'Marca', 2, 30), model: str(b.car_model, 'Modelo', 1, 40), year, color: str(b.car_color, 'Cor', 3, 20), plate, cnh };
+}
+function saveDriverPhotos(b, id) {
+  // fotos são opcionais no cadastro: falha numa foto não impede a conta
+  if (b.car_photo) { try { q('UPDATE users SET car_photo = ? WHERE id = ?').run(savePhoto(b.car_photo, id), id); } catch { /* ignora */ } }
+  if (b.cnh_photo) { try { q('UPDATE users SET cnh_photo = ? WHERE id = ?').run(savePhoto(b.cnh_photo, id, 'Foto da CNH', true), id); } catch { /* ignora */ } }
 }
 
 // ---- público
 app.get('/health', (_req, res) => res.json({ ok: true }));
 app.get('/api/config', wrap(() => {
   const s = getSettings();
-  return { appName: APP_NAME, fare: { base: s.fare_base, km: s.fare_km, min: s.fare_min, minimum: s.fare_minimum }, support_whatsapp: s.support_whatsapp };
+  return { appName: APP_NAME, fare: { base: s.fare_base, km: s.fare_km, min: s.fare_min, minimum: s.fare_minimum }, support_whatsapp: s.support_whatsapp, push_key: VAPID_PUBLIC };
 }));
 app.get('/manifest.webmanifest', (_req, res) => {
   res.type('application/manifest+json').json({
@@ -393,26 +487,17 @@ app.post('/api/register', rateLimit(15, 600_000), wrap((req) => {
   const password = String(b.password || '');
   if (password.length < 6 || password.length > 100) throw bad('A senha precisa ter pelo menos 6 caracteres.');
   if (b.accept_terms !== true) throw bad('É preciso aceitar os Termos de Uso e a Política de Privacidade.');
-  if (q('SELECT 1 FROM users WHERE phone = ?').get(phone)) throw bad('Este celular já está cadastrado. Faça login.', 409);
-
-  let car = {};
-  if (role === 'driver') {
-    const year = Number(b.car_year);
-    if (!Number.isInteger(year) || year < 1950 || year > new Date().getFullYear() + 1) throw bad('Ano do veículo inválido.');
-    const plate = String(b.car_plate || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
-    if (!/^[A-Z]{3}\d[A-Z0-9]\d{2}$/.test(plate)) throw bad('Placa inválida. Use o formato ABC1234 ou ABC1D23.');
-    const cnh = String(b.cnh || '').replace(/\D/g, '');
-    if (cnh.length < 9 || cnh.length > 11) throw bad('Número da CNH inválido.');
-    if (b.car_ok !== true) throw bad('Confirme que o veículo está em bom estado de conservação.');
-    car = { brand: str(b.car_brand, 'Marca', 2, 30), model: str(b.car_model, 'Modelo', 1, 40), year, color: str(b.car_color, 'Cor', 3, 20), plate, cnh };
+  const existing = q('SELECT role FROM users WHERE phone = ?').get(phone);
+  if (existing) {
+    if (existing.role === 'passenger' && role === 'driver') throw bad('Este celular já tem conta de passageiro. Entre com ela e toque em Menu › Quero ser motorista.', 409);
+    throw bad('Este celular já está cadastrado. Toque em "Já tenho conta" para entrar.', 409);
   }
+  const car = role === 'driver' ? parseCar(b) : {};
   const status = role === 'driver' && !getSettings().driver_auto_approve ? 'pending' : 'active';
   const info = q(`INSERT INTO users(role,name,phone,pass_hash,status,cnh,car_brand,car_model,car_year,car_color,car_plate,created_at)
     VALUES(?,?,?,?,?,?,?,?,?,?,?,?)`).run(role, name, phone, hashPassword(password), status, car.cnh ?? null, car.brand ?? null, car.model ?? null, car.year ?? null, car.color ?? null, car.plate ?? null, now());
   const id = Number(info.lastInsertRowid);
-  if (role === 'driver' && b.car_photo) {
-    try { q('UPDATE users SET car_photo = ? WHERE id = ?').run(savePhoto(b.car_photo, id), id); } catch { /* foto opcional */ }
-  }
+  if (role === 'driver') saveDriverPhotos(b, id);
   if (role === 'driver') io.to('admins').emit('admin:refresh');
   return { token: newSession(id), user: publicUser(q('SELECT * FROM users WHERE id = ?').get(id)) };
 }));
@@ -424,9 +509,56 @@ app.post('/api/login', rateLimit(15, 600_000), wrap((req) => {
   if (u.status === 'blocked') throw bad('Sua conta está bloqueada. Fale com o suporte.', 403);
   return { token: newSession(u.id), user: publicUser(u) };
 }));
+app.post('/api/password/forgot', rateLimit(5, 3600_000), wrap((req) => {
+  const phone = normPhone(req.body?.phone);
+  const u = q("SELECT id FROM users WHERE phone = ? AND role != 'admin' AND status != 'blocked'").get(phone);
+  if (u) {
+    q('UPDATE users SET reset_requested_at = ? WHERE id = ?').run(now(), u.id);
+    io.to('admins').emit('admin:refresh');
+  }
+  return { ok: true }; // mesma resposta exista ou não a conta
+}));
 app.post('/api/logout', auth(), wrap((req) => {
   q('DELETE FROM sessions WHERE token_hash = ?').run(sha(req.token));
   if (req.user.role === 'driver') presence.delete(req.user.id);
+  return { ok: true };
+}));
+app.post('/api/me/become-driver', auth('passenger'), wrap((req) => {
+  const b = req.body || {};
+  if (activeRideOf(req.user)) throw bad('Finalize sua corrida atual antes.', 409);
+  const car = parseCar(b);
+  const status = getSettings().driver_auto_approve ? 'active' : 'pending';
+  q(`UPDATE users SET role='driver', status=?, cnh=?, car_brand=?, car_model=?, car_year=?, car_color=?, car_plate=? WHERE id=?`)
+    .run(status, car.cnh, car.brand, car.model, car.year, car.color, car.plate, req.user.id);
+  saveDriverPhotos(b, req.user.id);
+  io.to('admins').emit('admin:refresh');
+  return { user: publicUser(q('SELECT * FROM users WHERE id = ?').get(req.user.id)) };
+}));
+app.post('/api/me/delete', auth('passenger', 'driver'), wrap((req) => {
+  const u = req.user;
+  if (!checkPassword(String(req.body?.password || ''), u.pass_hash)) throw bad('Senha incorreta.');
+  if (activeRideOf(u)) throw bad('Finalize ou cancele sua corrida antes de excluir a conta.', 409);
+  removeFile(u.car_photo);
+  removeFile(u.cnh_photo);
+  // anonimiza: mantém o histórico de corridas (obrigações legais) sem dados pessoais
+  q(`UPDATE users SET name='Conta excluída', phone=?, pass_hash='-', status='blocked', pix_key=NULL, cnh=NULL, car_photo=NULL, cnh_photo=NULL,
+     car_brand=NULL, car_model=NULL, car_color=NULL, car_plate=NULL, reset_requested_at=NULL, deleted_at=? WHERE id=?`).run(`del-${u.id}`, now(), u.id);
+  q('DELETE FROM sessions WHERE user_id = ?').run(u.id);
+  q('DELETE FROM push_subs WHERE user_id = ?').run(u.id);
+  presence.delete(u.id);
+  return { ok: true };
+}));
+app.post('/api/push/subscribe', auth('passenger', 'driver'), wrap((req) => {
+  const b = req.body || {};
+  const endpoint = String(b.endpoint || '');
+  const p256dh = String(b.keys?.p256dh || ''), authKey = String(b.keys?.auth || '');
+  if (!/^https:\/\/[^\s]{10,1000}$/.test(endpoint) || !p256dh || !authKey || p256dh.length > 200 || authKey.length > 100) throw bad('Inscrição inválida.');
+  q(`INSERT INTO push_subs(endpoint,user_id,p256dh,auth,created_at) VALUES(?,?,?,?,?)
+     ON CONFLICT(endpoint) DO UPDATE SET user_id=excluded.user_id, p256dh=excluded.p256dh, auth=excluded.auth`).run(endpoint, req.user.id, p256dh, authKey, now());
+  return { ok: true };
+}));
+app.post('/api/push/unsubscribe', auth(), wrap((req) => {
+  q('DELETE FROM push_subs WHERE endpoint = ? AND user_id = ?').run(String(req.body?.endpoint || ''), req.user.id);
   return { ok: true };
 }));
 app.get('/api/me', auth(), wrap((req) => {
@@ -463,30 +595,19 @@ app.post('/api/estimate', auth('passenger'), wrap(async (req) => {
   const r = await route(a, b);
   if (r.distance_m < 100) throw bad('O destino está muito perto do embarque.');
   if (r.distance_m > 300_000) throw bad('Destino muito distante (máximo de 300 km).');
-  const available = [...presence.keys()].filter((id) => isAvailable(id) && haversine(presence.get(id), a) <= getSettings().search_radius_km * 1000).length;
-  return { ...r, fare_cents: fareCents(r.distance_m, r.duration_s), drivers_nearby: available };
+  return { ...r, fare_cents: fareCents(r.distance_m, r.duration_s), drivers_nearby: availableDrivers(a).length };
 }));
 app.get('/api/drivers/nearby', auth('passenger'), wrap((req) => {
   const c = point({ lat: req.query.lat, lng: req.query.lng }, 'Local');
-  const radius = getSettings().search_radius_km * 1000;
-  const list = [];
-  for (const [id, p] of presence) {
-    if (isAvailable(id) && haversine(p, c) <= radius) list.push({ lat: Math.round(p.lat * 2000) / 2000, lng: Math.round(p.lng * 2000) / 2000 });
-  }
-  return { drivers: list.slice(0, 30) };
+  const list = availableDrivers(c).slice(0, 30).map((id) => {
+    const p = presence.get(id);
+    return { lat: Math.round(p.lat * 2000) / 2000, lng: Math.round(p.lng * 2000) / 2000 };
+  });
+  return { drivers: list };
 }));
 
 // ---- corridas (passageiro)
-function candidateDrivers(r) {
-  const radius = getSettings().search_radius_km * 1000;
-  const busy = new Set(q(`SELECT driver_id FROM rides WHERE driver_id IS NOT NULL AND status IN (${ACTIVE_SQL})`).all().map((x) => x.driver_id));
-  const out = [];
-  for (const [id, p] of presence) {
-    if (!isAvailable(id) || busy.has(id)) continue;
-    if (haversine(p, { lat: r.pickup_lat, lng: r.pickup_lng }) <= radius) out.push(id);
-  }
-  return out;
-}
+const candidateDrivers = (r) => availableDrivers({ lat: r.pickup_lat, lng: r.pickup_lng });
 app.post('/api/rides', auth('passenger'), wrap(async (req) => {
   const a = point(req.body?.pickup, 'Embarque'), b = point(req.body?.dest, 'Destino');
   const payment = req.body?.payment === 'pix' ? 'pix' : 'cash';
@@ -498,7 +619,15 @@ app.post('/api/rides', auth('passenger'), wrap(async (req) => {
   const info = q(`INSERT INTO rides(passenger_id,status,pickup_lat,pickup_lng,pickup_addr,dest_lat,dest_lng,dest_addr,distance_m,duration_s,fare_cents,payment,pin,route,created_at)
     VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`).run(req.user.id, 'searching', a.lat, a.lng, a.addr, b.lat, b.lng, b.addr, rt.distance_m, rt.duration_s, fareCents(rt.distance_m, rt.duration_s), payment, pin, JSON.stringify(rt.path), now());
   const r = getRide(info.lastInsertRowid);
-  for (const id of candidateDrivers(r)) io.to(`u:${id}`).emit('offer:new', offerView(r, id));
+  for (const id of candidateDrivers(r)) {
+    const offer = offerView(r, id);
+    io.to(`u:${id}`).emit('offer:new', offer);
+    pushTo(id, {
+      title: `Nova corrida · ${moneyTxt(r.fare_cents)}`,
+      body: `${kmTxt(r.distance_m)}${offer.to_pickup_m != null ? ` · embarque a ${kmTxt(offer.to_pickup_m)}` : ''} · ${r.pickup_addr}`,
+      tag: `offer-${r.id}`, ttl: SEARCH_TIMEOUT_S, sticky: true,
+    });
+  }
   io.to('admins').emit('admin:refresh');
   return { ride: rideView(r, req.user) };
 }));
@@ -514,10 +643,30 @@ app.post('/api/rides/:id/cancel', auth('passenger', 'driver'), wrap((req) => {
   const res = q(`UPDATE rides SET status='cancelled', cancelled_by=?, finished_at=? WHERE id=? AND status IN (${marks})`).run(req.user.role, now(), r.id, ...allowed);
   if (!res.changes) throw bad('Esta corrida não pode mais ser cancelada.', 409);
   const fresh = getRide(r.id);
-  notifyRide(fresh);
+  const other = req.user.role === 'passenger' ? 'driver' : 'passenger';
+  notifyRide(fresh, fresh.driver_id ? { to: other, title: 'Corrida cancelada', body: `${req.user.role === 'passenger' ? 'O passageiro' : 'O motorista'} cancelou a corrida.` } : null);
   io.to('drivers').emit('offer:gone', { id: r.id });
   io.to('admins').emit('admin:refresh');
   return { ride: rideView(fresh, req.user) };
+}));
+// ---- chat da corrida
+const CHAT_OPEN = ['accepted', 'arrived', 'in_progress'];
+app.get('/api/rides/:id/messages', auth('passenger', 'driver'), wrap((req) => {
+  const r = rideFor(req);
+  const rows = q('SELECT * FROM messages WHERE ride_id = ? ORDER BY id LIMIT 300').all(r.id);
+  return { messages: rows.map((m) => ({ id: m.id, ride_id: m.ride_id, mine: m.sender_id === req.user.id, text: m.text, created_at: m.created_at })) };
+}));
+app.post('/api/rides/:id/messages', auth('passenger', 'driver'), rateLimit(40, 60_000), wrap((req) => {
+  const r = rideFor(req);
+  if (!CHAT_OPEN.includes(r.status)) throw bad('O chat só funciona durante a corrida.', 409);
+  const text = str(req.body?.text, 'Mensagem', 1, 300);
+  const info = q('INSERT INTO messages(ride_id,sender_id,text,created_at) VALUES(?,?,?,?)').run(r.id, req.user.id, text, now());
+  const msg = { id: Number(info.lastInsertRowid), ride_id: r.id, text, created_at: now() };
+  const otherId = req.user.id === r.passenger_id ? r.driver_id : r.passenger_id;
+  io.to(`u:${req.user.id}`).emit('chat:msg', { ...msg, mine: true });
+  io.to(`u:${otherId}`).emit('chat:msg', { ...msg, mine: false });
+  pushTo(otherId, { title: `Mensagem de ${firstName(req.user.name)}`, body: text, tag: `chat-${r.id}` });
+  return { message: { ...msg, mine: true } };
 }));
 app.post('/api/rides/:id/rate', auth('passenger', 'driver'), wrap((req) => {
   const r = rideFor(req);
@@ -560,11 +709,14 @@ app.post('/api/rides/:id/accept', auth('driver'), wrap((req) => {
   const res = q("UPDATE rides SET status='accepted', driver_id=?, accepted_at=? WHERE id=? AND status='searching'").run(req.user.id, now(), Number(req.params.id));
   if (!res.changes) throw bad('Esta corrida não está mais disponível.', 409);
   const r = getRide(req.params.id);
-  notifyRide(r);
+  notifyRide(r, { to: 'passenger', title: 'Motorista a caminho! 🚗', body: `${firstName(req.user.name)} · ${req.user.car_brand} ${req.user.car_model} ${req.user.car_color} · placa ${req.user.car_plate}` });
   io.to('drivers').emit('offer:gone', { id: r.id });
   io.to('admins').emit('admin:refresh');
   return { ride: rideView(r, req.user) };
 }));
+const STEP_PUSH = {
+  arrived: (d) => ({ to: 'passenger', title: 'Seu motorista chegou!', body: `${d.car_brand} ${d.car_model} ${d.car_color} · placa ${d.car_plate}. Informe o código ao motorista.` }),
+};
 function step(from, to, timeCol, check) {
   return wrap((req) => {
     const r = rideFor(req, 'driver');
@@ -574,7 +726,7 @@ function step(from, to, timeCol, check) {
     const res = q(`UPDATE rides SET status=?, ${timeCol}=?, commission_cents=? WHERE id=? AND status=?`).run(to, now(), fee, r.id, from);
     if (!res.changes) throw bad('Ação não permitida no estado atual da corrida.', 409);
     const fresh = getRide(r.id);
-    notifyRide(fresh);
+    notifyRide(fresh, STEP_PUSH[to] && STEP_PUSH[to](req.user));
     io.to('admins').emit('admin:refresh');
     return { ride: rideView(fresh, req.user) };
   });
@@ -601,6 +753,7 @@ app.get('/api/admin/overview', auth('admin'), wrap(() => {
     drivers: one("SELECT COUNT(*) n FROM users WHERE role='driver' AND status='active'").n,
     drivers_pending: one("SELECT COUNT(*) n FROM users WHERE role='driver' AND status='pending'").n,
     drivers_online: [...presence.keys()].filter(isAvailable).length,
+    resets_pending: one("SELECT COUNT(*) n FROM users WHERE reset_requested_at IS NOT NULL AND deleted_at IS NULL").n,
     rides_active: one(`SELECT COUNT(*) n FROM rides WHERE status IN (${ACTIVE_SQL})`).n,
     today, total: tot,
     commission_received_cents: one('SELECT COALESCE(SUM(commission_paid_cents),0) n FROM users').n,
@@ -608,10 +761,10 @@ app.get('/api/admin/overview', auth('admin'), wrap(() => {
 }));
 app.get('/api/admin/users', auth('admin'), wrap((req) => {
   const role = req.query.role === 'driver' ? 'driver' : 'passenger';
-  const rows = q('SELECT * FROM users WHERE role = ? ORDER BY (status = \'pending\') DESC, id DESC LIMIT 500').all(role);
+  const rows = q("SELECT * FROM users WHERE role = ? AND deleted_at IS NULL ORDER BY (status = 'pending') DESC, (reset_requested_at IS NOT NULL) DESC, id DESC LIMIT 500").all(role);
   return {
     users: rows.map((u) => {
-      const v = { ...publicUser(u), created_at: u.created_at };
+      const v = { ...publicUser(u), created_at: u.created_at, reset_requested_at: u.reset_requested_at, has_cnh_photo: !!u.cnh_photo };
       if (role === 'driver') {
         const s = q("SELECT COUNT(*) n, COALESCE(SUM(fare_cents),0) fare, COALESCE(SUM(commission_cents),0) fee FROM rides WHERE driver_id = ? AND status='completed'").get(u.id);
         Object.assign(v, { cnh: u.cnh, rides: s.n, fare_cents: s.fare, commission_cents: s.fee, commission_paid_cents: u.commission_paid_cents, commission_due_cents: Math.max(0, s.fee - u.commission_paid_cents) });
@@ -631,8 +784,55 @@ app.post('/api/admin/users/:id/status', auth('admin'), wrap((req) => {
   if (status !== 'active') presence.delete(u.id);
   if (status === 'blocked') q('DELETE FROM sessions WHERE user_id = ?').run(u.id);
   io.to(`u:${u.id}`).emit('account:update', { status });
+  if (status === 'active' && u.role === 'driver' && u.status === 'pending') {
+    pushTo(u.id, { title: 'Cadastro aprovado! 🎉', body: 'Abra o app e fique online para receber corridas.', tag: 'account' });
+  }
   return { ok: true };
 }));
+app.post('/api/admin/users/:id/reset-password', auth('admin'), wrap((req) => {
+  const u = q("SELECT * FROM users WHERE id = ? AND role != 'admin' AND deleted_at IS NULL").get(Number(req.params.id));
+  if (!u) throw bad('Usuário não encontrado.', 404);
+  const password = String(crypto.randomInt(100000, 1000000));
+  q('UPDATE users SET pass_hash = ?, reset_requested_at = NULL WHERE id = ?').run(hashPassword(password), u.id);
+  q('DELETE FROM sessions WHERE user_id = ?').run(u.id);
+  return { password, phone: u.phone, name: u.name };
+}));
+app.get('/api/admin/users/:id/cnh-photo', auth('admin'), (req, res, next) => {
+  const u = q('SELECT cnh_photo FROM users WHERE id = ?').get(Number(req.params.id));
+  if (!u || !u.cnh_photo) return next(bad('Sem foto da CNH.', 404));
+  res.set('Cache-Control', 'no-store').sendFile(path.join(PRIVATE_DIR, path.basename(u.cnh_photo)));
+});
+app.post('/api/admin/rides/:id/cancel', auth('admin'), wrap((req) => {
+  const id = Number(req.params.id);
+  const res = q(`UPDATE rides SET status='cancelled', cancelled_by='admin', finished_at=? WHERE id=? AND status IN (${ACTIVE_SQL})`).run(now(), id);
+  if (!res.changes) throw bad('Esta corrida não está em andamento.', 409);
+  const r = getRide(id);
+  notifyRide(r);
+  io.to('drivers').emit('offer:gone', { id });
+  return { ok: true };
+}));
+app.get('/api/admin/live', auth('admin'), wrap(() => {
+  const busy = busyDrivers();
+  const drivers = [];
+  for (const [id, p] of presence) {
+    if (!isAvailable(id)) continue;
+    const u = q('SELECT name, car_brand, car_model, car_plate FROM users WHERE id = ?').get(id);
+    if (u) drivers.push({ id, name: u.name, car: `${u.car_brand} ${u.car_model}`, plate: u.car_plate, lat: p.lat, lng: p.lng, busy: busy.has(id), seen_s: Math.round((now() - p.ts) / 1000) });
+  }
+  const rides = q(`SELECT * FROM rides WHERE status IN (${ACTIVE_SQL}) ORDER BY id DESC`).all().map((r) => ({
+    id: r.id, status: r.status, fare_cents: r.fare_cents,
+    pickup: { lat: r.pickup_lat, lng: r.pickup_lng, addr: r.pickup_addr }, dest: { lat: r.dest_lat, lng: r.dest_lng, addr: r.dest_addr },
+  }));
+  return { drivers, rides };
+}));
+app.get('/api/admin/backup', auth('admin'), (req, res, next) => {
+  const file = path.join(DATA_DIR, `backup-${crypto.randomBytes(6).toString('hex')}.db`);
+  try {
+    db.exec(`VACUUM INTO '${file}'`);
+  } catch (err) { return next(err); }
+  const stamp = new Date().toISOString().slice(0, 10);
+  res.download(file, `backup-corridas-${stamp}.db`, () => fs.rm(file, { force: true }, () => {}));
+});
 app.post('/api/admin/users/:id/commission-paid', auth('admin'), wrap((req) => {
   const u = q("SELECT * FROM users WHERE id = ? AND role = 'driver'").get(Number(req.params.id));
   if (!u) throw bad('Motorista não encontrado.', 404);
@@ -681,7 +881,9 @@ io.use((socket, next) => {
 });
 io.on('connection', (socket) => {
   const { userId, role } = socket.data;
+  socket.data.visible = socket.handshake.auth?.visible !== false;
   socket.join(`u:${userId}`);
+  socket.on('vis', (v) => { socket.data.visible = v === true; });
   if (role === 'driver') socket.join('drivers');
   if (role === 'admin') socket.join('admins');
 
@@ -703,7 +905,7 @@ setInterval(() => {
   for (const r of q("SELECT * FROM rides WHERE status = 'searching' AND created_at < ?").all(limit)) {
     const res = q("UPDATE rides SET status='expired', finished_at=? WHERE id=? AND status='searching'").run(now(), r.id);
     if (!res.changes) continue;
-    notifyRide(getRide(r.id));
+    notifyRide(getRide(r.id), { to: 'passenger', title: 'Nenhum motorista disponível', body: 'Não encontramos motoristas agora. Toque para tentar de novo.' });
     io.to('drivers').emit('offer:gone', { id: r.id });
   }
 }, Math.min(15_000, SEARCH_TIMEOUT_S * 500)).unref();

@@ -6,6 +6,7 @@
   <meta name="robots" content="noindex">
   <title>Painel administrativo</title>
   <link rel="icon" href="/icons/icon-192.png">
+  <link rel="stylesheet" href="/vendor/leaflet/leaflet.css">
   <link rel="stylesheet" href="/style.css">
   <style>
     body { background: var(--bg); overscroll-behavior: auto; }
@@ -28,6 +29,9 @@
     .u .acts .btn { width: auto; }
     .tag { display: inline-block; font-size: .75rem; font-weight: 700; padding: 2px 8px; border-radius: 999px; background: #e2e8f0; color: #334155; }
     .tag.pending { background: #fef3c7; color: #92400e; } .tag.active { background: #dcfce7; color: #166534; } .tag.blocked { background: #fee2e2; color: #991b1b; }
+    #liveMap { height: 60vh; min-height: 340px; border-radius: 14px; border: 1px solid var(--line); margin-bottom: 12px; }
+    .legend { display: flex; gap: 14px; flex-wrap: wrap; font-size: .85rem; color: var(--muted); margin-bottom: 10px; }
+    .tag.reset { background: #dbeafe; color: #1e40af; }
     .set { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0 14px; }
   </style>
 </head>
@@ -47,6 +51,7 @@
         <button data-tab="overview" class="on">Resumo</button>
         <button data-tab="drivers">Motoristas <span id="pendingBadge"></span></button>
         <button data-tab="passengers">Passageiros</button>
+        <button data-tab="live">Mapa ao vivo</button>
         <button data-tab="rides">Corridas</button>
         <button data-tab="settings">Tarifas e ajustes</button>
       </div>
@@ -54,6 +59,7 @@
     </div>
   </div>
   <div id="toast" class="toast" hidden></div>
+  <script src="/vendor/leaflet/leaflet.js"></script>
   <script src="/socket.io/socket.io.js"></script>
   <script src="/admin.js"></script>
 </body>

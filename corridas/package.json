@@ -8,10 +8,13 @@
     "start": "node server.js",
     "test": "node test/e2e.js"
   },
-  "engines": { "node": ">=22.13" },
+  "engines": {
+    "node": ">=22.13"
+  },
   "dependencies": {
     "express": "^4.21.2",
     "leaflet": "^1.9.4",
-    "socket.io": "^4.8.1"
+    "socket.io": "^4.8.1",
+    "web-push": "^3.6.7"
   }
 }
